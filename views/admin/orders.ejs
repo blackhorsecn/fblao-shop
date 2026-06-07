@@ -20,7 +20,7 @@
 
 <table class="data-table">
   <thead>
-    <tr><th>#</th><th>Order</th><th>Email</th><th>Product</th><th>Qty</th><th>Total</th><th>Pay</th><th>Status</th><th>Placed</th><th></th></tr>
+    <tr><th>#</th><th>Order</th><th>Email / TG</th><th>Product</th><th>Qty</th><th>Total</th><th>Pay</th><th>Status</th><th>Placed</th><th></th></tr>
   </thead>
   <tbody>
     <% if (!orders.length) { %>
@@ -30,7 +30,7 @@
       <tr>
         <td><%= o.id %></td>
         <td><strong><%= o.order_number %></strong></td>
-        <td><%= o.email %></td>
+        <td><%= o.email %><br><span class="muted"><%= o.telegram_username || '—' %></span></td>
         <td><%= o.product_name %></td>
         <td><%= o.quantity %></td>
         <td><%= money(o.total) %></td>

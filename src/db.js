@@ -41,10 +41,10 @@ CREATE TABLE IF NOT EXISTS products (
   name        TEXT NOT NULL,
   description TEXT NOT NULL DEFAULT '',
   price       REAL NOT NULL DEFAULT 0,
-  stock       INTEGER NOT NULL DEFAULT 0, -- This will now be auto-synced with the pool count
+  stock       INTEGER NOT NULL DEFAULT 0,
   active      INTEGER NOT NULL DEFAULT 1,
   sort_order  INTEGER NOT NULL DEFAULT 0,
-  auto_deliver INTEGER NOT NULL DEFAULT 1  -- 1 = deliver from pool, 0 = manual delivery
+  auto_deliver INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS product_stock_pool (
@@ -81,9 +81,10 @@ CREATE TABLE IF NOT EXISTS orders (
   unit_price       REAL NOT NULL DEFAULT 0,
   total            REAL NOT NULL DEFAULT 0,
   currency         TEXT NOT NULL DEFAULT 'PHP',
-  payment_type     TEXT NOT NULL DEFAULT 'maya',      -- 'maya' | 'manual'
+  payment_type     TEXT NOT NULL DEFAULT 'maya',
   manual_method_id INTEGER REFERENCES manual_payment_methods(id) ON DELETE SET NULL,
-  status           TEXT NOT NULL DEFAULT 'pending',   -- pending | paid | delivered | cancelled | failed
+  telegram_username TEXT,
+  status           TEXT NOT NULL DEFAULT 'pending',
   maya_checkout_id TEXT,
   maya_reference   TEXT,
   delivered_content TEXT,
@@ -96,6 +97,7 @@ CREATE TABLE IF NOT EXISTS orders (
 
 // Migrations for existing database
 try { db.exec("ALTER TABLE products ADD COLUMN auto_deliver INTEGER NOT NULL DEFAULT 1"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN telegram_username TEXT"); } catch(e){}
 
 // ---------------------------------------------------------------------------
 // Settings helpers

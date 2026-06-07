@@ -23,6 +23,7 @@ router.get('/', (req, res) => {
 // Create order ---------------------------------------------------------------
 router.post('/order', asyncHandler(async (req, res) => {
   const email = String(req.body.email || '').trim().toLowerCase();
+  const telegramUsername = String(req.body.telegram_username || '').trim();
   const productId = parseInt(req.body.product_id, 10);
   const quantity = Math.max(1, parseInt(req.body.quantity, 10) || 1);
   const paymentType = req.body.payment_type === 'manual' ? 'manual' : 'maya';
@@ -30,6 +31,10 @@ router.post('/order', asyncHandler(async (req, res) => {
 
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
     return res.status(400).render('error', { title: 'Invalid email', message: 'Please enter a valid email address.' });
+  }
+
+  if (!telegramUsername) {
+    return res.status(400).render('error', { title: 'Missing info', message: 'Please enter your Telegram username for support and notifications.' });
   }
 
   const product = StoreService.getProduct(productId);
@@ -56,6 +61,7 @@ router.post('/order', asyncHandler(async (req, res) => {
   const order = StoreService.createOrder({
     orderNumber,
     email,
+    telegramUsername,
     productId: product.id,
     productName: product.name,
     quantity,

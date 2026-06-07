@@ -104,11 +104,12 @@ const StoreService = {
   createOrder(data) {
     const info = db.prepare(`
       INSERT INTO orders
-      (order_number, email, product_id, product_name, quantity, unit_price, total, currency, payment_type, manual_method_id, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+      (order_number, email, telegram_username, product_id, product_name, quantity, unit_price, total, currency, payment_type, manual_method_id, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
     `).run(
       data.orderNumber,
       data.email,
+      data.telegramUsername,
       data.productId,
       data.productName,
       data.quantity,
