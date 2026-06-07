@@ -204,28 +204,70 @@ function seed() {
     2
   );
 
-  // Categories + products (sample catalog matching an FB-account autoshop)
+  // Categories + products
   const insCat = db.prepare('INSERT INTO categories (name, sort_order) VALUES (?, ?)');
   const insProd = db.prepare(
-    'INSERT INTO products (category_id, name, description, price, stock, active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    'INSERT INTO products (category_id, name, description, price, stock, active, sort_order, auto_deliver) VALUES (?, ?, ?, ?, ?, ?, ?, 1)'
   );
 
-  const catFB = insCat.run('Facebook Accounts', 1).lastInsertRowid;
-  insProd.run(catFB, 'FB Aged Account (2018-2020)', 'Email-verified, with profile photo. Random country.', 120, 35, 1, 1);
-  insProd.run(catFB, 'FB Account + 2FA', 'Includes 2FA secret. Cookie + token provided.', 180, 20, 1, 2);
-  insProd.run(catFB, 'FB Brand New (PVA)', 'Phone-verified fresh account. Ready to warm up.', 60, 100, 1, 3);
-
-  const catBM = insCat.run('Business Manager (BM)', 2).lastInsertRowid;
-  insProd.run(catBM, 'BM1 (Limit 250)', 'Verified BM, 1 ad account, $250 daily limit.', 350, 12, 1, 1);
-  insProd.run(catBM, 'BM5 (No Limit)', 'Verified BM, 5 ad accounts, unlimited spend.', 1500, 4, 1, 2);
-
-  const catMail = insCat.run('Email & Tools', 3).lastInsertRowid;
-  insProd.run(catMail, 'Outlook Email (Aged)', 'Full access, used for account recovery.', 25, 200, 1, 1);
-  insProd.run(catMail, 'Proxy (Residential, 1 month)', 'Static residential proxy, PH/US location.', 90, 50, 1, 2);
+  const catBanks = insCat.run('Verified Bank Accounts', 1).lastInsertRowid;
+  insProd.run(catBanks, 'BPI', 'Verified digital account.', 1500, 34, 1, 1);
+  insProd.run(catBanks, 'CIMB', 'Verified digital account.', 1500, 0, 1, 2);
+  insProd.run(catBanks, 'COINS PH CORPORATE', 'Verified digital account.', 20000, 0, 1, 3);
+  insProd.run(catBanks, 'GCASH 100K', 'Verified digital account.', 1000, 0, 1, 4);
+  insProd.run(catBanks, 'GCASH 500K', 'Verified digital account.', 3000, 1, 1, 5);
+  insProd.run(catBanks, 'GOTYME', 'Verified digital account.', 1500, 5, 1, 6);
+  insProd.run(catBanks, 'MAYA BUSINESS NEGOSYANTE', 'Verified digital account.', 900, 65, 1, 7);
+  insProd.run(catBanks, 'NEW MAYA BUSINESS', 'Verified digital account.', 900, 15, 1, 8);
+  insProd.run(catBanks, 'PAYMAYA 5M', 'Verified digital account.', 15000, 2, 1, 9);
+  insProd.run(catBanks, 'PAYMAYA 500K', 'Verified digital account.', 900, 56, 1, 10);
+  insProd.run(catBanks, 'POS', 'Verified digital account.', 80000, 3, 1, 11);
+  insProd.run(catBanks, 'RCBC', 'Verified digital account.', 1500, 10, 1, 12);
+  insProd.run(catBanks, 'UNION BANK NEGOSYANTE', 'Verified digital account.', 20000, 5, 1, 13);
 
   setSetting('seeded', '1');
 }
 
+// Ensure the new Bank Account products exist even on re-deployment to an existing DB
+function migrateNewProducts() {
+  const catName = 'Verified Bank Accounts';
+  let cat = db.prepare('SELECT id FROM categories WHERE name = ?').get(catName);
+  let catId;
+  if (!cat) {
+    catId = db.prepare('INSERT INTO categories (name, sort_order) VALUES (?, ?)').run(catName, 1).lastInsertRowid;
+  } else {
+    catId = cat.id;
+  }
+
+  const products = [
+    { name: 'BPI', price: 1500.00, stock: 34 },
+    { name: 'CIMB', price: 1500.00, stock: 0 },
+    { name: 'COINS PH CORPORATE', price: 20000.00, stock: 0 },
+    { name: 'GCASH 100K', price: 1000.00, stock: 0 },
+    { name: 'GCASH 500K', price: 3000.00, stock: 1 },
+    { name: 'GOTYME', price: 1500.00, stock: 5 },
+    { name: 'MAYA BUSINESS NEGOSYANTE', price: 900.00, stock: 65 },
+    { name: 'NEW MAYA BUSINESS', price: 900.00, stock: 15 },
+    { name: 'PAYMAYA 5M', price: 15000.00, stock: 2 },
+    { name: 'PAYMAYA 500K', price: 900.00, stock: 56 },
+    { name: 'POS', price: 80000.00, stock: 3 },
+    { name: 'RCBC', price: 1500.00, stock: 10 },
+    { name: 'UNION BANK NEGOSYANTE', price: 20000.00, stock: 5 }
+  ];
+
+  const insProd = db.prepare(
+    'INSERT INTO products (category_id, name, description, price, stock, active, sort_order, auto_deliver) VALUES (?, ?, ?, ?, ?, 1, 0, 1)'
+  );
+
+  for (const p of products) {
+    const exists = db.prepare('SELECT id FROM products WHERE name = ? AND category_id = ?').get(p.name, catId);
+    if (!exists) {
+      insProd.run(catId, p.name, 'Verified digital account.', p.price, p.stock);
+    }
+  }
+}
+
 seed();
+migrateNewProducts();
 
 module.exports = { db, getSetting, setSetting, getSettings };
