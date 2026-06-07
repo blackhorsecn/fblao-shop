@@ -228,46 +228,6 @@ function seed() {
   setSetting('seeded', '1');
 }
 
-// Ensure the new Bank Account products exist even on re-deployment to an existing DB
-function migrateNewProducts() {
-  const catName = 'Verified Bank Accounts';
-  let cat = db.prepare('SELECT id FROM categories WHERE name = ?').get(catName);
-  let catId;
-  if (!cat) {
-    catId = db.prepare('INSERT INTO categories (name, sort_order) VALUES (?, ?)').run(catName, 1).lastInsertRowid;
-  } else {
-    catId = cat.id;
-  }
-
-  const products = [
-    { name: 'BPI', price: 1500.00, stock: 34 },
-    { name: 'CIMB', price: 1500.00, stock: 0 },
-    { name: 'COINS PH CORPORATE', price: 20000.00, stock: 0 },
-    { name: 'GCASH 100K', price: 1000.00, stock: 0 },
-    { name: 'GCASH 500K', price: 3000.00, stock: 1 },
-    { name: 'GOTYME', price: 1500.00, stock: 5 },
-    { name: 'MAYA BUSINESS NEGOSYANTE', price: 900.00, stock: 65 },
-    { name: 'NEW MAYA BUSINESS', price: 900.00, stock: 15 },
-    { name: 'PAYMAYA 5M', price: 15000.00, stock: 2 },
-    { name: 'PAYMAYA 500K', price: 900.00, stock: 56 },
-    { name: 'POS', price: 80000.00, stock: 3 },
-    { name: 'RCBC', price: 1500.00, stock: 10 },
-    { name: 'UNION BANK NEGOSYANTE', price: 20000.00, stock: 5 }
-  ];
-
-  const insProd = db.prepare(
-    'INSERT INTO products (category_id, name, description, price, stock, active, sort_order, auto_deliver) VALUES (?, ?, ?, ?, ?, 1, 0, 1)'
-  );
-
-  for (const p of products) {
-    const exists = db.prepare('SELECT id FROM products WHERE name = ? AND category_id = ?').get(p.name, catId);
-    if (!exists) {
-      insProd.run(catId, p.name, 'Verified digital account.', p.price, p.stock);
-    }
-  }
-}
-
 seed();
-migrateNewProducts();
 
 module.exports = { db, getSetting, setSetting, getSettings };

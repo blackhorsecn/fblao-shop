@@ -63,7 +63,15 @@ const StoreService = {
       data.auto_deliver ? 1 : 0,
       id
     );
-    this.syncProductStockCount(id);
+
+    // Only overwrite stock count from pool if auto-deliver is ENABLED
+    if (data.auto_deliver) {
+      this.syncProductStockCount(id);
+    } else if (data.stock !== undefined) {
+      // Allow manual stock override if auto-deliver is DISABLED
+      db.prepare('UPDATE products SET stock = ? WHERE id = ?').run(parseInt(data.stock, 10) || 0, id);
+    }
+
     return result;
   },
 

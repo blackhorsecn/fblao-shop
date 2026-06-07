@@ -210,7 +210,8 @@ router.post('/products/:id/update', (req, res) => {
     price: parseFloat(req.body.price),
     active: !!req.body.active,
     sort_order: parseInt(req.body.sort_order, 10),
-    auto_deliver: !!req.body.auto_deliver
+    auto_deliver: !!req.body.auto_deliver,
+    stock: req.body.stock // Pass stock for manual updates
   });
 
   if (req.body.action === 'quick_add' && req.body.quick_lines) {
