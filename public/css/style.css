@@ -296,8 +296,10 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 .alert-ok { background: rgba(40,199,111,.15); border: 1px solid rgba(40,199,111,.4); color: #a6f0c6; }
 
 /* Footer */
-.site-footer { border-top: 1px solid var(--border); padding: 24px 0; margin-top: 40px; color: var(--muted); font-size: 13px; }
+.site-footer { border-top: 1px solid var(--border); padding: 24px 0; margin-top: 40px; color: var(--muted); font-size: 13px; text-align: center; }
 .site-footer p { margin: 4px 0; }
+.payment-methods img { transition: filter 0.3s; }
+.payment-methods:hover img { filter: grayscale(0%) opacity(1); }
 
 /* ---------- Admin ---------- */
 .admin-shell { display: flex; min-height: 100vh; }
