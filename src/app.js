@@ -13,6 +13,18 @@ const webhookRoutes = require('./routes/webhook');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Security: Hide Express version
+app.disable('x-powered-by');
+
+// Security: Basic headers (poor man's helmet)
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
 // Railway (and most PaaS) terminate TLS at a proxy; trust it so req.protocol is https.
 app.set('trust proxy', 1);
 
@@ -22,18 +34,25 @@ app.set('views', path.join(__dirname, '..', 'views'));
 // Capture the raw body for webhook signature verification.
 app.use(
   express.json({
+    limit: '10kb', // Security: limit payload size
     verify: (req, _res, buf) => {
       req.rawBody = buf;
     },
   })
 );
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use('/static', express.static(path.join(__dirname, '..', 'public')));
 
 const isProd = process.env.NODE_ENV === 'production';
 
+// Security: Ensure SESSION_SECRET is set in production
+if (isProd && (!process.env.SESSION_SECRET || process.env.SESSION_SECRET === 'dev-secret')) {
+  console.warn('WARNING: SESSION_SECRET is not set or using default value in production!');
+}
+
 app.use(
   session({
+    name: '__shop_sid', // Security: hide session cookie name
     secret: process.env.SESSION_SECRET || 'dev-secret',
     resave: false,
     saveUninitialized: false,

@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const { db, getSetting, setSetting } = require('../db');
-const { requireAdmin, asyncHandler } = require('../middleware');
+const { requireAdmin, asyncHandler, rateLimit } = require('../middleware');
 const StoreService = require('../services/store');
 
 // ---- Auth ------------------------------------------------------------------
@@ -13,7 +13,7 @@ router.get('/login', (req, res) => {
   res.render('admin/login', { title: 'Admin Login', error: null, layout: false });
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', rateLimit, (req, res) => {
   const username = String(req.body.username || '').trim();
   const password = String(req.body.password || '');
   const admin = db.prepare('SELECT * FROM admins WHERE username = ?').get(username);

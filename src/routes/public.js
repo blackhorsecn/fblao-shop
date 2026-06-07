@@ -5,7 +5,7 @@ const router = express.Router();
 const { db, getSetting } = require('../db');
 const maya = require('../maya');
 const { generateOrderNumber } = require('../helpers');
-const { asyncHandler } = require('../middleware');
+const { asyncHandler, rateLimit } = require('../middleware');
 const StoreService = require('../services/store');
 
 // Homepage -------------------------------------------------------------------
@@ -21,7 +21,7 @@ router.get('/', (req, res) => {
 });
 
 // Create order ---------------------------------------------------------------
-router.post('/order', asyncHandler(async (req, res) => {
+router.post('/order', rateLimit, asyncHandler(async (req, res) => {
   const email = String(req.body.email || '').trim().toLowerCase();
   const telegramUsername = String(req.body.telegram_username || '').trim();
   const productId = parseInt(req.body.product_id, 10);
