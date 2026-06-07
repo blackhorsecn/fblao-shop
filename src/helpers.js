@@ -74,16 +74,19 @@ function timeAgo(dateStr) {
 function getPaymentIcon(methodName, dbIconUrl) {
   if (dbIconUrl) return dbIconUrl;
   const name = (methodName || '').toLowerCase();
-  // Using PNG thumbnails from Wikimedia for better hotlinking stability
-  if (name.includes('gcash')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/GCash_logo.svg/512px-GCash_logo.svg.png';
-  if (name.includes('paymaya') || name.includes('maya')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Maya_logo.svg/512px-Maya_logo.svg.png';
-  if (name.includes('grab')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Grab_logo.svg/512px-Grab_logo.svg.png';
-  if (name.includes('shopee')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Shopee.svg/512px-Shopee.svg.png';
-  if (name.includes('bpi')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/BPI_Logo.svg/512px-BPI_Logo.svg.png';
-  if (name.includes('unionbank') || name.includes('union bank')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/UnionBank_of_the_Philippines_logo.svg/512px-UnionBank_of_the_Philippines_logo.svg.png';
-  if (name.includes('visa')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/512px-Visa_Inc._logo.svg.png';
-  if (name.includes('mastercard')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/512px-Mastercard-logo.svg.png';
+
+  // Using high-stability professional CDN links (Xendit/Logos)
+  // These are designed for payment gateway UIs and are more reliable than raw Wikimedia hotlinks.
+  if (name.includes('gcash')) return 'https://assets.xendit.co/payment-methods/gcash.png';
+  if (name.includes('paymaya') || name.includes('maya')) return 'https://assets.xendit.co/payment-methods/paymaya.png';
+  if (name.includes('grab')) return 'https://assets.xendit.co/payment-methods/grabpay.png';
+  if (name.includes('shopee')) return 'https://assets.xendit.co/payment-methods/shopeepay.png';
+  if (name.includes('bpi')) return 'https://assets.xendit.co/payment-methods/bpi.png';
+  if (name.includes('unionbank') || name.includes('union bank')) return 'https://assets.xendit.co/payment-methods/ubp.png';
+  if (name.includes('visa')) return 'https://assets.xendit.co/payment-methods/visa.png';
+  if (name.includes('mastercard')) return 'https://assets.xendit.co/payment-methods/mastercard.png';
   if (name.includes('paypal')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/512px-PayPal.svg.png';
+
   return null;
 }
 
