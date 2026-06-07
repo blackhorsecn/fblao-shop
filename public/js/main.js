@@ -70,4 +70,20 @@
     var m = checked.getAttribute('data-manual');
     elManualId.value = checked.value === 'manual' && m ? m : '';
   }
+
+  // --- Mobile Menu Toggle ---
+  var menuToggle = document.getElementById('menuToggle');
+  var mainNav = document.getElementById('mainNav');
+  if (menuToggle && mainNav) {
+    menuToggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      mainNav.classList.toggle('is-open');
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!mainNav.contains(e.target) && e.target !== menuToggle) {
+        mainNav.classList.remove('is-open');
+      }
+    });
+  }
 })();
