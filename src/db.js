@@ -166,7 +166,9 @@ function getSettings() {
 // ---------------------------------------------------------------------------
 function seed() {
   const seeded = getSetting('seeded');
-  if (seeded === '1') return;
+  // Safer check: only seed if no categories exist at all
+  const hasCategories = db.prepare('SELECT id FROM categories LIMIT 1').get();
+  if (seeded === '1' || hasCategories) return;
 
   const defaults = {
     shop_name: '狮子王工作室 — FB账号BM批发',
@@ -240,4 +242,4 @@ function seed() {
 
 seed();
 
-module.exports = { db, getSetting, setSetting, getSettings };
+module.exports = { db, getSetting, setSetting, getSettings, DATA_DIR };
