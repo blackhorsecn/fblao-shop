@@ -16,9 +16,24 @@
 <header class="site-header">
   <div class="container header-inner">
     <a class="brand" href="/">
-      <img src="/logo.png" alt="PJ ADS Logo" style="height: 40px; margin-right: 10px; border-radius: 4px;">
+      <img id="siteLogo" src="/static/img/logo.svg" alt="Site Logo" style="height: 40px; margin-right: 10px; border-radius: 4px;">
       <span class="brand-text" style="background: linear-gradient(135deg, #fff, #bbb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><%= shopName %></span>
     </a>
+    <script>
+      // Prefer the persisted uploaded logo (served at /logo.png) when available.
+      (async function(){
+        try {
+          const res = await fetch('/logo.png', { method: 'HEAD' });
+          if (res && res.ok) {
+            const ct = res.headers.get('content-type') || '';
+            if (ct.startsWith('image/')) {
+              const el = document.getElementById('siteLogo');
+              if (el) el.src = '/logo.png?v=' + Date.now();
+            }
+          }
+        } catch(e){}
+      })();
+    </script>
 
     <button class="menu-toggle" id="menuToggle" aria-label="Menu">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
