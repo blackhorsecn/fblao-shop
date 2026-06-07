@@ -97,6 +97,16 @@ CREATE TABLE IF NOT EXISTS orders (
 // Migrations for existing database
 try { db.exec("ALTER TABLE products ADD COLUMN auto_deliver INTEGER NOT NULL DEFAULT 1"); } catch(e){}
 
+// Add Coins.ph Enterprise if it doesn't exist
+const coinsExist = db.prepare('SELECT id FROM manual_payment_methods WHERE name = ?').get('Coins.ph Enterprise');
+if (!coinsExist) {
+  db.prepare('INSERT INTO manual_payment_methods (name, instructions, enabled, sort_order) VALUES (?, ?, 1, ?)').run(
+    'Coins.ph Enterprise',
+    'Send the exact total to Coins.ph Wallet: 0917-000-0000 (Lion King Studio).\nUse your ORDER NUMBER as the reference/note.',
+    4
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Settings helpers
 // ---------------------------------------------------------------------------
