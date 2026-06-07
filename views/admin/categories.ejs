@@ -1,0 +1,31 @@
+<%- include('partials/head') %>
+<h1>Categories</h1>
+
+<div class="subpanel" style="margin-bottom:20px;">
+  <h2>Add category</h2>
+  <form method="POST" action="/admin/categories">
+    <div class="field-row">
+      <label class="field" style="flex:2;"><span>Name</span><input type="text" name="name" required></label>
+      <label class="field"><span>Sort order</span><input type="number" name="sort_order" value="0"></label>
+    </div>
+    <button class="btn btn-primary" type="submit">Add category</button>
+  </form>
+</div>
+
+<% if (!categories.length) { %><div class="empty-state">No categories yet.</div><% } %>
+
+<% categories.forEach(function(c){ %>
+  <div class="subpanel" style="margin-bottom:12px;">
+    <form method="POST" action="/admin/categories/<%= c.id %>/update">
+      <div class="field-row">
+        <label class="field" style="flex:2;"><span>Name</span><input type="text" name="name" value="<%= escapeHtml(c.name) %>"></label>
+        <label class="field"><span>Sort</span><input type="number" name="sort_order" value="<%= c.sort_order %>"></label>
+      </div>
+      <button class="btn btn-sm btn-primary" type="submit">Save</button>
+    </form>
+    <form class="inline-form" method="POST" action="/admin/categories/<%= c.id %>/delete" onsubmit="return confirm('Delete this category and ALL its products?');" style="margin-top:-34px; text-align:right;">
+      <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+    </form>
+  </div>
+<% }) %>
+<%- include('partials/foot') %>

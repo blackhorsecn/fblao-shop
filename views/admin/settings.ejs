@@ -1,0 +1,47 @@
+<%- include('partials/head') %>
+<h1>Settings</h1>
+
+<div class="panel-grid">
+  <div class="subpanel">
+    <h2>Shop</h2>
+    <form method="POST" action="/admin/settings">
+      <label class="field"><span>Shop name</span><input type="text" name="shop_name" value="<%= escapeHtml(s.shop_name) %>"></label>
+      <label class="field"><span>Tagline</span><input type="text" name="shop_tagline" value="<%= escapeHtml(s.shop_tagline) %>"></label>
+      <label class="field"><span>Currency code</span><input type="text" name="currency" value="<%= escapeHtml(s.currency) %>"></label>
+      <button class="btn btn-primary" type="submit">Save shop settings</button>
+    </form>
+  </div>
+
+  <div class="subpanel">
+    <h2>Admin password</h2>
+    <form method="POST" action="/admin/settings/password">
+      <label class="field"><span>Current password</span><input type="password" name="current_password" required></label>
+      <label class="field"><span>New password</span><input type="password" name="new_password" required></label>
+      <button class="btn btn-primary" type="submit">Change password</button>
+    </form>
+  </div>
+</div>
+
+<div class="subpanel" style="margin-top:20px;">
+  <h2>Maya Checkout (online card payment)</h2>
+  <p class="muted">Get keys from your Maya Business dashboard. Use <strong>sandbox</strong> keys for testing.</p>
+  <form method="POST" action="/admin/settings/maya">
+    <div class="field-row">
+      <label class="field" style="flex:0 0 130px;"><span>Enabled</span><input type="checkbox" name="maya_enabled" <%= s.maya_enabled === '1' ? 'checked' : '' %>></label>
+      <label class="field"><span>Mode</span>
+        <select name="maya_mode">
+          <option value="sandbox" <%= s.maya_mode !== 'live' ? 'selected' : '' %>>Sandbox</option>
+          <option value="live" <%= s.maya_mode === 'live' ? 'selected' : '' %>>Live (production)</option>
+        </select></label>
+    </div>
+    <label class="field"><span>Public key (pk-...)</span><input type="text" name="maya_public_key" value="<%= escapeHtml(s.maya_public_key) %>"></label>
+    <label class="field"><span>Secret key (sk-...)</span><input type="text" name="maya_secret_key" value="<%= escapeHtml(s.maya_secret_key) %>"></label>
+    <label class="field"><span>Webhook secret (optional, for HMAC verification)</span><input type="text" name="maya_webhook_secret" value="<%= escapeHtml(s.maya_webhook_secret) %>"></label>
+    <button class="btn btn-primary" type="submit">Save Maya configuration</button>
+  </form>
+  <div class="alert alert-ok" style="margin-top:14px;">
+    <strong>Webhook URL</strong> to register in your Maya dashboard:<br>
+    <code><%= baseUrl %>/webhooks/maya/payment-status</code>
+  </div>
+</div>
+<%- include('partials/foot') %>

@@ -1,0 +1,34 @@
+<%- include('partials/head') %>
+<h1>Announcement Banners</h1>
+<p class="muted">Enabled banners show at the top of the homepage, in sort order.</p>
+
+<div class="subpanel" style="margin-bottom:20px;">
+  <h2>Add banner</h2>
+  <form method="POST" action="/admin/banners">
+    <label class="field"><span>Text</span><input type="text" name="text" required></label>
+    <div class="field-row">
+      <label class="field"><span>Sort</span><input type="number" name="sort_order" value="0"></label>
+      <label class="field" style="flex:0 0 80px;"><span>Enabled</span><input type="checkbox" name="enabled" checked></label>
+    </div>
+    <button class="btn btn-primary" type="submit">Add banner</button>
+  </form>
+</div>
+
+<% if (!banners.length) { %><div class="empty-state">No banners yet.</div><% } %>
+
+<% banners.forEach(function(b){ %>
+  <div class="subpanel" style="margin-bottom:12px;">
+    <form method="POST" action="/admin/banners/<%= b.id %>/update">
+      <label class="field"><span>Text</span><input type="text" name="text" value="<%= escapeHtml(b.text) %>"></label>
+      <div class="field-row">
+        <label class="field"><span>Sort</span><input type="number" name="sort_order" value="<%= b.sort_order %>"></label>
+        <label class="field" style="flex:0 0 80px;"><span>Enabled</span><input type="checkbox" name="enabled" <%= b.enabled ? 'checked' : '' %>></label>
+      </div>
+      <button class="btn btn-sm btn-primary" type="submit">Save</button>
+    </form>
+    <form class="inline-form" method="POST" action="/admin/banners/<%= b.id %>/delete" onsubmit="return confirm('Delete this banner?');" style="margin-top:-34px; text-align:right;">
+      <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+    </form>
+  </div>
+<% }) %>
+<%- include('partials/foot') %>

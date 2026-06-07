@@ -1,0 +1,21 @@
+{
+  "name": "fblao-shop",
+  "version": "1.0.0",
+  "description": "Simple digital-goods storefront with Maya Checkout and manual payment support",
+  "main": "src/app.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/app.js",
+    "dev": "node --disable-warning=ExperimentalWarning --watch src/app.js"
+  },
+  "engines": {
+    "node": ">=22.5"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1"
+  }
+}

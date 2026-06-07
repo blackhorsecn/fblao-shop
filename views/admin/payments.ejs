@@ -1,0 +1,38 @@
+<%- include('partials/head') %>
+<h1>Manual Payment Methods</h1>
+<p class="muted">These appear as payment options in the buy modal. When chosen, their instructions are shown to the customer after placing the order.</p>
+
+<div class="subpanel" style="margin-bottom:20px;">
+  <h2>Add method</h2>
+  <form method="POST" action="/admin/payments">
+    <div class="field-row">
+      <label class="field" style="flex:2;"><span>Name (e.g. GCash, Bank Transfer)</span><input type="text" name="name" required></label>
+      <label class="field"><span>Sort</span><input type="number" name="sort_order" value="0"></label>
+      <label class="field" style="flex:0 0 80px;"><span>Enabled</span><input type="checkbox" name="enabled" checked></label>
+    </div>
+    <label class="field"><span>Instructions (shown to customer)</span>
+      <textarea name="instructions" rows="4" placeholder="Send to GCash 0917-xxx-xxxx, use your order number as reference..."></textarea></label>
+    <button class="btn btn-primary" type="submit">Add method</button>
+  </form>
+</div>
+
+<% if (!methods.length) { %><div class="empty-state">No manual methods yet.</div><% } %>
+
+<% methods.forEach(function(m){ %>
+  <div class="subpanel" style="margin-bottom:12px;">
+    <form method="POST" action="/admin/payments/<%= m.id %>/update">
+      <div class="field-row">
+        <label class="field" style="flex:2;"><span>Name</span><input type="text" name="name" value="<%= escapeHtml(m.name) %>"></label>
+        <label class="field"><span>Sort</span><input type="number" name="sort_order" value="<%= m.sort_order %>"></label>
+        <label class="field" style="flex:0 0 80px;"><span>Enabled</span><input type="checkbox" name="enabled" <%= m.enabled ? 'checked' : '' %>></label>
+      </div>
+      <label class="field"><span>Instructions</span>
+        <textarea name="instructions" rows="4"><%= m.instructions %></textarea></label>
+      <button class="btn btn-sm btn-primary" type="submit">Save</button>
+    </form>
+    <form class="inline-form" method="POST" action="/admin/payments/<%= m.id %>/delete" onsubmit="return confirm('Delete this payment method?');" style="margin-top:-34px; text-align:right;">
+      <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+    </form>
+  </div>
+<% }) %>
+<%- include('partials/foot') %>

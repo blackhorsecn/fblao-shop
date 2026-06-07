@@ -1,0 +1,65 @@
+<%- include('partials/head') %>
+<div style="margin-bottom: 20px;">
+  <a href="/admin/products" class="btn btn-sm">&larr; Back to Products</a>
+</div>
+
+<h1>Manage Stock: <%= product.name %></h1>
+
+<div class="subpanel" style="margin-bottom: 25px;">
+  <h2>Add Stock Lines</h2>
+  <p class="muted">Enter one item per line (e.g., email:password or account cookie). These will be automatically delivered to customers on purchase.</p>
+  <form method="POST" action="/admin/products/<%= product.id %>/stock/add">
+    <textarea name="lines" style="width:100%; min-height:150px; font-family:monospace; margin-bottom:10px;" placeholder="item1
+item2
+item3"></textarea>
+    <button class="btn btn-primary" type="submit">Import Stock Lines</button>
+  </form>
+</div>
+
+<div class="field-row" style="align-items: flex-start; gap: 20px;">
+  <div class="subpanel" style="flex: 1;">
+    <h2>Current Pool (<%= pool.length %> items)</h2>
+    <div style="max-height: 400px; overflow-y: auto;">
+      <% if (!pool.length) { %>
+        <p class="muted">No items in pool.</p>
+      <% } else { %>
+        <table class="table-full">
+          <thead><tr><th>Content</th></tr></thead>
+          <tbody>
+            <% pool.forEach(function(item){ %>
+              <tr><td style="font-family:monospace; font-size:0.9em;"><%= escapeHtml(item.content) %></td></tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+    <% if (pool.length) { %>
+      <form method="POST" action="/admin/products/<%= product.id %>/stock/clear" onsubmit="return confirm('Clear ALL unsold stock for this product?');" style="margin-top:15px;">
+        <button class="btn btn-sm btn-danger" type="submit">Clear Pool</button>
+      </form>
+    <% } %>
+  </div>
+
+  <div class="subpanel" style="flex: 1;">
+    <h2>Recent Deliveries (Sold)</h2>
+    <div style="max-height: 400px; overflow-y: auto;">
+      <% if (!sold.length) { %>
+        <p class="muted">No items sold yet.</p>
+      <% } else { %>
+        <table class="table-full">
+          <thead><tr><th>Content</th><th>Order</th></tr></thead>
+          <tbody>
+            <% sold.forEach(function(item){ %>
+              <tr>
+                <td style="font-family:monospace; font-size:0.85em; color:#777;"><%= escapeHtml(item.content) %></td>
+                <td><a href="/admin/orders?status=all&search=<%= item.order_number %>">#<%= item.order_number %></a></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/foot') %>

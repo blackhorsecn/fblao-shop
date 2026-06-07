@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> · Admin</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="admin-shell">
+  <aside class="admin-side">
+    <div class="logo">🦁 Admin</div>
+    <a href="/admin" class="<%= active === 'orders' ? 'active' : '' %>">Orders</a>
+    <a href="/admin/products" class="<%= active === 'products' ? 'active' : '' %>">Products</a>
+    <a href="/admin/categories" class="<%= active === 'categories' ? 'active' : '' %>">Categories</a>
+    <a href="/admin/payments" class="<%= active === 'payments' ? 'active' : '' %>">Manual Payments</a>
+    <a href="/admin/banners" class="<%= active === 'banners' ? 'active' : '' %>">Banners</a>
+    <a href="/admin/settings" class="<%= active === 'settings' ? 'active' : '' %>">Settings</a>
+    <a href="/" target="_blank">View shop ↗</a>
+    <form method="POST" action="/admin/logout" style="padding:10px 18px;">
+      <button class="btn btn-sm" type="submit">Log out</button>
+    </form>
+  </aside>
+  <main class="admin-main">
+    <% if (typeof flash !== 'undefined' && flash) { %>
+      <div class="alert <%= flash.type === 'error' ? 'alert-error' : 'alert-ok' %>"><%= flash.msg %></div>
+    <% } %>

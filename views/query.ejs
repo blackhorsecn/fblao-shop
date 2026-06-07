@@ -1,0 +1,51 @@
+<%- include('partials/head') %>
+
+<div class="card narrow">
+  <h2>Query your order</h2>
+  <p class="muted">Enter the email you used and your order number to check status and retrieve your delivery.</p>
+  <form method="POST" action="/query" class="stack">
+    <label class="field">
+      <span>Email</span>
+      <input type="email" name="email" required placeholder="you@example.com">
+    </label>
+    <label class="field">
+      <span>Order number</span>
+      <input type="text" name="order_number" required placeholder="LK-XXXXXXXX">
+    </label>
+    <button type="submit" class="btn btn-primary">Check status</button>
+  </form>
+
+  <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+
+  <% if (order) { %>
+    <hr>
+    <div class="status-pill status-<%= order.status %>"><%= order.status %></div>
+    <table class="kv">
+      <tr><th>Order number</th><td><strong><%= order.order_number %></strong></td></tr>
+      <tr><th>Product</th><td><%= order.product_name %> &times; <%= order.quantity %></td></tr>
+      <tr><th>Total</th><td><%= money(order.total) %></td></tr>
+      <tr><th>Placed</th><td><%= order.created_at %></td></tr>
+    </table>
+
+    <% if (order.status === 'pending' && order.payment_type === 'manual' && manualMethod) { %>
+      <div class="instructions">
+        <h3>Payment instructions — <%= manualMethod.name %></h3>
+        <div class="instructions-body"><%- nl2br(manualMethod.instructions) %></div>
+        <p class="ref-note">Reference: <strong><%= order.order_number %></strong></p>
+      </div>
+    <% } %>
+
+    <% if (order.status === 'delivered' && order.delivered_content) { %>
+      <div class="delivery">
+        <h3>Your delivery</h3>
+        <pre class="delivery-body"><%= order.delivered_content %></pre>
+      </div>
+    <% } else if (order.status === 'paid') { %>
+      <p class="muted">Payment confirmed — your delivery is being prepared and will appear here.</p>
+    <% } %>
+  <% } %>
+</div>
+
+<%- include('partials/foot') %>

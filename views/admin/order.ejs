@@ -1,0 +1,60 @@
+<%- include('partials/head') %>
+<div class="admin-bar">
+  <h1 style="margin:0;">Order <%= order.order_number %></h1>
+  <a class="btn btn-sm" href="/admin">← Back to orders</a>
+</div>
+
+<div class="panel-grid">
+  <div class="subpanel">
+    <h2>Details</h2>
+    <span class="status-pill status-<%= order.status %>"><%= order.status %></span>
+    <table class="kv">
+      <tr><th>Email</th><td><%= order.email %></td></tr>
+      <tr><th>Product</th><td><%= order.product_name %></td></tr>
+      <tr><th>Quantity</th><td><%= order.quantity %></td></tr>
+      <tr><th>Unit price</th><td><%= money(order.unit_price) %></td></tr>
+      <tr><th>Total</th><td><strong><%= money(order.total) %></strong></td></tr>
+      <tr><th>Payment</th><td><%= order.payment_type %><%= manualMethod ? ' — ' + manualMethod.name : '' %></td></tr>
+      <tr><th>Maya checkout</th><td class="muted"><%= order.maya_checkout_id || '—' %></td></tr>
+      <tr><th>Placed</th><td><%= order.created_at %></td></tr>
+      <tr><th>Paid at</th><td><%= order.paid_at || '—' %></td></tr>
+      <tr><th>Delivered</th><td><%= order.delivered_at || '—' %></td></tr>
+    </table>
+
+    <div class="row-actions" style="margin-top:12px;">
+      <% if (order.status === 'pending') { %>
+        <form class="inline-form" method="POST" action="/admin/orders/<%= order.id %>/mark-paid">
+          <button class="btn btn-primary btn-sm" type="submit">Mark as paid</button>
+        </form>
+        <form class="inline-form" method="POST" action="/admin/orders/<%= order.id %>/cancel">
+          <button class="btn btn-danger btn-sm" type="submit">Cancel order</button>
+        </form>
+      <% } %>
+    </div>
+
+    <form method="POST" action="/admin/orders/<%= order.id %>/notes" style="margin-top:16px;">
+      <label class="field"><span>Internal notes</span>
+        <textarea name="admin_notes"><%= order.admin_notes || '' %></textarea></label>
+      <button class="btn btn-sm" type="submit">Save notes</button>
+    </form>
+  </div>
+
+  <div class="subpanel">
+    <h2>Deliver digital goods</h2>
+    <% if (order.status === 'pending') { %>
+      <div class="alert alert-error">This order is not paid yet. Mark it as paid first (or wait for the Maya webhook).</div>
+    <% } %>
+    <p class="muted">Paste the account credentials / keys. Once delivered, the customer sees this on their order &amp; query page.</p>
+    <form method="POST" action="/admin/orders/<%= order.id %>/deliver">
+      <label class="field">
+        <span>Delivery content</span>
+        <textarea name="delivered_content" rows="8" placeholder="email:pass | 2fa:XXXX | cookie:..."><%= order.delivered_content || '' %></textarea>
+      </label>
+      <button class="btn btn-primary" type="submit"><%= order.status === 'delivered' ? 'Update delivery' : 'Deliver to customer' %></button>
+    </form>
+    <% if (order.status === 'delivered') { %>
+      <div class="alert alert-ok" style="margin-top:12px;">Delivered. The customer can retrieve this from the Query Order page.</div>
+    <% } %>
+  </div>
+</div>
+<%- include('partials/foot') %>
