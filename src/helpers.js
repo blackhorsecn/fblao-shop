@@ -74,15 +74,16 @@ function timeAgo(dateStr) {
 function getPaymentIcon(methodName, dbIconUrl) {
   if (dbIconUrl) return dbIconUrl;
   const name = (methodName || '').toLowerCase();
-  if (name.includes('gcash')) return 'https://upload.wikimedia.org/wikipedia/commons/e/eb/GCash_logo.svg';
-  if (name.includes('paymaya') || name.includes('maya')) return 'https://upload.wikimedia.org/wikipedia/commons/9/9a/Maya_logo.svg';
-  if (name.includes('grab')) return 'https://img.icons8.com/color/48/000000/grab.png';
-  if (name.includes('shopee')) return 'https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg';
-  if (name.includes('bpi')) return 'https://upload.wikimedia.org/wikipedia/commons/e/ee/BPI_Logo.svg';
-  if (name.includes('unionbank') || name.includes('union bank')) return 'https://upload.wikimedia.org/wikipedia/commons/c/c8/UnionBank_of_the_Philippines_logo.svg';
-  if (name.includes('visa')) return 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg';
-  if (name.includes('mastercard')) return 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg';
-  if (name.includes('paypal')) return 'https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg';
+  // Using PNG thumbnails from Wikimedia for better hotlinking stability
+  if (name.includes('gcash')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/GCash_logo.svg/512px-GCash_logo.svg.png';
+  if (name.includes('paymaya') || name.includes('maya')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Maya_logo.svg/512px-Maya_logo.svg.png';
+  if (name.includes('grab')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Grab_logo.svg/512px-Grab_logo.svg.png';
+  if (name.includes('shopee')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Shopee.svg/512px-Shopee.svg.png';
+  if (name.includes('bpi')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/BPI_Logo.svg/512px-BPI_Logo.svg.png';
+  if (name.includes('unionbank') || name.includes('union bank')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/UnionBank_of_the_Philippines_logo.svg/512px-UnionBank_of_the_Philippines_logo.svg.png';
+  if (name.includes('visa')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/512px-Visa_Inc._logo.svg.png';
+  if (name.includes('mastercard')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/512px-Mastercard-logo.svg.png';
+  if (name.includes('paypal')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/512px-PayPal.svg.png';
   return null;
 }
 
