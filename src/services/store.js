@@ -50,38 +50,44 @@ const StoreService = {
     db.prepare('UPDATE products SET stock = ? WHERE id = ?').run(count, productId);
   },
 
+  // Public transactional method
   autoDeliver(orderId) {
+    const tx = db.transaction(() => {
+      return this._performAutoDeliver(orderId);
+    });
+    return tx();
+  },
+
+  // Internal logic method (no transaction)
+  _performAutoDeliver(orderId) {
     const order = this.getOrder(orderId);
     if (!order || order.status !== 'paid' || order.delivered_content) return false;
 
     const product = this.getProduct(order.product_id, false);
     if (!product || !product.auto_deliver) return false;
 
-    const tx = db.transaction(() => {
-      const items = db.prepare('SELECT * FROM product_stock_pool WHERE product_id = ? AND is_sold = 0 LIMIT ?')
-        .all(order.product_id, order.quantity);
+    const items = db.prepare('SELECT * FROM product_stock_pool WHERE product_id = ? AND is_sold = 0 LIMIT ?')
+      .all(order.product_id, order.quantity);
 
-      if (items.length < order.quantity) {
-        // Not enough stock in pool! Log for admin.
-        db.prepare("UPDATE orders SET admin_notes = 'AUTO-DELIVERY FAILED: Insufficient stock in pool.' WHERE id = ?")
-          .run(orderId);
-        return false;
-      }
+    if (items.length < order.quantity) {
+      // Not enough stock in pool! Log for admin.
+      db.prepare("UPDATE orders SET admin_notes = 'AUTO-DELIVERY FAILED: Insufficient stock in pool.' WHERE id = ?")
+        .run(orderId);
+      return false;
+    }
 
-      const content = items.map(i => i.content).join('\n');
-      const itemIds = items.map(i => i.id);
+    const content = items.map(i => i.content).join('\n');
+    const itemIds = items.map(i => i.id);
 
-      // Mark items as sold
-      const markSold = db.prepare('UPDATE product_stock_pool SET is_sold = 1, order_id = ? WHERE id = ?');
-      for (const id of itemIds) markSold.run(orderId, id);
+    // Mark items as sold
+    const markSold = db.prepare('UPDATE product_stock_pool SET is_sold = 1, order_id = ? WHERE id = ?');
+    for (const id of itemIds) markSold.run(orderId, id);
 
-      // Update order
-      db.prepare("UPDATE orders SET delivered_content = ?, status = 'delivered', delivered_at = datetime('now') WHERE id = ?")
-        .run(content, orderId);
+    // Update order
+    db.prepare("UPDATE orders SET delivered_content = ?, status = 'delivered', delivered_at = datetime('now') WHERE id = ?")
+      .run(content, orderId);
 
-      this.syncProductStockCount(order.product_id);
-    });
-    tx();
+    this.syncProductStockCount(order.product_id);
     return true;
   },
 
@@ -131,17 +137,13 @@ const StoreService = {
       if (status === 'paid' && order.status !== 'paid' && order.status !== 'delivered' && order.product_id) {
         const product = this.getProduct(order.product_id, false);
         if (product && product.auto_deliver) {
-          // autoDeliver will handle stock reduction via pool
-          // but we need the status to be 'paid' first
-          db.prepare(updateSql).run(...params);
-          this.autoDeliver(orderId);
-          return; // Skip the default updateSql run below
+          // We need the status to be 'paid' first (which we just did)
+          // Use internal logic method to avoid nested transaction
+          this._performAutoDeliver(orderId);
         } else {
           this.updateProductStock(order.product_id, -order.quantity);
         }
       }
-
-      db.prepare(updateSql).run(...params);
     });
     tx();
   },
