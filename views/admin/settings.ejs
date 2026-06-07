@@ -47,8 +47,16 @@
         <% } %>
       </p>
     </div>
-    <div style="display:flex; gap:10px;">
+    <div style="display:flex; flex-direction: column; gap:10px;">
       <a href="/admin/settings/db-download" class="btn btn-sm" style="background:#eee;color:#333;">Download shop.db Backup</a>
+
+      <form method="POST" action="/admin/settings/db-restore" enctype="multipart/form-data" onsubmit="return confirm('WARNING: This will overwrite your entire database. Proceed?');" style="border-top: 1px solid var(--border); padding-top: 15px; margin-top: 5px;">
+        <label class="field">
+          <span style="color: var(--red); font-weight: bold;">Restore Database (.db file)</span>
+          <input type="file" name="db_file" accept=".db" required style="margin-top:5px;">
+        </label>
+        <button type="submit" class="btn btn-sm btn-danger">Upload & Restore</button>
+      </form>
     </div>
     <% if (!dbInfo.isPersistent) { %>
       <div class="alert alert-error" style="margin-top:15px; font-size: 12px;">

@@ -17,7 +17,13 @@ const storage = multer.diskStorage({
     cb(null, DATA_DIR);
   },
   filename: (req, file, cb) => {
-    cb(null, 'logo.png'); // Always save as logo.png
+    // For logos, we always save as logo.png
+    if (file.fieldname === 'logo') {
+      cb(null, 'logo.png');
+    } else {
+      // For others (like DB restore), use a unique name
+      cb(null, Date.now() + '-' + file.originalname);
+    }
   }
 });
 const upload = multer({
@@ -498,6 +504,45 @@ router.get('/settings', (req, res) => {
 router.get('/settings/db-download', (req, res) => {
   const dbPath = path.join(DATA_DIR, 'shop.db');
   res.download(dbPath, `shop-backup-${new Date().toISOString().split('T')[0]}.db`);
+});
+
+router.post('/settings/db-restore', upload.single('db_file'), (req, res) => {
+  if (!req.file) {
+    flash(req, 'No file uploaded.', 'error');
+    return res.redirect('/admin/settings');
+  }
+
+  const dbPath = path.join(DATA_DIR, 'shop.db');
+  const backupPath = dbPath + '.bak';
+
+  try {
+    // 1. Rename current DB as a temporary backup
+    if (fs.existsSync(dbPath)) {
+      fs.copyFileSync(dbPath, backupPath);
+    }
+
+    // 2. Copy uploaded file to the main DB path
+    // We use copyFileSync to overwrite it.
+    // Node-sqlite's DatabaseSync usually handles this if no active transactions are locked.
+    fs.copyFileSync(req.file.path, dbPath);
+
+    // 3. Delete the multer temporary file
+    fs.unlinkSync(req.file.path);
+
+    flash(req, 'Database restored successfully. The application may need a moment to sync.');
+
+    // On Railway, overwriting the DB might not trigger a restart, but the next request
+    // to the DB will use the new file.
+    res.redirect('/admin/settings');
+  } catch (e) {
+    console.error('Restore failed:', e);
+    // Try to restore the backup if it exists
+    if (fs.existsSync(backupPath)) {
+      fs.copyFileSync(backupPath, dbPath);
+    }
+    flash(req, 'Restore failed: ' + e.message, 'error');
+    res.redirect('/admin/settings');
+  }
 });
 router.post('/settings', (req, res) => {
   setSetting('shop_name', String(req.body.shop_name || '').trim());
