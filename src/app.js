@@ -4,6 +4,7 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const session = require('express-session');
+const FileStore = require('session-file-store')(session);
 
 const { shopContext } = require('./middleware');
 const publicRoutes = require('./routes/public');
@@ -45,6 +46,11 @@ app.use('/static', express.static(path.join(__dirname, '..', 'public')));
 
 const isProd = process.env.NODE_ENV === 'production';
 
+// Session storage path (persistent on Railway if DATA_DIR is set)
+const DATA_DIR = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : path.join(__dirname, '..', 'data');
+
 // Security: Ensure SESSION_SECRET is set in production
 if (isProd && (!process.env.SESSION_SECRET || process.env.SESSION_SECRET === 'dev-secret')) {
   console.warn('WARNING: SESSION_SECRET is not set or using default value in production!');
@@ -52,6 +58,11 @@ if (isProd && (!process.env.SESSION_SECRET || process.env.SESSION_SECRET === 'de
 
 app.use(
   session({
+    store: new FileStore({
+      path: path.join(DATA_DIR, 'sessions'),
+      retries: 0,
+      ttl: 60 * 60 * 8, // 8 hours
+    }),
     name: '__shop_sid', // Security: hide session cookie name
     secret: process.env.SESSION_SECRET || 'dev-secret',
     resave: false,

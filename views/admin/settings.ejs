@@ -22,8 +22,29 @@
   </div>
 </div>
 
-<div class="subpanel" style="margin-top:20px;">
-  <h2>Maya Checkout (online card payment)</h2>
+<div class="panel-grid" style="margin-top:20px;">
+  <div class="subpanel">
+    <h2>Cloudflare (Security & Verification)</h2>
+    <form method="POST" action="/admin/settings/cloudflare">
+      <label class="field">
+        <span>Cloudflare Site Verification Token</span>
+        <input type="text" name="cf_site_verification" value="<%= escapeHtml(s.cf_site_verification) %>" placeholder="cloudflare-site-verification=...">
+        <small class="muted">Adds <code>&lt;meta name="cloudflare-site-verification"&gt;</code> to your homepage.</small>
+      </label>
+
+      <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;">
+
+      <h3>Turnstile (Bot Protection)</h3>
+      <p class="muted">Protect your order and query forms from bots. Get keys from <a href="https://dash.cloudflare.com/?to=/:account/turnstile" target="_blank">Cloudflare Turnstile</a>.</p>
+      <label class="field"><span>Site Key</span><input type="text" name="cf_turnstile_site_key" value="<%= escapeHtml(s.cf_turnstile_site_key) %>"></label>
+      <label class="field"><span>Secret Key</span><input type="password" name="cf_turnstile_secret_key" value="<%= escapeHtml(s.cf_turnstile_secret_key) %>"></label>
+
+      <button class="btn btn-primary" type="submit">Save Cloudflare settings</button>
+    </form>
+  </div>
+
+  <div class="subpanel">
+    <h2>Maya Checkout (online card payment)</h2>
   <p class="muted">Get keys from your Maya Business dashboard. Use <strong>sandbox</strong> keys for testing.</p>
   <form method="POST" action="/admin/settings/maya">
     <div class="field-row">

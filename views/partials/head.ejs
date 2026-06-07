@@ -4,7 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %> · <%= shopName %></title>
+  <% if (settings.cf_site_verification) { %>
+    <meta name="cloudflare-site-verification" content="<%= settings.cf_site_verification.replace('cloudflare-site-verification=', '') %>">
+  <% } %>
   <link rel="stylesheet" href="/static/css/style.css">
+  <% if (settings.cf_turnstile_site_key) { %>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <% } %>
 </head>
 <body>
 <header class="site-header">

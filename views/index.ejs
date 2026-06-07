@@ -112,7 +112,13 @@
       </fieldset>
       <input type="hidden" name="manual_method_id" id="m-manual-id">
 
-      <button type="submit" class="btn btn-primary btn-block" id="m-submit">Proceed to payment</button>
+      <% if (settings.cf_turnstile_site_key) { %>
+        <div class="field" style="margin-top: 15px; display: flex; justify-content: center;">
+          <div class="cf-turnstile" data-sitekey="<%= settings.cf_turnstile_site_key %>"></div>
+        </div>
+      <% } %>
+
+      <button type="submit" class="btn btn-primary btn-block" id="m-submit" style="margin-top: 15px;">Proceed to payment</button>
     </form>
   </div>
 </div>

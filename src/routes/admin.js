@@ -359,6 +359,9 @@ router.get('/settings', (req, res) => {
       maya_public_key: getSetting('maya_public_key', ''),
       maya_secret_key: getSetting('maya_secret_key', ''),
       maya_webhook_secret: getSetting('maya_webhook_secret', ''),
+      cf_turnstile_site_key: getSetting('cf_turnstile_site_key', ''),
+      cf_turnstile_secret_key: getSetting('cf_turnstile_secret_key', ''),
+      cf_site_verification: getSetting('cf_site_verification', ''),
     },
     flash: takeFlash(req),
   });
@@ -377,6 +380,14 @@ router.post('/settings/maya', (req, res) => {
   setSetting('maya_secret_key', String(req.body.maya_secret_key || '').trim());
   setSetting('maya_webhook_secret', String(req.body.maya_webhook_secret || '').trim());
   flash(req, 'Maya configuration saved.');
+  res.redirect('/admin/settings');
+});
+
+router.post('/settings/cloudflare', (req, res) => {
+  setSetting('cf_turnstile_site_key', String(req.body.cf_turnstile_site_key || '').trim());
+  setSetting('cf_turnstile_secret_key', String(req.body.cf_turnstile_secret_key || '').trim());
+  setSetting('cf_site_verification', String(req.body.cf_site_verification || '').trim());
+  flash(req, 'Cloudflare settings saved.');
   res.redirect('/admin/settings');
 });
 
