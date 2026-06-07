@@ -93,6 +93,8 @@
             <td style="padding: 12px; display: flex; align-items: center; gap: 8px;">
                <% if (order.payment_type === 'maya') { %>
                  <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Maya_logo.svg" alt="Maya" style="height: 14px;">
+               <% } else if (manualMethod && manualMethod.icon_url) { %>
+                 <img src="<%= manualMethod.icon_url %>" alt="<%= manualMethod.name %>" style="height: 14px;">
                <% } else if (manualMethod && manualMethod.name.toLowerCase().includes('gcash')) { %>
                  <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/GCash_logo.svg" alt="GCash" style="height: 14px;">
                <% } else if (manualMethod && manualMethod.name.toLowerCase().includes('grab')) { %>

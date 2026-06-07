@@ -89,6 +89,12 @@ CREATE TABLE IF NOT EXISTS banners (
   sort_order INTEGER NOT NULL DEFAULT 0
 );
 
+CREATE INDEX IF NOT EXISTS idx_orders_order_number ON orders(order_number);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_telegram ON orders(telegram_username);
+CREATE INDEX IF NOT EXISTS idx_products_active ON products(active, sort_order);
+CREATE INDEX IF NOT EXISTS idx_stock_product ON product_stock_pool(product_id, is_sold);
+
 CREATE TABLE IF NOT EXISTS orders (
   id               INTEGER PRIMARY KEY AUTOINCREMENT,
   order_number     TEXT UNIQUE NOT NULL,
@@ -133,6 +139,7 @@ try { db.exec("ALTER TABLE orders ADD COLUMN acc_password TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN warranty_period TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE categories ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
 try { db.exec("ALTER TABLE products ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
+try { db.exec("ALTER TABLE manual_payment_methods ADD COLUMN icon_url TEXT"); } catch(e){}
 // email is already nullable in the CREATE TABLE statement above.
 // SQLite doesn't support ALTER COLUMN, so we skip this migration.
 
@@ -218,17 +225,25 @@ function seed() {
 
   // Manual payment methods
   const insManual = db.prepare(
-    'INSERT INTO manual_payment_methods (name, instructions, enabled, sort_order) VALUES (?, ?, 1, ?)'
+    'INSERT INTO manual_payment_methods (name, instructions, enabled, sort_order, icon_url) VALUES (?, ?, 1, ?, ?)'
   );
   insManual.run(
     'GCash',
     'Send the exact total to GCash number 0917-000-0000 (Juan D.).\nUse your ORDER NUMBER as the reference/note.\nAfter sending, your order will be confirmed by our staff, usually within 30 minutes.',
-    1
+    1,
+    'https://upload.wikimedia.org/wikipedia/commons/e/eb/GCash_logo.svg'
   );
   insManual.run(
     'Bank Transfer (BPI)',
     'Transfer the exact total to:\nBank: BPI\nAccount Name: Lion King Studio\nAccount No: 1234-5678-90\nUse your ORDER NUMBER as the reference.\nUpload nothing — we verify by reference number.',
-    2
+    2,
+    'https://upload.wikimedia.org/wikipedia/commons/e/ee/BPI_Logo.svg'
+  );
+  insManual.run(
+    'UnionBank',
+    'Transfer the exact total to:\nBank: UnionBank\nAccount Name: Lion King Studio\nAccount No: 9876-5432-10\nUse your ORDER NUMBER as the reference.',
+    3,
+    'https://upload.wikimedia.org/wikipedia/commons/c/c8/UnionBank_of_the_Philippines_logo.svg'
   );
 
   // Categories + products

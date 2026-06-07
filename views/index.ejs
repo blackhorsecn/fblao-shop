@@ -108,7 +108,9 @@
             <input type="radio" name="payment_type" value="manual"
                    data-manual="<%= m.id %>" <%= (!mayaEnabled && i === 0) ? 'checked' : '' %>>
             <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-               <% if (m.name.toLowerCase().includes('gcash')) { %>
+               <% if (m.icon_url) { %>
+                 <img src="<%= m.icon_url %>" alt="<%= m.name %>" style="height: 20px;">
+               <% } else if (m.name.toLowerCase().includes('gcash')) { %>
                  <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/GCash_logo.svg" alt="GCash" style="height: 20px;">
                <% } else if (m.name.toLowerCase().includes('maya')) { %>
                  <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Maya_logo.svg" alt="Maya" style="height: 20px;">
