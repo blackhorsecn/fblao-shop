@@ -1,115 +1,161 @@
 <%- include('partials/head') %>
-<h1>Products</h1>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+  <h1 style="margin:0;">Products</h1>
+  <div style="display: flex; gap: 10px;">
+    <form method="POST" action="/admin/products/sync-all" style="margin:0;">
+      <button class="btn btn-sm" type="submit" style="background: var(--panel-2); color: var(--muted); border: 1px solid var(--border);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        Sync All Stock
+      </button>
+    </form>
+    <button class="btn btn-sm btn-primary" onclick="document.getElementById('add-product-panel').scrollIntoView({behavior:'smooth'})">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      Add Product
+    </button>
+  </div>
+</div>
 
-<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 10px; flex-wrap: wrap;">
-  <form method="GET" action="/admin/products" style="display:flex; gap:5px; flex-grow: 1;">
-    <input type="text" name="search" value="<%= search || '' %>" placeholder="Search products..." style="padding:4px 8px; border:1px solid #ddd; border-radius:4px; flex-grow: 1; max-width: 300px;">
-    <select name="category_id" style="padding:4px; border:1px solid #ddd; border-radius:4px;">
+<div class="admin-bar" style="background: var(--panel); padding: 15px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 25px; display: flex; align-items: center; gap: 15px;">
+  <form method="GET" action="/admin/products" style="display:flex; gap:10px; flex-grow: 1;">
+    <div style="position: relative; flex-grow: 1; max-width: 400px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" name="search" value="<%= search || '' %>" placeholder="Search by name or description..." style="padding:8px 12px 8px 32px; border:1px solid var(--border); border-radius:6px; background: var(--panel-2); color: var(--text); width: 100%;">
+    </div>
+    <select name="category_id" style="padding:8px 12px; border:1px solid var(--border); border-radius:6px; background: var(--panel-2); color: var(--text); width: 200px;">
       <option value="">All Categories</option>
       <% categories.forEach(function(c){ %>
         <option value="<%= c.id %>" <%= catFilter === c.id ? 'selected' : '' %>><%= c.name %></option>
       <% }) %>
     </select>
-    <button type="submit" class="btn btn-sm">Filter</button>
+    <button type="submit" class="btn btn-sm btn-primary">Filter</button>
     <% if (search || catFilter) { %>
-      <a href="/admin/products" class="btn btn-sm" style="background:#eee;color:#333;">Clear</a>
+      <a href="/admin/products" class="btn btn-sm" style="background:var(--panel-2);color:var(--muted);">Clear</a>
     <% } %>
-  </form>
-
-  <form method="POST" action="/admin/products/sync-all" style="margin:0;">
-    <button class="btn btn-sm" type="submit" style="background:#eee;color:#333;">Sync All Stock</button>
   </form>
 </div>
 
-<div class="subpanel" style="margin-bottom:20px; border-top: 4px solid #007bff;">
-  <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-    <h2 style="margin:0; font-size: 1.2rem;">Add New Product</h2>
-  </div>
+<div class="table-wrap" style="border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 30px;">
+  <table class="product-table">
+    <thead>
+      <tr>
+        <th style="width: 50px;">ID</th>
+        <th>Product Info</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Status</th>
+        <th style="text-align: right;">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (!products.length) { %>
+        <tr><td colspan="7" class="muted" style="text-align: center; padding: 40px;">No products found.</td></tr>
+      <% } %>
+      <% products.forEach(function(p){ %>
+        <tr>
+          <td class="muted">#<%= p.id %></td>
+          <td>
+            <div style="font-weight: 700; color: var(--text);"><%= p.name %></div>
+            <div class="muted" style="font-size: 11px;"><%= p.description || 'No description' %></div>
+          </td>
+          <td>
+            <span style="font-size: 13px; font-weight: 500;"><%= p.category_name || 'Uncategorized' %></span>
+          </td>
+          <td>
+            <div style="color: var(--accent-2); font-weight: 700;"><%= money(p.price) %></div>
+          </td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <strong style="font-size: 14px; <%= p.stock <= 5 ? 'color: var(--red);' : 'color: var(--green);' %>"><%= p.stock %></strong>
+              <% if (p.auto_deliver) { %>
+                <a href="/admin/products/<%= p.id %>/stock" class="btn btn-sm" style="padding: 2px 6px; font-size: 10px; background: rgba(212, 175, 55, 0.1); color: var(--accent); border-color: var(--accent);">Pool</a>
+              <% } %>
+            </div>
+          </td>
+          <td>
+            <span class="status-pill <%= p.active ? 'status-paid' : 'status-failed' %>" style="font-size: 9px; padding: 2px 8px; min-width: 60px;">
+              <%= p.active ? 'ACTIVE' : 'INACTIVE' %>
+            </span>
+          </td>
+          <td style="text-align: right;">
+            <div style="display: flex; gap: 5px; justify-content: flex-end;">
+              <button class="btn btn-sm" onclick="this.closest('tr').nextElementSibling.style.display = this.closest('tr').nextElementSibling.style.display === 'none' ? 'table-row' : 'none'" style="padding: 4px 10px;">Edit</button>
+              <form method="POST" action="/admin/products/<%= p.id %>/duplicate" style="margin:0;">
+                <button class="btn btn-sm" type="submit" style="padding: 4px 10px;" title="Duplicate">Copy</button>
+              </form>
+              <form method="POST" action="/admin/products/<%= p.id %>/delete" onsubmit="return confirm('Delete this product?');" style="margin:0;">
+                <button class="btn btn-sm btn-danger" type="submit" style="padding: 4px 10px;">&times;</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        <tr style="display: none; background: var(--panel-2);">
+          <td colspan="7" style="padding: 20px;">
+            <form method="POST" action="/admin/products/<%= p.id %>/update">
+              <div class="field-row">
+                <label class="field" style="flex:1;"><span>Name</span><input type="text" name="name" value="<%= escapeHtml(p.name) %>"></label>
+                <label class="field" style="flex:1;"><span>Category</span>
+                  <select name="category_id">
+                    <% categories.forEach(function(c){ %>
+                      <option value="<%= c.id %>" <%= c.id === p.category_id ? 'selected' : '' %>><%= c.name %></option>
+                    <% }) %>
+                  </select></label>
+              </div>
+              <label class="field"><span>Description</span><input type="text" name="description" value="<%= escapeHtml(p.description) %>"></label>
+              <div class="field-row">
+                <label class="field"><span>Price</span><input type="number" step="0.01" name="price" value="<%= p.price %>"></label>
+                <label class="field"><span>Min Order</span><input type="number" name="min_quantity" value="<%= p.min_quantity || 1 %>" min="1"></label>
+                <label class="field"><span>Stock</span><input type="number" name="stock" value="<%= p.stock %>" <%= p.auto_deliver ? 'readonly' : '' %>></label>
+                <label class="field"><span>Sort</span><input type="number" name="sort_order" value="<%= p.sort_order %>"></label>
+                <label class="field" style="flex: 0 0 auto;"><span>Auto-Deliver</span><input type="checkbox" name="auto_deliver" <%= p.auto_deliver ? 'checked' : '' %>></label>
+                <label class="field" style="flex: 0 0 auto;"><span>Active</span><input type="checkbox" name="active" <%= p.active ? 'checked' : '' %>></label>
+              </div>
+              <div style="display: flex; gap: 10px; align-items: center; margin-top: 15px;">
+                <button class="btn btn-sm btn-primary" type="submit">Update Product</button>
+                <button type="button" class="btn btn-sm" onclick="this.closest('tr').style.display = 'none'">Cancel</button>
+              </div>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<div id="add-product-panel" class="subpanel" style="margin-top: 40px; border-top: 4px solid var(--accent); padding: 25px;">
+  <h2 style="font-size: 1.2rem; color: var(--text); margin-bottom: 20px;">Add New Product</h2>
   <% if (!categories.length) { %>
-    <p class="muted">Create a <a href="/admin/categories">category</a> first.</p>
+    <div class="empty-state" style="padding: 20px;">
+      Create a <a href="/admin/categories" style="font-weight: 700;">category</a> first before adding products.
+    </div>
   <% } else { %>
   <form method="POST" action="/admin/products">
     <div class="field-row">
-      <label class="field"><span>Category</span>
+      <label class="field" style="flex: 1.5;"><span>Product Name</span><input type="text" name="name" required placeholder="e.g. Aged Facebook Account (2015)"></label>
+      <label class="field" style="flex: 1;"><span>Category</span>
         <select name="category_id">
           <% categories.forEach(function(c){ %><option value="<%= c.id %>"><%= c.name %></option><% }) %>
         </select></label>
-      <label class="field" style="flex: 2;"><span>Name</span><input type="text" name="name" required placeholder="e.g. Aged FB Account"></label>
     </div>
-    <label class="field"><span>Description</span><input type="text" name="description" placeholder="Briefly describe what the customer gets"></label>
+    <label class="field"><span>Description</span><input type="text" name="description" placeholder="Brief details about the account/service"></label>
     <div class="field-row">
-      <label class="field"><span>Price</span><input type="number" step="0.01" name="price" value="0" required></label>
-      <label class="field"><span>Min Order</span><input type="number" name="min_quantity" value="1" min="1"></label>
+      <label class="field"><span>Price (PHP)</span><input type="number" step="0.01" name="price" value="0" required></label>
+      <label class="field"><span>Minimum Quantity</span><input type="number" name="min_quantity" value="1" min="1"></label>
       <label class="field"><span>Sort Order</span><input type="number" name="sort_order" value="0"></label>
-      <label class="field" style="flex:0 0 100px;"><span>Auto-Deliver</span><input type="checkbox" name="auto_deliver" checked></label>
-      <label class="field" style="flex:0 0 70px;"><span>Active</span><input type="checkbox" name="active" checked></label>
+      <div style="display: flex; gap: 20px; align-items: center; padding: 15px 10px 0;">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px;">
+          <input type="checkbox" name="auto_deliver" checked style="width: 18px; height: 18px; accent-color: var(--accent);"> Auto-Deliver
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px;">
+          <input type="checkbox" name="active" checked style="width: 18px; height: 18px; accent-color: var(--accent);"> Active
+        </label>
+      </div>
     </div>
-    <button class="btn btn-primary" type="submit">Add Product</button>
+    <button class="btn btn-primary" type="submit" style="margin-top: 15px; padding: 12px 30px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      Add Product to Shop
+    </button>
   </form>
   <% } %>
 </div>
-
-<% if (!products.length) { %>
-  <div class="empty-state">
-    <% if (search || catFilter) { %>
-      No products match your filters. <a href="/admin/products">Clear filters</a>.
-    <% } else { %>
-      No products yet.
-    <% } %>
-  </div>
-<% } %>
-
-<% products.forEach(function(p){ %>
-  <div class="subpanel" style="margin-bottom:12px; position: relative; <%= p.stock === 0 ? 'border-left: 4px solid #ff4d4d;' : 'border-left: 4px solid #28a745;' %> <%= !p.active ? 'opacity: 0.8;' : '' %>">
-    <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 5px;">
-       <form method="POST" action="/admin/products/<%= p.id %>/duplicate" style="margin:0;">
-          <button class="btn btn-sm" type="submit" style="background:#eee;color:#333; padding: 2px 8px;" title="Duplicate">Copy</button>
-        </form>
-        <form method="POST" action="/admin/products/<%= p.id %>/delete" onsubmit="return confirm('Delete this product?');" style="margin:0;">
-          <button class="btn btn-sm btn-danger" type="submit" style="padding: 2px 8px;">&times;</button>
-        </form>
-    </div>
-
-    <form method="POST" action="/admin/products/<%= p.id %>/update">
-      <div class="field-row" style="margin-right: 80px;">
-        <label class="field" style="max-width: 200px;"><span>Category</span>
-          <select name="category_id">
-            <% categories.forEach(function(c){ %>
-              <option value="<%= c.id %>" <%= c.id === p.category_id ? 'selected' : '' %>><%= c.name %></option>
-            <% }) %>
-          </select></label>
-        <label class="field" style="flex:2;"><span>Name</span><input type="text" name="name" value="<%= escapeHtml(p.name) %>"></label>
-      </div>
-
-      <label class="field"><span>Description</span><input type="text" name="description" value="<%= escapeHtml(p.description) %>"></label>
-
-      <div class="field-row">
-        <label class="field"><span>Price</span><input type="number" step="0.01" name="price" value="<%= p.price %>"></label>
-        <label class="field"><span>Min Order</span><input type="number" name="min_quantity" value="<%= p.min_quantity || 1 %>" min="1"></label>
-        <label class="field">
-          <span>Current Stock</span>
-          <div style="display: flex; align-items: center; gap: 5px;">
-            <input type="number" name="stock" value="<%= p.stock %>" style="width: 80px; <%= p.stock === 0 ? 'color: #ff4d4d; font-weight: bold;' : 'color: #28a745;' %>" <%= p.auto_deliver ? 'readonly title="Managed by Stock Pool"' : '' %>>
-            <% if (p.auto_deliver) { %>
-              <a href="/admin/products/<%= p.id %>/stock" class="btn btn-sm" style="background:#eee;color:#333; font-size: 10px; padding: 2px 4px; white-space: nowrap;">Stock Pool</a>
-            <% } %>
-          </div>
-        </label>
-        <label class="field" style="max-width: 80px;"><span>Sort</span><input type="number" name="sort_order" value="<%= p.sort_order %>"></label>
-        <label class="field" style="flex:0 0 100px;"><span>Auto-Deliver</span><input type="checkbox" name="auto_deliver" <%= p.auto_deliver ? 'checked' : '' %>></label>
-        <label class="field" style="flex:0 0 70px;"><span>Active</span><input type="checkbox" name="active" <%= p.active ? 'checked' : '' %>></label>
-      </div>
-
-      <div class="row-actions" style="display:flex; gap:5px; margin-top: 15px;">
-        <button class="btn btn-sm btn-primary" type="submit">Update Details</button>
-        <button type="button" class="btn btn-sm" style="background:#007bff; color:white;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">+ Quick Add Stock</button>
-        <div style="display:none; margin-top: 10px; width: 100%; border: 1px solid #ddd; padding: 10px; border-radius: 4px; background: #f9f9f9;">
-           <p class="muted" style="margin-top:0;">Paste items (one per line):</p>
-           <textarea name="quick_lines" placeholder="email:pass:2fa..." style="width:100%; height:80px; font-family:monospace; margin-bottom:5px;"></textarea>
-           <button type="submit" name="action" value="quick_add" class="btn btn-sm btn-primary">Add & Save</button>
-        </div>
-      </div>
-    </form>
-  </div>
-<% }) %>
 <%- include('partials/foot') %>

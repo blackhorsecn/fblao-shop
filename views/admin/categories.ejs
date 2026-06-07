@@ -1,31 +1,61 @@
 <%- include('partials/head') %>
-<h1>Categories</h1>
-
-<div class="subpanel" style="margin-bottom:20px;">
-  <h2>Add category</h2>
-  <form method="POST" action="/admin/categories">
-    <div class="field-row">
-      <label class="field" style="flex:2;"><span>Name</span><input type="text" name="name" required></label>
-      <label class="field"><span>Sort order</span><input type="number" name="sort_order" value="0"></label>
-    </div>
-    <button class="btn btn-primary" type="submit">Add category</button>
-  </form>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+  <h1 style="margin:0;">Categories</h1>
 </div>
 
-<% if (!categories.length) { %><div class="empty-state">No categories yet.</div><% } %>
-
-<% categories.forEach(function(c){ %>
-  <div class="subpanel" style="margin-bottom:12px;">
-    <form method="POST" action="/admin/categories/<%= c.id %>/update">
-      <div class="field-row">
-        <label class="field" style="flex:2;"><span>Name</span><input type="text" name="name" value="<%= escapeHtml(c.name) %>"></label>
-        <label class="field"><span>Sort</span><input type="number" name="sort_order" value="<%= c.sort_order %>"></label>
-      </div>
-      <button class="btn btn-sm btn-primary" type="submit">Save</button>
-    </form>
-    <form class="inline-form" method="POST" action="/admin/categories/<%= c.id %>/delete" onsubmit="return confirm('Delete this category and ALL its products?');" style="margin-top:-34px; text-align:right;">
-      <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+<div class="panel-grid" style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; align-items: start;">
+  <div class="subpanel" style="padding: 20px; border-top: 3px solid var(--accent);">
+    <h2>Add New Category</h2>
+    <form method="POST" action="/admin/categories">
+      <label class="field"><span>Name</span><input type="text" name="name" required placeholder="e.g. Premium Accounts"></label>
+      <label class="field"><span>Sort Order</span><input type="number" name="sort_order" value="0"></label>
+      <button class="btn btn-primary btn-block" type="submit">Add Category</button>
     </form>
   </div>
-<% }) %>
+
+  <div class="subpanel" style="padding: 0; overflow: hidden; border-top: 3px solid var(--blue);">
+    <div style="padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+      <h2 style="margin:0;">Existing Categories</h2>
+      <span class="muted" style="font-size: 12px;"><%= categories.length %> total</span>
+    </div>
+    <div class="table-wrap" style="border: none; border-radius: 0;">
+      <table class="product-table">
+        <thead>
+          <tr>
+            <th style="width: 60px;">ID</th>
+            <th>Category Name</th>
+            <th style="width: 100px;">Sort</th>
+            <th style="text-align: right; width: 180px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!categories.length) { %>
+            <tr><td colspan="4" class="muted" style="text-align: center; padding: 40px;">No categories found.</td></tr>
+          <% } %>
+          <% categories.forEach(function(c){ %>
+            <tr>
+              <td class="muted">#<%= c.id %></td>
+              <td>
+                <form id="edit-cat-<%= c.id %>" method="POST" action="/admin/categories/<%= c.id %>/update" style="margin:0;">
+                  <input type="text" name="name" value="<%= escapeHtml(c.name) %>" style="padding: 6px 10px; font-weight: 600;">
+                </form>
+              </td>
+              <td>
+                <input form="edit-cat-<%= c.id %>" type="number" name="sort_order" value="<%= c.sort_order %>" style="padding: 6px 10px; width: 70px;">
+              </td>
+              <td style="text-align: right;">
+                <div style="display: flex; gap: 5px; justify-content: flex-end;">
+                  <button form="edit-cat-<%= c.id %>" class="btn btn-sm btn-primary" type="submit" style="padding: 4px 10px;">Save</button>
+                  <form method="POST" action="/admin/categories/<%= c.id %>/delete" onsubmit="return confirm('Delete this category and ALL its products?');" style="margin:0;">
+                    <button class="btn btn-sm btn-danger" type="submit" style="padding: 4px 10px;">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 <%- include('partials/foot') %>
