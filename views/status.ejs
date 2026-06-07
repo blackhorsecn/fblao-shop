@@ -1,0 +1,89 @@
+<%- include('partials/head') %>
+
+<div class="card narrow">
+  <h2>Order Status</h2>
+  <p class="muted">Enter your Telegram username and order number to check your order status.</p>
+  <form method="POST" action="/status" class="stack">
+    <label class="field">
+      <span>Telegram Username</span>
+      <input type="text" name="telegram_username" required placeholder="@username" value="<%= user ? user.username : '' %>">
+    </label>
+    <label class="field">
+      <span>Order number</span>
+      <input type="text" name="order_number" required placeholder="LK-XXXXXXXX">
+    </label>
+
+    <% if (settings.cf_turnstile_site_key) { %>
+      <div style="margin: 10px 0; display: flex; justify-content: center;">
+        <div class="cf-turnstile" data-sitekey="<%= settings.cf_turnstile_site_key %>"></div>
+      </div>
+    <% } %>
+
+    <button type="submit" class="btn btn-primary">Check status</button>
+  </form>
+
+  <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+
+  <% if (order) { %>
+    <hr>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <div class="status-pill status-<%= order.status %>" style="font-size: 1.2rem; padding: 8px 24px;"><%= order.status.toUpperCase() %></div>
+    </div>
+
+    <div class="subpanel" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;">
+        <table class="kv" style="margin: 0;">
+          <tr style="border-bottom: 1px solid var(--border);">
+            <th style="padding: 12px; background: rgba(255,255,255,0.02);">Order Number</th>
+            <td style="padding: 12px;"><strong><%= order.order_number %></strong></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <th style="padding: 12px; background: rgba(255,255,255,0.02);">Account Ordered</th>
+            <td style="padding: 12px;"><%= order.acc_ordered || order.product_name %></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <th style="padding: 12px; background: rgba(255,255,255,0.02);">Account Number</th>
+            <td style="padding: 12px;"><%= order.acc_number || 'Processing...' %></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <th style="padding: 12px; background: rgba(255,255,255,0.02);">Account Name</th>
+            <td style="padding: 12px;"><%= order.acc_name || 'Processing...' %></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <th style="padding: 12px; background: rgba(255,255,255,0.02);">Warranty Period</th>
+            <td style="padding: 12px;"><span style="color: var(--accent); font-weight: bold;"><%= order.warranty_period || 'Standard' %></span></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <th style="padding: 12px; background: rgba(255,255,255,0.02);">Placed On</th>
+            <td style="padding: 12px;"><%= order.created_at %></td>
+          </tr>
+          <tr>
+            <th style="padding: 12px; background: rgba(255,255,255,0.02);">Total Paid</th>
+            <td style="padding: 12px;"><strong><%= money(order.total) %></strong></td>
+          </tr>
+        </table>
+    </div>
+
+    <% if (order.status === 'pending' && order.payment_type === 'manual' && manualMethod) { %>
+      <div class="instructions">
+        <h3>Payment instructions — <%= manualMethod.name %></h3>
+        <div class="instructions-body"><%- nl2br(manualMethod.instructions) %></div>
+        <p class="ref-note">Reference: <strong><%= order.order_number %></strong></p>
+      </div>
+    <% } %>
+
+    <% if (order.status === 'delivered' && order.delivered_content) { %>
+      <div class="delivery">
+        <h3>Your delivery credentials</h3>
+        <pre class="delivery-body"><%= order.delivered_content %></pre>
+      </div>
+    <% } else if (order.status === 'paid') { %>
+      <div class="alert alert-ok" style="margin-top: 20px; text-align: center;">
+        <strong>Payment confirmed!</strong> Your account is being prepared and will be displayed here soon.
+      </div>
+    <% } %>
+  <% } %>
+</div>
+
+<%- include('partials/foot') %>

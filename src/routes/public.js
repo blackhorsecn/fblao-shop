@@ -128,18 +128,18 @@ router.get('/order/result', asyncHandler(async (req, res) => {
   });
 }));
 
-// Order query page -----------------------------------------------------------
-router.get('/query', (req, res) => {
-  res.render('query', { title: 'Query Order', order: null, manualMethod: null, error: null, searched: false });
+// Order status page -----------------------------------------------------------
+router.get('/status', (req, res) => {
+  res.render('status', { title: 'Order Status', order: null, manualMethod: null, error: null, searched: false });
 });
 
-router.post('/query', (req, res) => {
+router.post('/status', (req, res) => {
   const telegramUsername = String(req.body.telegram_username || '').trim().replace(/^@/, '');
   const ref = String(req.body.order_number || '').trim();
   const order = StoreService.getOrderByTGAndRef(telegramUsername, ref);
   if (!order) {
-    return res.render('query', {
-      title: 'Query Order',
+    return res.render('status', {
+      title: 'Order Status',
       order: null,
       manualMethod: null,
       searched: true,
@@ -149,7 +149,7 @@ router.post('/query', (req, res) => {
   const manualMethod = order.manual_method_id
     ? db.prepare('SELECT * FROM manual_payment_methods WHERE id = ?').get(order.manual_method_id)
     : null;
-  res.render('query', { title: 'Query Order', order, manualMethod, searched: true, error: null });
+  res.render('status', { title: 'Order Status', order, manualMethod, searched: true, error: null });
 });
 
 // Telegram Auth --------------------------------------------------------------
