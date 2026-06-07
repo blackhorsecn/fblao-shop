@@ -197,7 +197,8 @@ router.post('/products', (req, res) => {
     price: parseFloat(req.body.price),
     active: !!req.body.active,
     sort_order: parseInt(req.body.sort_order, 10),
-    auto_deliver: !!req.body.auto_deliver
+    auto_deliver: !!req.body.auto_deliver,
+    min_quantity: parseInt(req.body.min_quantity, 10) || 1
   });
   flash(req, 'Product added.');
   res.redirect('/admin/products');
@@ -211,6 +212,7 @@ router.post('/products/:id/update', (req, res) => {
     active: !!req.body.active,
     sort_order: parseInt(req.body.sort_order, 10),
     auto_deliver: !!req.body.auto_deliver,
+    min_quantity: parseInt(req.body.min_quantity, 10) || 1,
     stock: req.body.stock // Pass stock for manual updates
   });
 

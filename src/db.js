@@ -51,7 +51,8 @@ CREATE TABLE IF NOT EXISTS products (
   stock       INTEGER NOT NULL DEFAULT 0,
   active      INTEGER NOT NULL DEFAULT 1,
   sort_order  INTEGER NOT NULL DEFAULT 0,
-  auto_deliver INTEGER NOT NULL DEFAULT 1
+  auto_deliver INTEGER NOT NULL DEFAULT 1,
+  min_quantity INTEGER NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS product_stock_pool (
@@ -104,6 +105,7 @@ CREATE TABLE IF NOT EXISTS orders (
 
 // Migrations for existing database
 try { db.exec("ALTER TABLE products ADD COLUMN auto_deliver INTEGER NOT NULL DEFAULT 1"); } catch(e){}
+try { db.exec("ALTER TABLE products ADD COLUMN min_quantity INTEGER NOT NULL DEFAULT 1"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN telegram_username TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ALTER COLUMN email DROP NOT NULL"); } catch(e){
   // SQLite doesn't support DROP NOT NULL directly, we'll just ignore it as it usually allows nulls if not strictly checked

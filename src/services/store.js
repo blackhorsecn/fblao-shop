@@ -37,7 +37,7 @@ const StoreService = {
 
   createProduct(data) {
     return db.prepare(
-      'INSERT INTO products (category_id, name, description, price, stock, active, sort_order, auto_deliver) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+      'INSERT INTO products (category_id, name, description, price, stock, active, sort_order, auto_deliver, min_quantity) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
     ).run(
       data.category_id || null,
       data.name || 'Untitled',
@@ -46,13 +46,14 @@ const StoreService = {
       0,
       data.active ? 1 : 0,
       data.sort_order || 0,
-      data.auto_deliver ? 1 : 0
+      data.auto_deliver ? 1 : 0,
+      data.min_quantity || 1
     );
   },
 
   updateProduct(id, data) {
     const result = db.prepare(
-      'UPDATE products SET category_id = ?, name = ?, description = ?, price = ?, active = ?, sort_order = ?, auto_deliver = ? WHERE id = ?'
+      'UPDATE products SET category_id = ?, name = ?, description = ?, price = ?, active = ?, sort_order = ?, auto_deliver = ?, min_quantity = ? WHERE id = ?'
     ).run(
       data.category_id || null,
       data.name || '',
@@ -61,6 +62,7 @@ const StoreService = {
       data.active ? 1 : 0,
       data.sort_order || 0,
       data.auto_deliver ? 1 : 0,
+      data.min_quantity || 1,
       id
     );
 

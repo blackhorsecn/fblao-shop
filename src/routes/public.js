@@ -43,6 +43,12 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
       message: `Only ${product.stock} unit(s) of "${product.name}" are available.`,
     });
   }
+  if (quantity < (product.min_quantity || 1)) {
+    return res.status(400).render('error', {
+      title: 'Minimum order not met',
+      message: `The minimum order for "${product.name}" is ${product.min_quantity} unit(s).`,
+    });
+  }
 
   if (paymentType === 'manual') {
     const method = db.prepare('SELECT * FROM manual_payment_methods WHERE id = ? AND enabled = 1').get(manualMethodId);

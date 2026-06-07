@@ -12,7 +12,7 @@
   var elTotal = document.getElementById('m-total');
   var elManualId = document.getElementById('m-manual-id');
 
-  var current = { price: 0, stock: 1 };
+  var current = { price: 0, stock: 1, min: 1 };
   var currencySymbol = '₱'; // ₱
 
   function fmt(n) {
@@ -20,8 +20,8 @@
   }
 
   function recalc() {
-    var q = parseInt(elQty.value, 10) || 1;
-    if (q < 1) q = 1;
+    var q = parseInt(elQty.value, 10) || current.min;
+    if (q < current.min) q = current.min;
     if (q > current.stock) q = current.stock;
     elQty.value = q;
     elUnit.textContent = fmt(current.price);
@@ -31,9 +31,11 @@
   function openModal(btn) {
     current.price = parseFloat(btn.getAttribute('data-price')) || 0;
     current.stock = parseInt(btn.getAttribute('data-stock'), 10) || 1;
+    current.min = parseInt(btn.getAttribute('data-min'), 10) || 1;
     elProduct.textContent = btn.getAttribute('data-name');
     elProductId.value = btn.getAttribute('data-id');
-    elQty.value = 1;
+    elQty.value = current.min;
+    elQty.min = current.min;
     elQty.max = current.stock;
     recalc();
     modal.classList.add('is-open');
