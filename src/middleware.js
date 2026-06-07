@@ -1,7 +1,8 @@
 'use strict';
 
-const { getSettings } = require('./db');
-const { formatMoney, nl2br, escapeHtml, formatDate, timeAgo } = require('./helpers');
+const { getSettings, db } = require('./db');
+const { formatMoney, nl2br, escapeHtml, formatDate, timeAgo, getPaymentIcon } = require('./helpers');
+const maya = require('./maya');
 
 function shopContext(req, res, next) {
   const settings = getSettings();
@@ -14,6 +15,12 @@ function shopContext(req, res, next) {
   res.locals.timeAgo = timeAgo;
   res.locals.nl2br = nl2br;
   res.locals.escapeHtml = escapeHtml;
+  res.locals.getIcon = getPaymentIcon;
+
+  // Fetch enabled manual methods for footer
+  res.locals.footerMethods = db.prepare('SELECT name, icon_url FROM manual_payment_methods WHERE enabled = 1 ORDER BY sort_order').all();
+  res.locals.mayaEnabled = maya.isConfigured();
+
   res.locals.isAdmin = !!(req.session && req.session.adminId);
   res.locals.user = req.session.user || null;
   res.locals.currentPath = req.path;

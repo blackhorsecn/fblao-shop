@@ -91,16 +91,9 @@
           <tr style="border-bottom: 1px solid var(--border);">
             <th style="padding: 12px; background: rgba(255,255,255,0.02);">Payment Method</th>
             <td style="padding: 12px; display: flex; align-items: center; gap: 8px;">
-               <% if (order.payment_type === 'maya') { %>
-                 <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Maya_logo.svg" alt="Maya" style="height: 14px;">
-               <% } else if (manualMethod && manualMethod.icon_url) { %>
-                 <img src="<%= manualMethod.icon_url %>" alt="<%= manualMethod.name %>" style="height: 14px;">
-               <% } else if (manualMethod && manualMethod.name.toLowerCase().includes('gcash')) { %>
-                 <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/GCash_logo.svg" alt="GCash" style="height: 14px;">
-               <% } else if (manualMethod && manualMethod.name.toLowerCase().includes('grab')) { %>
-                 <img src="https://img.icons8.com/color/48/000000/grab.png" alt="GrabPay" style="height: 16px;">
-               <% } else if (manualMethod && manualMethod.name.toLowerCase().includes('shopee')) { %>
-                 <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" alt="ShopeePay" style="height: 14px;">
+               <% var icon = order.payment_type === 'maya' ? getIcon('maya') : (manualMethod ? getIcon(manualMethod.name, manualMethod.icon_url) : null); %>
+               <% if (icon) { %>
+                 <img src="<%= icon %>" alt="Icon" style="height: 14px;">
                <% } %>
                <span style="text-transform: uppercase; font-size: 11px; font-weight: bold;"><%= order.payment_type %></span>
                <%= manualMethod ? ' — ' + manualMethod.name : '' %>

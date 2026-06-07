@@ -17,7 +17,6 @@ router.get('/', (req, res) => {
     banners,
     catalog: StoreService.getCatalog(),
     manualMethods: StoreService.getEnabledManualMethods(),
-    mayaEnabled: maya.isConfigured(),
   });
 });
 

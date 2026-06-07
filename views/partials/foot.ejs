@@ -2,14 +2,17 @@
 <footer class="site-footer">
   <div class="container">
     <div class="payment-methods" style="margin-bottom: 20px; display: flex; justify-content: center; gap: 25px; align-items: center; flex-wrap: wrap;">
-       <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" style="height: 18px;">
-       <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" style="height: 30px;">
-       <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/GCash_logo.svg" alt="GCash" style="height: 24px;">
-       <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Maya_logo.svg" alt="Maya" style="height: 24px;">
-       <img src="https://upload.wikimedia.org/wikipedia/commons/e/ee/BPI_Logo.svg" alt="BPI" style="height: 20px;">
-       <img src="https://upload.wikimedia.org/wikipedia/commons/c/c8/UnionBank_of_the_Philippines_logo.svg" alt="UnionBank" style="height: 20px;">
-       <img src="https://img.icons8.com/color/48/000000/grab.png" alt="GrabPay" style="height: 30px;">
-       <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" alt="ShopeePay" style="height: 24px;">
+       <img src="<%= getIcon('visa') %>" alt="Visa" style="height: 18px;">
+       <img src="<%= getIcon('mastercard') %>" alt="Mastercard" style="height: 30px;">
+       <% if (mayaEnabled) { %>
+         <img src="<%= getIcon('maya') %>" alt="Maya" style="height: 24px;">
+       <% } %>
+       <% footerMethods.forEach(function(m){ %>
+         <% var icon = getIcon(m.name, m.icon_url); %>
+         <% if (icon && !['visa','mastercard','maya'].includes(m.name.toLowerCase())) { %>
+           <img src="<%= icon %>" alt="<%= m.name %>" style="height: 24px;">
+         <% } %>
+       <% }) %>
     </div>
     <p>&copy; <%= shopName %>. All accounts are for authorized use only.</p>
     <p>Current Time (PH): <span id="live-clock" style="color: var(--accent); font-weight: bold; font-family: ui-monospace, monospace;"><%= date(new Date().toISOString()) %></span></p>

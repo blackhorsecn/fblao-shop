@@ -71,4 +71,19 @@ function timeAgo(dateStr) {
   return Math.floor(seconds) + " seconds ago";
 }
 
-module.exports = { generateOrderNumber, formatMoney, escapeHtml, nl2br, formatDate, timeAgo };
+function getPaymentIcon(methodName, dbIconUrl) {
+  if (dbIconUrl) return dbIconUrl;
+  const name = (methodName || '').toLowerCase();
+  if (name.includes('gcash')) return 'https://upload.wikimedia.org/wikipedia/commons/e/eb/GCash_logo.svg';
+  if (name.includes('paymaya') || name.includes('maya')) return 'https://upload.wikimedia.org/wikipedia/commons/9/9a/Maya_logo.svg';
+  if (name.includes('grab')) return 'https://img.icons8.com/color/48/000000/grab.png';
+  if (name.includes('shopee')) return 'https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg';
+  if (name.includes('bpi')) return 'https://upload.wikimedia.org/wikipedia/commons/e/ee/BPI_Logo.svg';
+  if (name.includes('unionbank') || name.includes('union bank')) return 'https://upload.wikimedia.org/wikipedia/commons/c/c8/UnionBank_of_the_Philippines_logo.svg';
+  if (name.includes('visa')) return 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg';
+  if (name.includes('mastercard')) return 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg';
+  if (name.includes('paypal')) return 'https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg';
+  return null;
+}
+
+module.exports = { generateOrderNumber, formatMoney, escapeHtml, nl2br, formatDate, timeAgo, getPaymentIcon };
