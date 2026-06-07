@@ -139,6 +139,27 @@ router.post('/orders/:id/notes', (req, res) => {
   res.redirect('/admin/orders/' + req.params.id);
 });
 
+router.post('/orders/:id/update-details', (req, res) => {
+  db.prepare(`
+    UPDATE orders
+    SET status = ?,
+        acc_ordered = ?,
+        acc_number = ?,
+        acc_name = ?,
+        warranty_period = ?
+    WHERE id = ?
+  `).run(
+    req.body.status,
+    req.body.acc_ordered,
+    req.body.acc_number,
+    req.body.acc_name,
+    req.body.warranty_period,
+    req.params.id
+  );
+  flash(req, 'Order details updated.');
+  res.redirect('/admin/orders/' + req.params.id);
+});
+
 router.post('/orders/:id/cancel', (req, res) => {
   db.prepare("UPDATE orders SET status = 'cancelled' WHERE id = ? AND status = 'pending'").run(req.params.id);
   flash(req, 'Order cancelled.');

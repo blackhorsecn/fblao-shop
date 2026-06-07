@@ -41,6 +41,32 @@
   </div>
 
   <div class="subpanel">
+    <h2>Edit Order Details</h2>
+    <form method="POST" action="/admin/orders/<%= order.id %>/update-details" class="stack">
+      <label class="field"><span>Status</span>
+        <select name="status">
+          <% ['pending','paid','delivered','failed','cancelled'].forEach(function(s){ %>
+            <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= s.toUpperCase() %></option>
+          <% }) %>
+        </select></label>
+
+      <label class="field"><span>Account Ordered</span>
+        <input type="text" name="acc_ordered" value="<%= order.acc_ordered || order.product_name %>"></label>
+
+      <label class="field"><span>Account Number</span>
+        <input type="text" name="acc_number" value="<%= order.acc_number || '' %>"></label>
+
+      <label class="field"><span>Account Name</span>
+        <input type="text" name="acc_name" value="<%= order.acc_name || '' %>"></label>
+
+      <label class="field"><span>Warranty Period</span>
+        <input type="text" name="warranty_period" value="<%= order.warranty_period || '' %>" placeholder="e.g. 7 Days, 1 Month"></label>
+
+      <button class="btn btn-primary btn-sm" type="submit">Update Details</button>
+    </form>
+  </div>
+
+  <div class="subpanel">
     <h2>Deliver digital goods</h2>
     <% if (order.status === 'pending') { %>
       <div class="alert alert-error">This order is not paid yet. Mark it as paid first (or wait for the Maya webhook).</div>
