@@ -33,7 +33,7 @@
           <th>Payment</th>
           <td>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <% var icon = order.payment_type === 'maya' ? getIcon('maya') : (manualMethod ? getIcon(manualMethod.name, manualMethod.icon_url) : null); %>
+              <% var icon = order.payment_type === 'maya' ? getIcon('maya') : (order.payment_type === 'coins' ? getIcon('coins.ph') : (manualMethod ? getIcon(manualMethod.name, manualMethod.icon_url) : null)); %>
               <% if (icon) { %>
                 <img src="<%= icon %>" alt="Icon" style="height: 14px;">
               <% } %>

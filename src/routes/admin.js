@@ -482,6 +482,11 @@ router.get('/settings', (req, res) => {
       maya_public_key: getSetting('maya_public_key', ''),
       maya_secret_key: getSetting('maya_secret_key', ''),
       maya_webhook_secret: getSetting('maya_webhook_secret', ''),
+      coins_enabled: getSetting('coins_enabled', '0'),
+      coins_mode: getSetting('coins_mode', 'sandbox'),
+      coins_api_key: getSetting('coins_api_key', ''),
+      coins_api_secret: getSetting('coins_api_secret', ''),
+      coins_webhook_secret: getSetting('coins_webhook_secret', ''),
       cf_turnstile_site_key: getSetting('cf_turnstile_site_key', ''),
       cf_turnstile_secret_key: getSetting('cf_turnstile_secret_key', ''),
       cf_site_verification: getSetting('cf_site_verification', ''),
@@ -518,6 +523,16 @@ router.post('/settings/maya', (req, res) => {
   setSetting('maya_secret_key', String(req.body.maya_secret_key || '').trim());
   setSetting('maya_webhook_secret', String(req.body.maya_webhook_secret || '').trim());
   flash(req, 'Maya configuration saved.');
+  res.redirect('/admin/settings');
+});
+
+router.post('/settings/coins', (req, res) => {
+  setSetting('coins_enabled', req.body.coins_enabled ? '1' : '0');
+  setSetting('coins_mode', req.body.coins_mode === 'live' ? 'live' : 'sandbox');
+  setSetting('coins_api_key', String(req.body.coins_api_key || '').trim());
+  setSetting('coins_api_secret', String(req.body.coins_api_secret || '').trim());
+  setSetting('coins_webhook_secret', String(req.body.coins_webhook_secret || '').trim());
+  flash(req, 'Coins.ph configuration saved.');
   res.redirect('/admin/settings');
 });
 

@@ -5,6 +5,7 @@ const router = express.Router();
 const crypto = require('crypto');
 const { db, getSetting } = require('../db');
 const maya = require('../maya');
+const coins = require('../coins');
 const { generateOrderNumber } = require('../helpers');
 const { asyncHandler, rateLimit } = require('../middleware');
 const StoreService = require('../services/store');
@@ -17,6 +18,7 @@ router.get('/', (req, res) => {
     banners,
     catalog: StoreService.getCatalog(),
     manualMethods: StoreService.getEnabledManualMethods(),
+    coinsEnabled: coins.isConfigured(),
   });
 });
 
@@ -25,7 +27,7 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
   const telegramUsername = String(req.body.telegram_username || '').trim().replace(/^@/, '');
   const productId = parseInt(req.body.product_id, 10);
   const quantity = Math.max(1, parseInt(req.body.quantity, 10) || 1);
-  const paymentType = req.body.payment_type === 'manual' ? 'manual' : 'maya';
+  const paymentType = req.body.payment_type; // 'manual', 'maya', or 'coins'
   const manualMethodId = req.body.manual_method_id ? parseInt(req.body.manual_method_id, 10) : null;
 
   if (!telegramUsername) {
@@ -54,8 +56,10 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
     if (!method) {
       return res.status(400).render('error', { title: 'Invalid payment', message: 'Please choose a valid payment method.' });
     }
-  } else if (!maya.isConfigured()) {
-    return res.status(400).render('error', { title: 'Unavailable', message: 'Online card/Maya payment is not available right now. Please choose a manual method.' });
+  } else if (paymentType === 'maya' && !maya.isConfigured()) {
+    return res.status(400).render('error', { title: 'Unavailable', message: 'Online card/Maya payment is not available right now. Please choose another method.' });
+  } else if (paymentType === 'coins' && !coins.isConfigured()) {
+    return res.status(400).render('error', { title: 'Unavailable', message: 'Coins.ph payment is not available right now. Please choose another method.' });
   }
 
   const orderNumber = generateOrderNumber();
@@ -91,6 +95,23 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
       return res.status(502).render('error', {
         title: 'Payment error',
         message: 'Could not start the Maya payment. ' + e.message + ` Your reference is ${orderNumber}.`,
+      });
+    }
+  }
+
+  if (paymentType === 'coins') {
+    try {
+      const { paymentRequestId, redirectUrl } = await coins.createPaymentRequest(order, res.locals.baseUrl);
+      db.prepare('UPDATE orders SET coins_request_id = ? WHERE id = ?').run(paymentRequestId, order.id);
+      return res.redirect(redirectUrl);
+    } catch (e) {
+      db.prepare("UPDATE orders SET status = 'failed', admin_notes = ? WHERE id = ?").run(
+        'Coins.ph checkout error: ' + e.message,
+        order.id
+      );
+      return res.status(502).render('error', {
+        title: 'Payment error',
+        message: 'Could not start the Coins.ph payment. ' + e.message + ` Your reference is ${orderNumber}.`,
       });
     }
   }

@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS orders (
   manual_method_id INTEGER REFERENCES manual_payment_methods(id) ON DELETE SET NULL,
   status           TEXT NOT NULL DEFAULT 'pending',
   maya_checkout_id TEXT,
+  coins_request_id TEXT,
   maya_reference   TEXT,
   delivered_content TEXT,
   admin_notes      TEXT,
@@ -96,6 +97,7 @@ CREATE TABLE IF NOT EXISTS orders (
 
 // Migrations for existing database
 try { db.exec("ALTER TABLE products ADD COLUMN auto_deliver INTEGER NOT NULL DEFAULT 1"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN coins_request_id TEXT"); } catch(e){}
 
 // Add Coins.ph Enterprise if it doesn't exist
 const coinsExist = db.prepare('SELECT id FROM manual_payment_methods WHERE name = ?').get('Coins.ph Enterprise');
@@ -145,6 +147,11 @@ function seed() {
     maya_secret_key: process.env.MAYA_SECRET_KEY || '',
     maya_webhook_secret: process.env.MAYA_WEBHOOK_SECRET || '',
     maya_enabled: process.env.MAYA_PUBLIC_KEY ? '1' : '0',
+    coins_mode: process.env.COINS_MODE || 'sandbox',
+    coins_api_key: process.env.COINS_API_KEY || '',
+    coins_api_secret: process.env.COINS_API_SECRET || '',
+    coins_webhook_secret: process.env.COINS_WEBHOOK_SECRET || '',
+    coins_enabled: process.env.COINS_API_KEY ? '1' : '0',
   };
   for (const [k, v] of Object.entries(defaults)) setSetting(k, v);
 

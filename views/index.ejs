@@ -103,6 +103,15 @@
             </div>
           </label>
         <% } %>
+        <% if (coinsEnabled) { %>
+          <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
+            <input type="radio" name="payment_type" value="coins" <%= !mayaEnabled ? 'checked' : '' %>>
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+               <img src="<%= getIcon('coins.ph') %>" alt="Coins.ph" style="height: 20px;">
+               <span><strong>Coins.ph Enterprise</strong> — Instant Crypto/Wallet payment</span>
+            </div>
+          </label>
+        <% } %>
         <% manualMethods.forEach(function(m, i){ %>
           <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
             <input type="radio" name="payment_type" value="manual"

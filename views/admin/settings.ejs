@@ -81,24 +81,46 @@
 
   <div class="subpanel">
     <h2>Maya Checkout (online card payment)</h2>
-  <p class="muted">Get keys from your Maya Business dashboard. Use <strong>sandbox</strong> keys for testing.</p>
-  <form method="POST" action="/admin/settings/maya">
-    <div class="field-row">
-      <label class="field" style="flex:0 0 130px;"><span>Enabled</span><input type="checkbox" name="maya_enabled" <%= s.maya_enabled === '1' ? 'checked' : '' %>></label>
-      <label class="field"><span>Mode</span>
-        <select name="maya_mode">
-          <option value="sandbox" <%= s.maya_mode !== 'live' ? 'selected' : '' %>>Sandbox</option>
-          <option value="live" <%= s.maya_mode === 'live' ? 'selected' : '' %>>Live (production)</option>
-        </select></label>
+    <p class="muted">Get keys from your Maya Business dashboard. Use <strong>sandbox</strong> keys for testing.</p>
+    <form method="POST" action="/admin/settings/maya">
+      <div class="field-row">
+        <label class="field" style="flex:0 0 130px;"><span>Enabled</span><input type="checkbox" name="maya_enabled" <%= s.maya_enabled === '1' ? 'checked' : '' %>></label>
+        <label class="field"><span>Mode</span>
+          <select name="maya_mode">
+            <option value="sandbox" <%= s.maya_mode !== 'live' ? 'selected' : '' %>>Sandbox</option>
+            <option value="live" <%= s.maya_mode === 'live' ? 'selected' : '' %>>Live (production)</option>
+          </select></label>
+      </div>
+      <label class="field"><span>Public key (pk-...)</span><input type="text" name="maya_public_key" value="<%= escapeHtml(s.maya_public_key) %>"></label>
+      <label class="field"><span>Secret key (sk-...)</span><input type="text" name="maya_secret_key" value="<%= escapeHtml(s.maya_secret_key) %>"></label>
+      <label class="field"><span>Webhook secret (optional)</span><input type="text" name="maya_webhook_secret" value="<%= escapeHtml(s.maya_webhook_secret) %>"></label>
+      <button class="btn btn-primary" type="submit">Save Maya configuration</button>
+    </form>
+    <div class="alert alert-ok" style="margin-top:14px; font-size: 11px;">
+      <strong>Webhook URL:</strong> <code><%= baseUrl %>/webhooks/maya/payment-status</code>
     </div>
-    <label class="field"><span>Public key (pk-...)</span><input type="text" name="maya_public_key" value="<%= escapeHtml(s.maya_public_key) %>"></label>
-    <label class="field"><span>Secret key (sk-...)</span><input type="text" name="maya_secret_key" value="<%= escapeHtml(s.maya_secret_key) %>"></label>
-    <label class="field"><span>Webhook secret (optional, for HMAC verification)</span><input type="text" name="maya_webhook_secret" value="<%= escapeHtml(s.maya_webhook_secret) %>"></label>
-    <button class="btn btn-primary" type="submit">Save Maya configuration</button>
-  </form>
-  <div class="alert alert-ok" style="margin-top:14px;">
-    <strong>Webhook URL</strong> to register in your Maya dashboard:<br>
-    <code><%= baseUrl %>/webhooks/maya/payment-status</code>
+  </div>
+
+  <div class="subpanel">
+    <h2>Coins.ph Enterprise (crypto/wallet)</h2>
+    <p class="muted">Get keys from your Coins.ph Business Portal. Use <strong>sandbox</strong> for testing.</p>
+    <form method="POST" action="/admin/settings/coins">
+      <div class="field-row">
+        <label class="field" style="flex:0 0 130px;"><span>Enabled</span><input type="checkbox" name="coins_enabled" <%= s.coins_enabled === '1' ? 'checked' : '' %>></label>
+        <label class="field"><span>Mode</span>
+          <select name="coins_mode">
+            <option value="sandbox" <%= s.coins_mode !== 'live' ? 'selected' : '' %>>Sandbox</option>
+            <option value="live" <%= s.coins_mode === 'live' ? 'selected' : '' %>>Live (production)</option>
+          </select></label>
+      </div>
+      <label class="field"><span>API Key</span><input type="text" name="coins_api_key" value="<%= escapeHtml(s.coins_api_key) %>"></label>
+      <label class="field"><span>API Secret</span><input type="text" name="coins_api_secret" value="<%= escapeHtml(s.coins_api_secret) %>"></label>
+      <label class="field"><span>Webhook Secret</span><input type="text" name="coins_webhook_secret" value="<%= escapeHtml(s.coins_webhook_secret) %>"></label>
+      <button class="btn btn-primary" type="submit">Save Coins.ph configuration</button>
+    </form>
+    <div class="alert alert-ok" style="margin-top:14px; font-size: 11px;">
+      <strong>Webhook URL:</strong> <code><%= baseUrl %>/webhooks/coins/payment-status</code>
+    </div>
   </div>
 </div>
 <%- include('partials/foot') %>
