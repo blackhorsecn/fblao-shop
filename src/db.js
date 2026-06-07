@@ -100,6 +100,7 @@ CREATE TABLE IF NOT EXISTS orders (
   payment_type     TEXT NOT NULL DEFAULT 'maya',
   manual_method_id INTEGER REFERENCES manual_payment_methods(id) ON DELETE SET NULL,
   telegram_username TEXT,
+  telegram_id      TEXT,
   status           TEXT NOT NULL DEFAULT 'pending',
   maya_checkout_id TEXT,
   maya_reference   TEXT,
@@ -121,6 +122,7 @@ CREATE TABLE IF NOT EXISTS orders (
 try { db.exec("ALTER TABLE products ADD COLUMN auto_deliver INTEGER NOT NULL DEFAULT 1"); } catch(e){}
 try { db.exec("ALTER TABLE products ADD COLUMN min_quantity INTEGER NOT NULL DEFAULT 1"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN telegram_username TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN telegram_id TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN acc_ordered TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN acc_number TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN acc_name TEXT"); } catch(e){}

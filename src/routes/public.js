@@ -64,6 +64,7 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
     orderNumber,
     email: '', // Email is no longer used
     telegramUsername,
+    telegramId: req.session.user ? req.session.user.telegram_id : null,
     productId: product.id,
     productName: product.name,
     quantity,
@@ -73,6 +74,10 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
     paymentType,
     manualMethodId: paymentType === 'manual' ? manualMethodId : null
   });
+
+  // Notify admin
+  const NotificationService = require('../services/notifications');
+  NotificationService.onNewOrder(order).catch(console.error);
 
   if (paymentType === 'maya') {
     try {

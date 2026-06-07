@@ -136,6 +136,9 @@ router.post('/orders/:id/notes', (req, res) => {
 });
 
 router.post('/orders/:id/update-details', (req, res) => {
+  const oldOrder = StoreService.getOrder(req.params.id);
+  const newStatus = req.body.status;
+
   db.prepare(`
     UPDATE orders
     SET status = ?,
@@ -147,7 +150,7 @@ router.post('/orders/:id/update-details', (req, res) => {
         warranty_period = ?
     WHERE id = ?
   `).run(
-    req.body.status,
+    newStatus,
     req.body.acc_ordered,
     req.body.acc_number,
     req.body.acc_name,
@@ -156,6 +159,16 @@ router.post('/orders/:id/update-details', (req, res) => {
     req.body.warranty_period,
     req.params.id
   );
+
+  const updatedOrder = StoreService.getOrder(req.params.id);
+  const NotificationService = require('../services/notifications');
+
+  if (newStatus === 'paid' && oldOrder.status !== 'paid') {
+     NotificationService.onOrderPaid(updatedOrder).catch(console.error);
+  } else if (newStatus === 'delivered' && oldOrder.status !== 'delivered') {
+     NotificationService.onOrderDelivered(updatedOrder).catch(console.error);
+  }
+
   flash(req, 'Order details updated.');
   res.redirect('/admin/orders/' + req.params.id);
 });

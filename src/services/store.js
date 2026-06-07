@@ -1,6 +1,7 @@
 'use strict';
 
 const { db } = require('../db');
+const NotificationService = require('./notifications');
 
 const StoreService = {
   // Catalog
@@ -201,12 +202,13 @@ const StoreService = {
   createOrder(data) {
     const info = db.prepare(`
       INSERT INTO orders
-      (order_number, email, telegram_username, product_id, product_name, quantity, unit_price, total, currency, payment_type, manual_method_id, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+      (order_number, email, telegram_username, telegram_id, product_id, product_name, quantity, unit_price, total, currency, payment_type, manual_method_id, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
     `).run(
       data.orderNumber,
       data.email,
       data.telegramUsername,
+      data.telegramId,
       data.productId,
       data.productName,
       data.quantity,
@@ -220,10 +222,10 @@ const StoreService = {
   },
 
   updateOrderStatus(orderId, status, paidAt = null) {
-    const tx = db.transaction(() => {
-      const order = this.getOrder(orderId);
-      if (!order) return;
+    const order = this.getOrder(orderId);
+    if (!order) return;
 
+    const tx = db.transaction(() => {
       const updateSql = paidAt
         ? "UPDATE orders SET status = ?, paid_at = ? WHERE id = ?"
         : "UPDATE orders SET status = ? WHERE id = ?";
@@ -235,8 +237,6 @@ const StoreService = {
       if (status === 'paid' && order.status !== 'paid' && order.status !== 'delivered' && order.product_id) {
         const product = this.getProduct(order.product_id, false);
         if (product && product.auto_deliver) {
-          // We need the status to be 'paid' first (which we just did)
-          // Use internal logic method to avoid nested transaction
           this._performAutoDeliver(orderId);
         } else {
           this.updateProductStock(order.product_id, -order.quantity);
@@ -244,11 +244,22 @@ const StoreService = {
       }
     });
     tx();
+
+    // Post-transaction notifications (outside transaction)
+    const updatedOrder = this.getOrder(orderId);
+    if (status === 'paid' && order.status !== 'paid') {
+      NotificationService.onOrderPaid(updatedOrder).catch(console.error);
+    } else if (status === 'delivered' && order.status !== 'delivered') {
+      NotificationService.onOrderDelivered(updatedOrder).catch(console.error);
+    }
   },
 
   deliverOrder(orderId, content) {
     db.prepare("UPDATE orders SET delivered_content = ?, status = 'delivered', delivered_at = datetime('now') WHERE id = ?")
       .run(content, orderId);
+
+    const updatedOrder = this.getOrder(orderId);
+    NotificationService.onOrderDelivered(updatedOrder).catch(console.error);
   },
 
   // Admin Stats
