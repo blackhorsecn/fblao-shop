@@ -4,48 +4,99 @@
   <div class="muted" style="font-size: 14px;">Last updated: <%= date(new Date().toISOString()) %></div>
 </div>
 
-<div class="panel-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:15px; margin-bottom:30px;">
+<div class="panel-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:30px;">
   <div class="subpanel" style="padding:15px; border-top: 3px solid var(--blue);">
-    <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Total Orders</div>
-    <div style="display: flex; align-items: baseline; gap: 8px;">
-      <strong style="font-size:24px; color: var(--text);"><%= stats.orders %></strong>
+    <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Orders Overview</div>
+    <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 10px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <span class="muted" style="font-size: 13px;">Total</span>
+        <strong style="font-size:18px; color: var(--text);"><%= stats.orders %></strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <span class="muted" style="font-size: 13px;">Last 24h</span>
+        <strong style="font-size:18px; color: var(--blue);"><%= stats.orders24h %></strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <span class="muted" style="font-size: 13px;">Pending</span>
+        <strong style="font-size:18px; color: var(--accent-2);"><%= stats.pending %></strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <span class="muted" style="font-size: 13px;">Delivered</span>
+        <strong style="font-size:18px; color: var(--accent);"><%= stats.delivered %></strong>
+      </div>
     </div>
   </div>
-  <div class="subpanel" style="padding:15px; border-top: 3px solid var(--accent-2);">
-    <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Pending</div>
-    <strong style="font-size:24px; color: var(--accent-2);"><%= stats.pending %></strong>
-  </div>
-  <div class="subpanel" style="padding:15px; border-top: 3px solid var(--green);">
-    <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Paid</div>
-    <strong style="font-size:24px; color: var(--green);"><%= stats.paid %></strong>
-  </div>
-  <div class="subpanel" style="padding:15px; border-top: 3px solid var(--accent);">
-    <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Delivered</div>
-    <strong style="font-size:24px; color: var(--accent);"><%= stats.delivered %></strong>
-  </div>
+
   <div class="subpanel" style="padding:15px; border-top: 3px solid var(--gold-gradient);">
-    <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Revenue</div>
-    <strong style="font-size:24px; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><%= money(stats.revenue) %></strong>
+    <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Revenue (Paid/Delivered)</div>
+    <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 10px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <span class="muted" style="font-size: 13px;">Today</span>
+        <strong style="font-size:18px; color: var(--green);"><%= money(stats.revenueToday) %></strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <span class="muted" style="font-size: 13px;">This Month</span>
+        <strong style="font-size:18px; color: var(--accent);"><%= money(stats.revenueMonth) %></strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <span class="muted" style="font-size: 13px;">Total All Time</span>
+        <strong style="font-size:18px; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><%= money(stats.revenue) %></strong>
+      </div>
+    </div>
   </div>
-  <% if (stats.lowStock > 0) { %>
-    <a href="/admin/products" class="subpanel" style="padding:15px; border-top: 3px solid var(--red); text-decoration: none;">
-      <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Low Stock</div>
-      <strong style="font-size:24px; color: var(--red);"><%= stats.lowStock %></strong>
-    </a>
-  <% } %>
+
+  <div class="subpanel" style="padding:15px; border-top: 3px solid var(--purple);">
+    <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Top Selling (Units)</div>
+    <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px;">
+      <% if (stats.topProducts && stats.topProducts.length > 0) { %>
+        <% stats.topProducts.forEach(p => { %>
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;" title="<%= p.product_name %>"><%= p.product_name %></span>
+            <strong style="color: var(--accent);"><%= p.total_sold %></strong>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <div class="muted" style="font-size: 12px; text-align: center; margin-top: 10px;">No sales yet</div>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="subpanel" style="padding:15px; border-top: 3px solid var(--red);">
+    <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Inventory</div>
+    <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 10px;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <span class="muted" style="font-size: 13px;">Total Products</span>
+        <strong style="font-size:18px;"><%= stats.products %></strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <span class="muted" style="font-size: 13px;">Low Stock</span>
+        <strong style="font-size:18px; color: <%= stats.lowStock > 0 ? 'var(--red)' : 'var(--green)' %>;"><%= stats.lowStock %></strong>
+      </div>
+      <% if (stats.lowStock > 0) { %>
+        <a href="/admin/products" class="btn btn-sm" style="margin-top:5px; font-size: 10px; padding: 2px 0; text-align: center; background: rgba(239, 68, 68, 0.1); color: var(--red); border: 1px solid var(--red);">View Low Stock</a>
+      <% } %>
+    </div>
+  </div>
 </div>
 
-<div class="admin-bar" style="background: var(--panel); padding: 15px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-  <div class="row-actions" style="margin:0;">
-    <% ['all','pending','paid','delivered','failed','cancelled'].forEach(function(f){ %>
-      <a class="btn btn-sm <%= filter === f ? 'btn-primary' : '' %>" href="/admin?status=<%= f %><%= search ? '&search=' + encodeURIComponent(search) : '' %>" style="text-transform: capitalize;"><%= f %></a>
-    <% }) %>
+<div class="admin-bar" style="background: var(--panel); padding: 15px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+    <div class="row-actions" style="margin:0; display: flex; gap: 5px;">
+      <% ['all','pending','paid','delivered','failed','cancelled'].forEach(function(f){ %>
+        <a class="btn btn-sm <%= filter === f ? 'btn-primary' : '' %>" href="/admin?status=<%= f %><%= search ? '&search=' + encodeURIComponent(search) : '' %>" style="text-transform: capitalize;"><%= f %></a>
+      <% }) %>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <a href="/admin/products" class="btn btn-sm btn-primary" style="background: var(--accent);">+ Add Stock</a>
+      <a href="/admin/settings" class="btn btn-sm" style="background: var(--panel-2);">Settings</a>
+    </div>
   </div>
-  <form method="GET" action="/admin" style="display:flex; gap:5px; flex-grow: 1; max-width: 400px;">
+
+  <form method="GET" action="/admin" style="display:flex; gap:5px; width: 100%;">
     <input type="hidden" name="status" value="<%= filter %>">
     <div style="position: relative; flex-grow: 1;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input type="text" name="search" value="<%= search || '' %>" placeholder="Search order/TG/details..." style="padding:8px 12px 8px 32px; border:1px solid var(--border); border-radius:6px; background: var(--panel-2); color: var(--text); width: 100%;">
+      <input type="text" name="search" value="<%= search || '' %>" placeholder="Search by order #, email, telegram, or ID..." style="padding:8px 12px 8px 32px; border:1px solid var(--border); border-radius:6px; background: var(--panel-2); color: var(--text); width: 100%;">
     </div>
     <button type="submit" class="btn btn-sm btn-primary">Search</button>
     <% if (search) { %>

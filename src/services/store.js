@@ -271,14 +271,32 @@ const StoreService = {
 
   // Admin Stats
   getStats() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayIso = today.toISOString();
+
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const monthStartIso = monthStart.toISOString();
+
     return {
       orders: db.prepare('SELECT COUNT(*) c FROM orders').get().c,
+      orders24h: db.prepare("SELECT COUNT(*) c FROM orders WHERE created_at >= ?").get(new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()).c,
       pending: db.prepare("SELECT COUNT(*) c FROM orders WHERE status = 'pending'").get().c,
       paid: db.prepare("SELECT COUNT(*) c FROM orders WHERE status = 'paid'").get().c,
       delivered: db.prepare("SELECT COUNT(*) c FROM orders WHERE status = 'delivered'").get().c,
       revenue: db.prepare("SELECT COALESCE(SUM(total),0) s FROM orders WHERE status IN ('paid','delivered')").get().s,
+      revenueToday: db.prepare("SELECT COALESCE(SUM(total),0) s FROM orders WHERE status IN ('paid','delivered') AND created_at >= ?").get(todayIso).s,
+      revenueMonth: db.prepare("SELECT COALESCE(SUM(total),0) s FROM orders WHERE status IN ('paid','delivered') AND created_at >= ?").get(monthStartIso).s,
       products: db.prepare('SELECT COUNT(*) c FROM products').get().c,
       lowStock: db.prepare('SELECT COUNT(*) c FROM products WHERE stock <= 5 AND active = 1').get().c,
+      topProducts: db.prepare(`
+        SELECT product_name, SUM(quantity) as total_sold
+        FROM orders
+        WHERE status IN ('paid', 'delivered')
+        GROUP BY product_name
+        ORDER BY total_sold DESC
+        LIMIT 5
+      `).all()
     };
   }
 };
