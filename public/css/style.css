@@ -327,8 +327,8 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 /* Footer */
 .site-footer { border-top: 1px solid var(--border); padding: 24px 0; margin-top: 40px; color: var(--muted); font-size: 13px; text-align: center; }
 .site-footer p { margin: 4px 0; }
-.payment-methods img { transition: filter 0.3s; filter: grayscale(100%) opacity(0.7); }
-.payment-methods:hover img { filter: grayscale(0%) opacity(1); }
+.payment-methods img { transition: transform 0.3s; }
+.payment-methods img:hover { transform: scale(1.1); }
 
 @keyframes shine {
   0% { background-position: -100% 0; }

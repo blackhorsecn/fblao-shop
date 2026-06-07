@@ -37,6 +37,10 @@
                 <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Maya_logo.svg" alt="Maya" style="height: 14px;">
               <% } else if (manualMethod && manualMethod.name.toLowerCase().includes('gcash')) { %>
                 <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/GCash_logo.svg" alt="GCash" style="height: 14px;">
+              <% } else if (manualMethod && manualMethod.name.toLowerCase().includes('grab')) { %>
+                <img src="https://img.icons8.com/color/48/000000/grab.png" alt="GrabPay" style="height: 16px;">
+              <% } else if (manualMethod && manualMethod.name.toLowerCase().includes('shopee')) { %>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" alt="ShopeePay" style="height: 14px;">
               <% } %>
               <span style="text-transform: uppercase; font-size: 12px; font-weight: bold;"><%= order.payment_type %></span>
               <%= manualMethod ? ' — ' + manualMethod.name : '' %>
