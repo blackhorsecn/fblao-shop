@@ -100,6 +100,8 @@ CREATE TABLE IF NOT EXISTS orders (
   acc_ordered      TEXT,
   acc_number       TEXT,
   acc_name         TEXT,
+  acc_username     TEXT,
+  acc_password     TEXT,
   warranty_period  TEXT,
   created_at       TEXT NOT NULL DEFAULT (datetime('now')),
   paid_at          TEXT,
@@ -114,6 +116,8 @@ try { db.exec("ALTER TABLE orders ADD COLUMN telegram_username TEXT"); } catch(e
 try { db.exec("ALTER TABLE orders ADD COLUMN acc_ordered TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN acc_number TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN acc_name TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN acc_username TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN acc_password TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN warranty_period TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ALTER COLUMN email DROP NOT NULL"); } catch(e){
   // SQLite doesn't support DROP NOT NULL directly, we'll just ignore it as it usually allows nulls if not strictly checked

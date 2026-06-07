@@ -12,6 +12,8 @@
       <tr><th>Telegram</th><td><strong>@<%= order.telegram_username %></strong></td></tr>
       <% if (order.email) { %><tr><th>Email</th><td><%= order.email %></td></tr><% } %>
       <tr><th>Product</th><td><%= order.product_name %></td></tr>
+      <tr><th>Acc Username</th><td><code><%= order.acc_username || '—' %></code></td></tr>
+      <tr><th>Acc Password</th><td><code><%= order.acc_password || '—' %></code></td></tr>
       <tr><th>Quantity</th><td><%= order.quantity %></td></tr>
       <tr><th>Unit price</th><td><%= money(order.unit_price) %></td></tr>
       <tr><th>Total</th><td><strong><%= money(order.total) %></strong></td></tr>
@@ -58,6 +60,12 @@
 
       <label class="field"><span>Account Name</span>
         <input type="text" name="acc_name" value="<%= order.acc_name || '' %>"></label>
+
+      <label class="field"><span>Account Username</span>
+        <input type="text" name="acc_username" value="<%= order.acc_username || '' %>"></label>
+
+      <label class="field"><span>Account Password</span>
+        <input type="text" name="acc_password" value="<%= order.acc_password || '' %>"></label>
 
       <label class="field"><span>Warranty Period</span>
         <input type="text" name="warranty_period" value="<%= order.warranty_period || '' %>" placeholder="e.g. 7 Days, 1 Month"></label>

@@ -51,6 +51,14 @@
             <td style="padding: 12px;"><%= order.acc_name || 'Processing...' %></td>
           </tr>
           <tr style="border-bottom: 1px solid var(--border);">
+            <th style="padding: 12px; background: rgba(255,255,255,0.02);">Username</th>
+            <td style="padding: 12px;"><code><%= order.acc_username || 'Processing...' %></code></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <th style="padding: 12px; background: rgba(255,255,255,0.02);">Password</th>
+            <td style="padding: 12px;"><code><%= order.acc_password || 'Processing...' %></code></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
             <th style="padding: 12px; background: rgba(255,255,255,0.02);">Warranty Period</th>
             <td style="padding: 12px;"><span style="color: var(--accent); font-weight: bold;"><%= order.warranty_period || 'Standard' %></span></td>
           </tr>

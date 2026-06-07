@@ -146,6 +146,8 @@ router.post('/orders/:id/update-details', (req, res) => {
         acc_ordered = ?,
         acc_number = ?,
         acc_name = ?,
+        acc_username = ?,
+        acc_password = ?,
         warranty_period = ?
     WHERE id = ?
   `).run(
@@ -153,6 +155,8 @@ router.post('/orders/:id/update-details', (req, res) => {
     req.body.acc_ordered,
     req.body.acc_number,
     req.body.acc_name,
+    req.body.acc_username,
+    req.body.acc_password,
     req.body.warranty_period,
     req.params.id
   );
