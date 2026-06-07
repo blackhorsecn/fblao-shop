@@ -205,37 +205,47 @@ function seed() {
 
   // Manual payment methods
   const insManual = db.prepare(
-    'INSERT INTO manual_payment_methods (name, instructions, enabled, sort_order) VALUES (?, ?, 1, ?)'
+    'INSERT INTO manual_payment_methods (name, instructions, enabled, sort_order, icon_url) VALUES (?, ?, 1, ?, ?)'
   );
   insManual.run(
     'GCash',
     'Send the exact total to GCash number 0917-000-0000 (Juan D.).\nUse your ORDER NUMBER as the reference/note.\nAfter sending, your order will be confirmed by our staff, usually within 30 minutes.',
-    1
+    1,
+    'https://cdn.paymongo.com/images/gcash.png'
   );
   insManual.run(
     'Bank Transfer (BPI)',
     'Transfer the exact total to:\nBank: BPI\nAccount Name: Lion King Studio\nAccount No: 1234-5678-90\nUse your ORDER NUMBER as the reference.\nUpload nothing — we verify by reference number.',
-    2
+    2,
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/BPI_Logo.svg/512px-BPI_Logo.svg.png'
+  );
+  insManual.run(
+    'UnionBank',
+    'Transfer the exact total to:\nBank: UnionBank\nAccount Name: Lion King Studio\nAccount No: 9876-5432-10\nUse your ORDER NUMBER as the reference.',
+    3,
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/UnionBank_of_the_Philippines_logo.svg/512px-UnionBank_of_the_Philippines_logo.svg.png'
   );
 
-  // Categories + products (sample catalog matching an FB-account autoshop)
+  // Categories + products
   const insCat = db.prepare('INSERT INTO categories (name, sort_order) VALUES (?, ?)');
   const insProd = db.prepare(
-    'INSERT INTO products (category_id, name, description, price, stock, active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    'INSERT INTO products (category_id, name, description, price, stock, active, sort_order, auto_deliver) VALUES (?, ?, ?, ?, ?, ?, ?, 1)'
   );
 
-  const catFB = insCat.run('Facebook Accounts', 1).lastInsertRowid;
-  insProd.run(catFB, 'FB Aged Account (2018-2020)', 'Email-verified, with profile photo. Random country.', 120, 35, 1, 1);
-  insProd.run(catFB, 'FB Account + 2FA', 'Includes 2FA secret. Cookie + token provided.', 180, 20, 1, 2);
-  insProd.run(catFB, 'FB Brand New (PVA)', 'Phone-verified fresh account. Ready to warm up.', 60, 100, 1, 3);
-
-  const catBM = insCat.run('Business Manager (BM)', 2).lastInsertRowid;
-  insProd.run(catBM, 'BM1 (Limit 250)', 'Verified BM, 1 ad account, $250 daily limit.', 350, 12, 1, 1);
-  insProd.run(catBM, 'BM5 (No Limit)', 'Verified BM, 5 ad accounts, unlimited spend.', 1500, 4, 1, 2);
-
-  const catMail = insCat.run('Email & Tools', 3).lastInsertRowid;
-  insProd.run(catMail, 'Outlook Email (Aged)', 'Full access, used for account recovery.', 25, 200, 1, 1);
-  insProd.run(catMail, 'Proxy (Residential, 1 month)', 'Static residential proxy, PH/US location.', 90, 50, 1, 2);
+  const catBanks = insCat.run('Verified Bank Accounts', 1).lastInsertRowid;
+  insProd.run(catBanks, 'BPI', 'Verified digital account.', 1500, 34, 1, 1);
+  insProd.run(catBanks, 'CIMB', 'Verified digital account.', 1500, 0, 1, 2);
+  insProd.run(catBanks, 'COINS PH CORPORATE', 'Verified digital account.', 20000, 0, 1, 3);
+  insProd.run(catBanks, 'GCASH 100K', 'Verified digital account.', 1000, 0, 1, 4);
+  insProd.run(catBanks, 'GCASH 500K', 'Verified digital account.', 3000, 1, 1, 5);
+  insProd.run(catBanks, 'GOTYME', 'Verified digital account.', 1500, 5, 1, 6);
+  insProd.run(catBanks, 'MAYA BUSINESS NEGOSYANTE', 'Verified digital account.', 900, 65, 1, 7);
+  insProd.run(catBanks, 'NEW MAYA BUSINESS', 'Verified digital account.', 900, 15, 1, 8);
+  insProd.run(catBanks, 'PAYMAYA 5M', 'Verified digital account.', 15000, 2, 1, 9);
+  insProd.run(catBanks, 'PAYMAYA 500K', 'Verified digital account.', 900, 56, 1, 10);
+  insProd.run(catBanks, 'POS', 'Verified digital account.', 80000, 3, 1, 11);
+  insProd.run(catBanks, 'RCBC', 'Verified digital account.', 1500, 10, 1, 12);
+  insProd.run(catBanks, 'UNION BANK NEGOSYANTE', 'Verified digital account.', 20000, 5, 1, 13);
 
   setSetting('seeded', '1');
 }
