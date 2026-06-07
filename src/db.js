@@ -17,10 +17,14 @@ db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
 console.log(`[Database] Initialized at ${path.join(DATA_DIR, 'shop.db')}`);
-if (process.env.DATA_DIR) {
+if (process.env.RAILWAY_ENVIRONMENT_ID && !process.env.DATA_DIR) {
+  console.log(`***************************************************`);
+  console.log(`[CRITICAL WARNING] YOU ARE RUNNING ON RAILWAY WITHOUT A PERSISTENT VOLUME!`);
+  console.log(`YOUR PRODUCTS AND ORDERS WILL BE DELETED ON EVERY REDEPLOY.`);
+  console.log(`Please set DATA_DIR=/data and mount a volume to /data.`);
+  console.log(`***************************************************`);
+} else if (process.env.DATA_DIR) {
   console.log(`[Database] Using persistent DATA_DIR: ${process.env.DATA_DIR}`);
-} else {
-  console.log(`[Database] WARNING: No DATA_DIR env var set. Data will be lost on redeploy!`);
 }
 
 db.exec(`
