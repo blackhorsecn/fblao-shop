@@ -1,6 +1,30 @@
 (function () {
   'use strict';
 
+  // --- Live Clock ---
+  function updateClock() {
+    var el = document.getElementById('live-clock');
+    if (!el) return;
+    var now = new Date();
+    try {
+      el.textContent = now.toLocaleString('en-PH', {
+        timeZone: 'Asia/Manila',
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+    } catch (e) {
+      // Fallback if timezone not supported in very old browsers
+      el.textContent = now.toLocaleString();
+    }
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
   var modal = document.getElementById('buyModal');
   if (!modal) return;
 

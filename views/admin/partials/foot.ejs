@@ -1,7 +1,20 @@
     <footer style="margin-top: 50px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; font-size: 12px; color: var(--muted);">
-       <p>Server Time (PH): <%= date(new Date().toISOString()) %></p>
+       <p>Server Time (PH): <span id="admin-live-clock"><%= date(new Date().toISOString()) %></span></p>
        <p>Powered by <span class="shining-gold">BlackHorse</span> · Admin Panel</p>
     </footer>
+    <script>
+      function updateAdminClock() {
+        var el = document.getElementById('admin-live-clock');
+        if (!el) return;
+        el.textContent = new Date().toLocaleString('en-PH', {
+          timeZone: 'Asia/Manila',
+          year: 'numeric', month: 'short', day: '2-digit',
+          hour: '2-digit', minute: '2-digit', second: '2-digit',
+          hour12: true
+        });
+      }
+      setInterval(updateAdminClock, 1000);
+    </script>
   </main>
 </div>
 </body>
