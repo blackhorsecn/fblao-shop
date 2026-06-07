@@ -39,6 +39,7 @@ function formatDate(dateStr, includeTime = true) {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
+    timeZone: 'Asia/Manila'
   };
 
   if (includeTime) {

@@ -1,7 +1,7 @@
 <%- include('partials/head') %>
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
   <h1 style="margin:0;">Dashboard Overview</h1>
-  <div class="muted" style="font-size: 14px;">Last updated: <%= new Date().toLocaleTimeString() %></div>
+  <div class="muted" style="font-size: 14px;">Last updated: <%= date(new Date().toISOString()) %></div>
 </div>
 
 <div class="panel-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:15px; margin-bottom:30px;">
@@ -76,7 +76,7 @@
         <td class="muted">#<%= o.id %></td>
         <td>
           <div style="font-weight: bold; color: var(--text);"><%= o.order_number %></div>
-          <div class="muted" style="font-size: 11px;"><%= o.created_at %></div>
+          <div class="muted" style="font-size: 11px;"><%= date(o.created_at) %></div>
         </td>
         <td>
           <div style="color: var(--accent); font-weight: 600;">@<%= o.telegram_username %></div>

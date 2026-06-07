@@ -5,7 +5,7 @@
     <h1 style="margin:0; font-size: 1.5rem;">Order <%= order.order_number %></h1>
     <span class="status-pill status-<%= order.status %>" style="margin:0;"><%= order.status %></span>
   </div>
-  <div class="muted" style="font-size: 13px;">Placed on <%= order.created_at %></div>
+  <div class="muted" style="font-size: 13px;">Placed on <%= date(order.created_at) %></div>
 </div>
 
 <div class="panel-grid">
@@ -94,8 +94,8 @@
         <tr><th>Quantity</th><td><%= order.quantity %></td></tr>
         <tr><th>Unit Price</th><td><%= money(order.unit_price) %></td></tr>
         <tr><th>Total Amount</th><td><strong style="color: var(--accent-2); font-size: 1.1rem;"><%= money(order.total) %></strong></td></tr>
-        <tr><th>Paid At</th><td><%= order.paid_at || 'Not yet' %></td></tr>
-        <tr><th>Delivered At</th><td><%= order.delivered_at || 'Not yet' %></td></tr>
+        <tr><th>Paid At</th><td><%= order.paid_at ? date(order.paid_at) : 'Not yet' %></td></tr>
+        <tr><th>Delivered At</th><td><%= order.delivered_at ? date(order.delivered_at) : 'Not yet' %></td></tr>
       </table>
 
       <div class="row-actions" style="margin-top:20px; padding-top: 15px; border-top: 1px solid var(--border);">
