@@ -212,7 +212,19 @@ router.post('/products/:id/update', (req, res) => {
     sort_order: parseInt(req.body.sort_order, 10),
     auto_deliver: !!req.body.auto_deliver
   });
-  flash(req, 'Product updated.');
+
+  if (req.body.action === 'quick_add' && req.body.quick_lines) {
+    const lines = String(req.body.quick_lines).split('\n').map(l => l.trim()).filter(l => l);
+    if (lines.length > 0) {
+      const added = StoreService.addStockToPool(req.params.id, lines);
+      flash(req, `Product updated and ${added} stock items added.`);
+    } else {
+      flash(req, 'Product updated.');
+    }
+  } else {
+    flash(req, 'Product updated.');
+  }
+
   res.redirect('/admin/products');
 });
 

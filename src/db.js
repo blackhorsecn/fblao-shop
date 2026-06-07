@@ -152,9 +152,10 @@ function seed() {
     }
   }
 
-  // If already seeded, skip the initial content creation
+  // If already seeded OR if we have any categories/products, skip the initial content creation
   const seeded = getSetting('seeded');
-  if (seeded === '1') return;
+  const hasCategories = db.prepare('SELECT id FROM categories LIMIT 1').get();
+  if (seeded === '1' || hasCategories) return;
 
   const defaults = {
     shop_name: '狮子王工作室 — FB账号BM批发',

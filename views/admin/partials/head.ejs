@@ -22,6 +22,14 @@
     </form>
   </aside>
   <main class="admin-main">
+    <% if (!process.env.DATA_DIR && !currentPath.includes('login')) { %>
+      <div class="alert alert-error" style="margin-bottom: 20px; border: 2px solid #ff4d4d;">
+        <strong>⚠️ DATA PERSISTENCE WARNING:</strong> No <code>DATA_DIR</code> environment variable is set.
+        Your products, orders, and settings <strong>will be deleted</strong> every time you redeploy or update your code.
+        <br>Please set up a <strong>Railway Volume</strong> mounted to <code>/data</code> and set <code>DATA_DIR=/data</code>.
+      </div>
+    <% } %>
+
     <% if (typeof flash !== 'undefined' && flash) { %>
       <div class="alert <%= flash.type === 'error' ? 'alert-error' : 'alert-ok' %>"><%= flash.msg %></div>
     <% } %>
