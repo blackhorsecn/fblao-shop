@@ -56,9 +56,6 @@ CREATE TABLE IF NOT EXISTS product_stock_pool (
   added_at   TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-// Migrations for existing database
-try { db.exec("ALTER TABLE products ADD COLUMN auto_deliver INTEGER NOT NULL DEFAULT 1"); } catch(e){}
-
 CREATE TABLE IF NOT EXISTS manual_payment_methods (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
   name         TEXT NOT NULL,
@@ -96,6 +93,9 @@ CREATE TABLE IF NOT EXISTS orders (
   delivered_at     TEXT
 );
 `);
+
+// Migrations for existing database
+try { db.exec("ALTER TABLE products ADD COLUMN auto_deliver INTEGER NOT NULL DEFAULT 1"); } catch(e){}
 
 // ---------------------------------------------------------------------------
 // Settings helpers
