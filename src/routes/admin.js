@@ -148,9 +148,39 @@ router.post('/categories/:id/delete', (req, res) => {
 
 // ---- Products --------------------------------------------------------------
 router.get('/products', (req, res) => {
-  const products = StoreService.getProductsAdmin();
   const categories = StoreService.getCategories();
-  res.render('admin/products', { title: 'Products', active: 'products', products, categories, flash: takeFlash(req) });
+  const search = String(req.query.search || '').trim().toLowerCase();
+  const catFilter = parseInt(req.query.category_id, 10) || null;
+
+  let products;
+  if (search || catFilter) {
+    let sql = `SELECT p.*, c.name AS category_name FROM products p
+               LEFT JOIN categories c ON c.id = p.category_id
+               WHERE 1=1`;
+    let params = [];
+    if (search) {
+      sql += ' AND (p.name LIKE ? OR p.description LIKE ?)';
+      params.push(`%${search}%`, `%${search}%`);
+    }
+    if (catFilter) {
+      sql += ' AND p.category_id = ?';
+      params.push(catFilter);
+    }
+    sql += ' ORDER BY c.sort_order, p.sort_order, p.id';
+    products = db.prepare(sql).all(...params);
+  } else {
+    products = StoreService.getProductsAdmin();
+  }
+
+  res.render('admin/products', {
+    title: 'Products',
+    active: 'products',
+    products,
+    categories,
+    search,
+    catFilter,
+    flash: takeFlash(req)
+  });
 });
 
 router.post('/products/sync-all', (req, res) => {
