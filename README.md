@@ -39,6 +39,18 @@ Default admin login (from `.env`): **admin / admin123** — change it in Admin �
 
 > Requires Node 22.5+ (uses the built-in `node:sqlite` module). Tested on Node 24.
 
+## Deployment to Railway (Persistent Data)
+
+Railway has an ephemeral filesystem, meaning the database will be deleted every time you redeploy **unless you use a Volume**.
+
+1.  In your Railway project, click **+ New** → **Volume**.
+2.  Set the **Mount Path** to `/data`.
+3.  Go to your service's **Variables** tab and add:
+    - `DATA_DIR` = `/data`
+4.  (Optional but recommended) Set a strong `SESSION_SECRET`.
+
+Now your `shop.db` will be stored in the persistent volume and survive redeployments.
+
 ## Configuration (`.env`)
 
 | Var | Purpose |

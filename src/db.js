@@ -16,6 +16,13 @@ const db = openDatabase(path.join(DATA_DIR, 'shop.db'));
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
+console.log(`[Database] Initialized at ${path.join(DATA_DIR, 'shop.db')}`);
+if (process.env.DATA_DIR) {
+  console.log(`[Database] Using persistent DATA_DIR: ${process.env.DATA_DIR}`);
+} else {
+  console.log(`[Database] WARNING: No DATA_DIR env var set. Data will be lost on redeploy!`);
+}
+
 db.exec(`
 CREATE TABLE IF NOT EXISTS settings (
   key   TEXT PRIMARY KEY,
@@ -122,9 +129,27 @@ function getSettings() {
 }
 
 // ---------------------------------------------------------------------------
-// First-run seeding
+// Seeding & Syncing (Persistent Storage Management)
 // ---------------------------------------------------------------------------
 function seed() {
+  // Always allow environment variables to override sensitive or key settings on startup/re-deployment.
+  // This ensures that if you update keys in Railway, they are applied to the database.
+  const syncFromEnv = {
+    currency: process.env.CURRENCY,
+    maya_mode: process.env.MAYA_MODE,
+    maya_public_key: process.env.MAYA_PUBLIC_KEY,
+    maya_secret_key: process.env.MAYA_SECRET_KEY,
+    maya_webhook_secret: process.env.MAYA_WEBHOOK_SECRET,
+  };
+
+  for (const [k, v] of Object.entries(syncFromEnv)) {
+    if (v !== undefined) {
+      setSetting(k, v);
+      if (k === 'maya_public_key' && v) setSetting('maya_enabled', '1');
+    }
+  }
+
+  // If already seeded, skip the initial content creation
   const seeded = getSetting('seeded');
   if (seeded === '1') return;
 
@@ -138,7 +163,10 @@ function seed() {
     maya_webhook_secret: process.env.MAYA_WEBHOOK_SECRET || '',
     maya_enabled: process.env.MAYA_PUBLIC_KEY ? '1' : '0',
   };
-  for (const [k, v] of Object.entries(defaults)) setSetting(k, v);
+  for (const [k, v] of Object.entries(defaults)) {
+    // Only set if not already set by the env-sync above
+    if (getSetting(k) === null) setSetting(k, v);
+  }
 
   // Seed admin from env
   const username = process.env.ADMIN_USERNAME || 'admin';
