@@ -7,9 +7,16 @@ const bcrypt = require('bcryptjs');
 
 // DATA_DIR can be overridden (e.g. a mounted Railway volume at /data) so the
 // SQLite file survives redeploys. Defaults to the local ./data folder.
-const DATA_DIR = process.env.DATA_DIR
-  ? path.resolve(process.env.DATA_DIR)
-  : path.join(__dirname, '..', 'data');
+let DATA_DIR;
+if (process.env.DATA_DIR) {
+  DATA_DIR = path.resolve(process.env.DATA_DIR);
+} else if (fs.existsSync('/data')) {
+  // Auto-detect Railway Volume
+  DATA_DIR = '/data';
+} else {
+  DATA_DIR = path.join(__dirname, '..', 'data');
+}
+
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const db = openDatabase(path.join(DATA_DIR, 'shop.db'));
@@ -17,14 +24,11 @@ db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
 console.log(`[Database] Initialized at ${path.join(DATA_DIR, 'shop.db')}`);
-if (process.env.RAILWAY_ENVIRONMENT_ID && !process.env.DATA_DIR) {
-  console.log(`***************************************************`);
-  console.log(`[CRITICAL WARNING] YOU ARE RUNNING ON RAILWAY WITHOUT A PERSISTENT VOLUME!`);
-  console.log(`YOUR PRODUCTS AND ORDERS WILL BE DELETED ON EVERY REDEPLOY.`);
-  console.log(`Please set DATA_DIR=/data and mount a volume to /data.`);
-  console.log(`***************************************************`);
-} else if (process.env.DATA_DIR) {
-  console.log(`[Database] Using persistent DATA_DIR: ${process.env.DATA_DIR}`);
+if (DATA_DIR === '/data' || process.env.DATA_DIR) {
+  console.log(`[Database] SUCCESS: Using PERSISTENT storage.`);
+} else {
+  console.log(`[Database] WARNING: Using TEMPORARY storage. Data will be lost on redeploy!`);
+  console.log(`[Database] FIX: Mount a Railway Volume to /data to keep your data forever.`);
 }
 
 db.exec(`
@@ -251,4 +255,4 @@ seed();
 const productCount = db.prepare('SELECT COUNT(*) c FROM products').get().c;
 console.log(`[Database] Seeding complete. Current product count: ${productCount}`);
 
-module.exports = { db, getSetting, setSetting, getSettings };
+module.exports = { db, getSetting, setSetting, getSettings, DATA_DIR };

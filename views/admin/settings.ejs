@@ -34,6 +34,28 @@
       <button class="btn btn-primary" type="submit">Change password</button>
     </form>
   </div>
+  <div class="subpanel">
+    <h2>Database Management</h2>
+    <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+      <p style="margin-top:0;"><strong>Storage Path:</strong> <code><%= dbInfo.path %></code></p>
+      <p><strong>File Size:</strong> <%= dbInfo.size %></p>
+      <p><strong>Persistence:</strong>
+        <% if (dbInfo.isPersistent) { %>
+          <span style="color: var(--green); font-weight: bold;">✓ SECURE (Volume Active)</span>
+        <% } else { %>
+          <span style="color: var(--red); font-weight: bold;">⚠ TEMPORARY (Data will be lost on redeploy)</span>
+        <% } %>
+      </p>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <a href="/admin/settings/db-download" class="btn btn-sm" style="background:#eee;color:#333;">Download shop.db Backup</a>
+    </div>
+    <% if (!dbInfo.isPersistent) { %>
+      <div class="alert alert-error" style="margin-top:15px; font-size: 12px;">
+        To fix: Create a <strong>Railway Volume</strong> mounted to <code>/data</code> and redeploy.
+      </div>
+    <% } %>
+  </div>
 </div>
 
 <div class="panel-grid" style="margin-top:20px;">

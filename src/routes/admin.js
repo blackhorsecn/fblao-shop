@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { db, getSetting, setSetting } = require('../db');
+const { db, getSetting, setSetting, DATA_DIR } = require('../db');
 const { requireAdmin, asyncHandler, rateLimit } = require('../middleware');
 const StoreService = require('../services/store');
 
@@ -402,9 +402,17 @@ router.post('/banners/:id/delete', (req, res) => {
 
 // ---- Settings (shop + Maya) ------------------------------------------------
 router.get('/settings', (req, res) => {
+  const dbPath = path.join(DATA_DIR, 'shop.db');
+  let dbSize = '0 KB';
+  try {
+    const stats = fs.statSync(dbPath);
+    dbSize = (stats.size / 1024).toFixed(2) + ' KB';
+  } catch (e) {}
+
   res.render('admin/settings', {
     title: 'Settings',
     active: 'settings',
+    dbInfo: { path: dbPath, size: dbSize, isPersistent: DATA_DIR === '/data' || !!process.env.DATA_DIR },
     s: {
       shop_name: getSetting('shop_name', ''),
       shop_tagline: getSetting('shop_tagline', ''),
@@ -420,6 +428,11 @@ router.get('/settings', (req, res) => {
     },
     flash: takeFlash(req),
   });
+});
+
+router.get('/settings/db-download', (req, res) => {
+  const dbPath = path.join(DATA_DIR, 'shop.db');
+  res.download(dbPath, `shop-backup-${new Date().toISOString().split('T')[0]}.db`);
 });
 router.post('/settings', (req, res) => {
   setSetting('shop_name', String(req.body.shop_name || '').trim());
