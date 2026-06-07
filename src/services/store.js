@@ -180,8 +180,8 @@ const StoreService = {
     return db.prepare(`SELECT * FROM orders WHERE ${field} = ?`).get(idOrNumber);
   },
 
-  getOrderByRefAndEmail(ref, email) {
-    return db.prepare('SELECT * FROM orders WHERE order_number = ? AND lower(email) = ?').get(ref, email.toLowerCase());
+  getOrderByTGAndRef(tg, ref) {
+    return db.prepare('SELECT * FROM orders WHERE lower(telegram_username) = ? AND order_number = ?').get(tg.toLowerCase(), ref);
   },
 
   createOrder(data) {

@@ -17,6 +17,26 @@
       <a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">Shop</a>
       <a href="/query" class="<%= currentPath === '/query' ? 'active' : '' %>">Query Order</a>
       <a href="/admin" class="nav-admin">Admin</a>
+
+      <% if (user) { %>
+        <div class="user-profile" style="display: flex; align-items: center; gap: 8px;">
+          <% if (user.photo_url) { %>
+            <img src="<%= user.photo_url %>" alt="Profile" style="width: 24px; height: 24px; border-radius: 50%;">
+          <% } %>
+          <span class="user-name" style="font-weight: bold;">@<%= user.username %></span>
+          <a href="https://t.me/mm6668mm" target="_blank" class="btn btn-sm" style="background: #0088cc; color: white; padding: 4px 10px;">Chat Support</a>
+          <a href="/logout" class="nav-logout" style="font-size: 0.8em; color: var(--muted);">Logout</a>
+        </div>
+      <% } else if (settings.telegram_bot_username) { %>
+        <div class="tg-login">
+          <script async src="https://telegram.org/js/telegram-widget.js?22"
+            data-telegram-login="<%= settings.telegram_bot_username %>"
+            data-size="medium"
+            data-userpic="false"
+            data-auth-url="/auth/telegram"
+            data-request-access="write"></script>
+        </div>
+      <% } %>
     </nav>
   </div>
   <% if (typeof shopTagline !== 'undefined' && shopTagline) { %>

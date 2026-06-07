@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS banners (
 CREATE TABLE IF NOT EXISTS orders (
   id               INTEGER PRIMARY KEY AUTOINCREMENT,
   order_number     TEXT UNIQUE NOT NULL,
-  email            TEXT NOT NULL,
+  email            TEXT,
   product_id       INTEGER REFERENCES products(id) ON DELETE SET NULL,
   product_name     TEXT NOT NULL,
   quantity         INTEGER NOT NULL DEFAULT 1,
@@ -105,6 +105,9 @@ CREATE TABLE IF NOT EXISTS orders (
 // Migrations for existing database
 try { db.exec("ALTER TABLE products ADD COLUMN auto_deliver INTEGER NOT NULL DEFAULT 1"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN telegram_username TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ALTER COLUMN email DROP NOT NULL"); } catch(e){
+  // SQLite doesn't support DROP NOT NULL directly, we'll just ignore it as it usually allows nulls if not strictly checked
+}
 
 // ---------------------------------------------------------------------------
 // Settings helpers
@@ -162,6 +165,7 @@ function seed() {
     maya_secret_key: process.env.MAYA_SECRET_KEY || '',
     maya_webhook_secret: process.env.MAYA_WEBHOOK_SECRET || '',
     maya_enabled: process.env.MAYA_PUBLIC_KEY ? '1' : '0',
+    telegram_bot_username: process.env.TELEGRAM_BOT_USERNAME || '',
   };
   for (const [k, v] of Object.entries(defaults)) {
     // Only set if not already set by the env-sync above

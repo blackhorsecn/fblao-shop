@@ -38,7 +38,7 @@
       <tr>
         <td><%= o.id %></td>
         <td><strong><%= o.order_number %></strong></td>
-        <td><%= o.email %><br><span class="muted"><%= o.telegram_username || '—' %></span></td>
+        <td><span style="font-weight: bold; color: var(--accent);">@<%= o.telegram_username %></span><br><span class="muted"><%= o.email || '' %></span></td>
         <td><%= o.product_name %></td>
         <td><%= o.quantity %></td>
         <td><%= money(o.total) %></td>

@@ -37,7 +37,11 @@ async function createCheckout(order, baseUrl) {
 
   const payload = {
     totalAmount: { value: Number(amount), currency },
-    buyer: { contact: { email: order.email } },
+    buyer: {
+      contact: {
+        email: order.email || `${order.telegram_username}@t.me`
+      }
+    },
     items: [
       {
         name: String(order.product_name).slice(0, 100),

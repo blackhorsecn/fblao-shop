@@ -2,6 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
 const { db, getSetting } = require('../db');
 const maya = require('../maya');
 const { generateOrderNumber } = require('../helpers');
@@ -22,19 +23,14 @@ router.get('/', (req, res) => {
 
 // Create order ---------------------------------------------------------------
 router.post('/order', rateLimit, asyncHandler(async (req, res) => {
-  const email = String(req.body.email || '').trim().toLowerCase();
-  const telegramUsername = String(req.body.telegram_username || '').trim();
+  const telegramUsername = String(req.body.telegram_username || '').trim().replace(/^@/, '');
   const productId = parseInt(req.body.product_id, 10);
   const quantity = Math.max(1, parseInt(req.body.quantity, 10) || 1);
   const paymentType = req.body.payment_type === 'manual' ? 'manual' : 'maya';
   const manualMethodId = req.body.manual_method_id ? parseInt(req.body.manual_method_id, 10) : null;
 
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-    return res.status(400).render('error', { title: 'Invalid email', message: 'Please enter a valid email address.' });
-  }
-
   if (!telegramUsername) {
-    return res.status(400).render('error', { title: 'Missing info', message: 'Please enter your Telegram username for support and notifications.' });
+    return res.status(400).render('error', { title: 'Missing info', message: 'Please enter your Telegram username.' });
   }
 
   const product = StoreService.getProduct(productId);
@@ -60,7 +56,7 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
   const orderNumber = generateOrderNumber();
   const order = StoreService.createOrder({
     orderNumber,
-    email,
+    email: '', // Email is no longer used
     telegramUsername,
     productId: product.id,
     productName: product.name,
@@ -132,22 +128,58 @@ router.get('/query', (req, res) => {
 });
 
 router.post('/query', (req, res) => {
-  const email = String(req.body.email || '').trim().toLowerCase();
+  const telegramUsername = String(req.body.telegram_username || '').trim().replace(/^@/, '');
   const ref = String(req.body.order_number || '').trim();
-  const order = StoreService.getOrderByRefAndEmail(ref, email);
+  const order = StoreService.getOrderByTGAndRef(telegramUsername, ref);
   if (!order) {
     return res.render('query', {
       title: 'Query Order',
       order: null,
       manualMethod: null,
       searched: true,
-      error: 'No order found for that email and order number.',
+      error: 'No order found for that Telegram username and order number.',
     });
   }
   const manualMethod = order.manual_method_id
     ? db.prepare('SELECT * FROM manual_payment_methods WHERE id = ?').get(order.manual_method_id)
     : null;
   res.render('query', { title: 'Query Order', order, manualMethod, searched: true, error: null });
+});
+
+// Telegram Auth --------------------------------------------------------------
+router.get('/auth/telegram', (req, res) => {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return res.redirect('/');
+
+  const data = { ...req.query };
+  const hash = data.hash;
+  delete data.hash;
+
+  const dataCheckArr = Object.keys(data)
+    .sort()
+    .map(key => `${key}=${data[key]}`);
+  const dataCheckString = dataCheckArr.join('\n');
+
+  const secretKey = crypto.createHash('sha256').update(token).digest();
+  const hmac = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
+
+  if (hmac === hash) {
+    // Valid login
+    req.session.user = {
+      telegram_id: data.id,
+      first_name: data.first_name,
+      username: data.username,
+      photo_url: data.photo_url,
+    };
+    return res.redirect('/');
+  }
+
+  res.status(401).send('Invalid Telegram auth');
+});
+
+router.get('/logout', (req, res) => {
+  delete req.session.user;
+  res.redirect('/');
 });
 
 module.exports = router;

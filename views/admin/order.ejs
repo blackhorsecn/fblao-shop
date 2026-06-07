@@ -9,8 +9,8 @@
     <h2>Details</h2>
     <span class="status-pill status-<%= order.status %>"><%= order.status %></span>
     <table class="kv">
-      <tr><th>Email</th><td><%= order.email %></td></tr>
-      <tr><th>Telegram</th><td><%= order.telegram_username || '—' %></td></tr>
+      <tr><th>Telegram</th><td><strong>@<%= order.telegram_username %></strong></td></tr>
+      <% if (order.email) { %><tr><th>Email</th><td><%= order.email %></td></tr><% } %>
       <tr><th>Product</th><td><%= order.product_name %></td></tr>
       <tr><th>Quantity</th><td><%= order.quantity %></td></tr>
       <tr><th>Unit price</th><td><%= money(order.unit_price) %></td></tr>

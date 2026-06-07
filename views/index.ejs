@@ -71,13 +71,9 @@
       <input type="hidden" name="product_id" id="m-product-id">
 
       <label class="field">
-        <span>Email <small>(your accounts/credentials are delivered here & to your order page)</small></span>
-        <input type="email" name="email" id="m-email" required placeholder="you@example.com">
-      </label>
-
-      <label class="field">
-        <span>Telegram Username <small>(for support contact)</small></span>
-        <input type="text" name="telegram_username" id="m-telegram" required placeholder="@username">
+        <span>Telegram Username</span>
+        <input type="text" name="telegram_username" id="m-telegram" required placeholder="@username" value="<%= user ? user.username : '' %>">
+        <small class="muted">Your order details and delivery will be linked to this username.</small>
       </label>
 
       <div class="field-row">

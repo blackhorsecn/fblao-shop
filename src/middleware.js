@@ -13,6 +13,7 @@ function shopContext(req, res, next) {
   res.locals.nl2br = nl2br;
   res.locals.escapeHtml = escapeHtml;
   res.locals.isAdmin = !!(req.session && req.session.adminId);
+  res.locals.user = req.session.user || null;
   res.locals.currentPath = req.path;
   res.locals.baseUrl = (process.env.BASE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
   next();
