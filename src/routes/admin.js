@@ -11,10 +11,6 @@ const { requireAdmin, asyncHandler, rateLimit } = require('../middleware');
 const StoreService = require('../services/store');
 
 // Setup multer for logo uploads
-const DATA_DIR = process.env.DATA_DIR
-  ? path.resolve(process.env.DATA_DIR)
-  : path.join(__dirname, '..', '..', 'data');
-
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
