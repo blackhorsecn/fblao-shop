@@ -22,6 +22,9 @@
     <nav class="main-nav">
       <a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">Shop</a>
       <a href="/status" class="<%= currentPath === '/status' ? 'active' : '' %>">Order Status</a>
+      <% if (user) { %>
+        <a href="/account" class="<%= currentPath === '/account' ? 'active' : '' %>">My Account</a>
+      <% } %>
       <a href="/admin" class="nav-admin">Admin</a>
 
       <% if (user) { %>

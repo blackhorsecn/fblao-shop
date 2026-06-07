@@ -1,0 +1,54 @@
+<%- include('partials/head') %>
+
+<div class="user-account-page">
+  <div class="card" style="margin-bottom: 30px;">
+    <div style="display: flex; align-items: center; gap: 20px;">
+      <% if (user.photo_url) { %>
+        <img src="<%= user.photo_url %>" alt="Profile" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--accent);">
+      <% } %>
+      <div>
+        <h1 style="margin: 0; font-size: 1.8rem;">Welcome, @<%= user.username %>!</h1>
+        <p class="muted" style="margin: 5px 0 0;">Manage your orders and account details here.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2>My Orders</h2>
+  <% if (!orders.length) { %>
+    <div class="empty-state">
+      <p>You haven't placed any orders yet.</p>
+      <a href="/" class="btn btn-primary">Go to Shop</a>
+    </div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table class="product-table">
+        <thead>
+          <tr>
+            <th>Order #</th>
+            <th>Product</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Placed On</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% orders.forEach(function(o){ %>
+            <tr>
+              <td><strong><%= o.order_number %></strong></td>
+              <td><%= o.product_name %> &times; <%= o.quantity %></td>
+              <td class="col-price"><%= money(o.total) %></td>
+              <td><span class="status-pill status-<%= o.status %>"><%= o.status.toUpperCase() %></span></td>
+              <td class="muted"><%= o.created_at %></td>
+              <td style="text-align: right;">
+                <a href="/status?ref=<%= o.order_number %>&tg=<%= o.telegram_username %>" class="btn btn-sm">View Details</a>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/foot') %>

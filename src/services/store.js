@@ -194,6 +194,10 @@ const StoreService = {
     return db.prepare('SELECT * FROM orders WHERE lower(telegram_username) = ? AND order_number = ?').get(tg.toLowerCase(), ref);
   },
 
+  getOrdersByTelegramUsername(tgUsername) {
+    return db.prepare('SELECT * FROM orders WHERE lower(telegram_username) = ? ORDER BY id DESC').all(tgUsername.toLowerCase());
+  },
+
   createOrder(data) {
     const info = db.prepare(`
       INSERT INTO orders

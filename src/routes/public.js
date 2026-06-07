@@ -130,6 +130,19 @@ router.get('/order/result', asyncHandler(async (req, res) => {
 
 // Order status page -----------------------------------------------------------
 router.get('/status', (req, res) => {
+  const ref = String(req.query.ref || '').trim();
+  const tg = String(req.query.tg || '').trim();
+
+  if (ref && tg) {
+    const order = StoreService.getOrderByTGAndRef(tg, ref);
+    if (order) {
+      const manualMethod = order.manual_method_id
+        ? db.prepare('SELECT * FROM manual_payment_methods WHERE id = ?').get(order.manual_method_id)
+        : null;
+      return res.render('status', { title: 'Order Status', order, manualMethod, searched: true, error: null });
+    }
+  }
+
   res.render('status', { title: 'Order Status', order: null, manualMethod: null, error: null, searched: false });
 });
 
@@ -150,6 +163,18 @@ router.post('/status', (req, res) => {
     ? db.prepare('SELECT * FROM manual_payment_methods WHERE id = ?').get(order.manual_method_id)
     : null;
   res.render('status', { title: 'Order Status', order, manualMethod, searched: true, error: null });
+});
+
+// My Account -----------------------------------------------------------------
+router.get('/account', (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/');
+  }
+  const orders = StoreService.getOrdersByTelegramUsername(req.session.user.username);
+  res.render('account', {
+    title: 'My Account',
+    orders
+  });
 });
 
 // Telegram Auth --------------------------------------------------------------
