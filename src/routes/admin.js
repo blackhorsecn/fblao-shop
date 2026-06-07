@@ -45,13 +45,32 @@ function takeFlash(req) {
 router.get('/', (req, res) => {
   const stats = StoreService.getStats();
   const filter = String(req.query.status || 'all');
+  const search = String(req.query.search || '').trim().toLowerCase();
+
   let orders;
-  if (filter === 'all') {
-    orders = db.prepare('SELECT * FROM orders ORDER BY id DESC LIMIT 200').all();
-  } else {
-    orders = db.prepare('SELECT * FROM orders WHERE status = ? ORDER BY id DESC LIMIT 200').all(filter);
+  let sql = 'SELECT * FROM orders';
+  let params = [];
+  let conditions = [];
+
+  if (filter !== 'all') {
+    conditions.push('status = ?');
+    params.push(filter);
   }
-  res.render('admin/orders', { title: 'Orders', active: 'orders', orders, stats, filter, flash: takeFlash(req) });
+
+  if (search) {
+    conditions.push('(order_number LIKE ? OR email LIKE ? OR telegram_username LIKE ?)');
+    const p = `%${search}%`;
+    params.push(p, p, p);
+  }
+
+  if (conditions.length > 0) {
+    sql += ' WHERE ' + conditions.join(' AND ');
+  }
+
+  sql += ' ORDER BY id DESC LIMIT 200';
+  orders = db.prepare(sql).all(...params);
+
+  res.render('admin/orders', { title: 'Orders', active: 'orders', orders, stats, filter, search, flash: takeFlash(req) });
 });
 
 router.get('/orders/:id', (req, res) => {
@@ -101,11 +120,11 @@ router.post('/orders/:id/cancel', (req, res) => {
 
 // ---- Categories ------------------------------------------------------------
 router.get('/categories', (req, res) => {
-  const categories = db.prepare('SELECT * FROM categories ORDER BY sort_order, id').all();
+  const categories = StoreService.getCategories();
   res.render('admin/categories', { title: 'Categories', active: 'categories', categories, flash: takeFlash(req) });
 });
 router.post('/categories', (req, res) => {
-  db.prepare('INSERT INTO categories (name, sort_order) VALUES (?, ?)').run(
+  StoreService.createCategory(
     String(req.body.name || 'Untitled').trim(),
     parseInt(req.body.sort_order, 10) || 0
   );
@@ -113,61 +132,74 @@ router.post('/categories', (req, res) => {
   res.redirect('/admin/categories');
 });
 router.post('/categories/:id/update', (req, res) => {
-  db.prepare('UPDATE categories SET name = ?, sort_order = ? WHERE id = ?').run(
+  StoreService.updateCategory(
+    req.params.id,
     String(req.body.name || '').trim(),
-    parseInt(req.body.sort_order, 10) || 0,
-    req.params.id
+    parseInt(req.body.sort_order, 10) || 0
   );
   flash(req, 'Category updated.');
   res.redirect('/admin/categories');
 });
 router.post('/categories/:id/delete', (req, res) => {
-  db.prepare('DELETE FROM categories WHERE id = ?').run(req.params.id); // products cascade
+  StoreService.deleteCategory(req.params.id);
   flash(req, 'Category and its products deleted.');
   res.redirect('/admin/categories');
 });
 
 // ---- Products --------------------------------------------------------------
 router.get('/products', (req, res) => {
-  const products = db
-    .prepare(`SELECT p.*, c.name AS category_name FROM products p
-              LEFT JOIN categories c ON c.id = p.category_id
-              ORDER BY c.sort_order, p.sort_order, p.id`)
-    .all();
-  const categories = db.prepare('SELECT * FROM categories ORDER BY sort_order, id').all();
+  const products = StoreService.getProductsAdmin();
+  const categories = StoreService.getCategories();
   res.render('admin/products', { title: 'Products', active: 'products', products, categories, flash: takeFlash(req) });
 });
+
+router.post('/products/sync-all', (req, res) => {
+  StoreService.syncAllProductStock();
+  flash(req, 'All product stock counts synchronized.');
+  res.redirect('/admin/products');
+});
+
 router.post('/products', (req, res) => {
-  db.prepare(
-    'INSERT INTO products (category_id, name, description, price, stock, active, sort_order, auto_deliver) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-  ).run(
-    parseInt(req.body.category_id, 10) || null,
-    String(req.body.name || 'Untitled').trim(),
-    String(req.body.description || ''),
-    parseFloat(req.body.price) || 0,
-    0, // Initial stock is 0, will be updated by pool
-    req.body.active ? 1 : 0,
-    parseInt(req.body.sort_order, 10) || 0,
-    req.body.auto_deliver ? 1 : 0
-  );
+  StoreService.createProduct({
+    category_id: parseInt(req.body.category_id, 10),
+    name: String(req.body.name || 'Untitled').trim(),
+    description: String(req.body.description || ''),
+    price: parseFloat(req.body.price),
+    active: !!req.body.active,
+    sort_order: parseInt(req.body.sort_order, 10),
+    auto_deliver: !!req.body.auto_deliver
+  });
   flash(req, 'Product added.');
   res.redirect('/admin/products');
 });
 router.post('/products/:id/update', (req, res) => {
-  db.prepare(
-    'UPDATE products SET category_id = ?, name = ?, description = ?, price = ?, active = ?, sort_order = ?, auto_deliver = ? WHERE id = ?'
-  ).run(
-    parseInt(req.body.category_id, 10) || null,
-    String(req.body.name || '').trim(),
-    String(req.body.description || ''),
-    parseFloat(req.body.price) || 0,
-    req.body.active ? 1 : 0,
-    parseInt(req.body.sort_order, 10) || 0,
-    req.body.auto_deliver ? 1 : 0,
-    req.params.id
-  );
-  StoreService.syncProductStockCount(req.params.id);
+  StoreService.updateProduct(req.params.id, {
+    category_id: parseInt(req.body.category_id, 10),
+    name: String(req.body.name || '').trim(),
+    description: String(req.body.description || ''),
+    price: parseFloat(req.body.price),
+    active: !!req.body.active,
+    sort_order: parseInt(req.body.sort_order, 10),
+    auto_deliver: !!req.body.auto_deliver
+  });
   flash(req, 'Product updated.');
+  res.redirect('/admin/products');
+});
+
+router.post('/products/:id/duplicate', (req, res) => {
+  const p = StoreService.getProduct(req.params.id, false);
+  if (p) {
+    StoreService.createProduct({
+      category_id: p.category_id,
+      name: p.name + ' (Copy)',
+      description: p.description,
+      price: p.price,
+      active: 0,
+      sort_order: p.sort_order + 1,
+      auto_deliver: p.auto_deliver
+    });
+    flash(req, 'Product duplicated as draft.');
+  }
   res.redirect('/admin/products');
 });
 
@@ -191,8 +223,8 @@ router.get('/products/:id/stock', (req, res) => {
 router.post('/products/:id/stock/add', (req, res) => {
   const lines = String(req.body.lines || '').split('\n').map(l => l.trim()).filter(l => l);
   if (lines.length > 0) {
-    StoreService.addStockToPool(req.params.id, lines);
-    flash(req, `Added ${lines.length} items to stock.`);
+    const added = StoreService.addStockToPool(req.params.id, lines);
+    flash(req, `Processed ${lines.length} lines. ${added} new items added to stock.`);
   }
   res.redirect(`/admin/products/${req.params.id}/stock`);
 });
@@ -204,7 +236,7 @@ router.post('/products/:id/stock/clear', (req, res) => {
   res.redirect(`/admin/products/${req.params.id}/stock`);
 });
 router.post('/products/:id/delete', (req, res) => {
-  db.prepare('DELETE FROM products WHERE id = ?').run(req.params.id);
+  StoreService.deleteProduct(req.params.id);
   flash(req, 'Product deleted.');
   res.redirect('/admin/products');
 });

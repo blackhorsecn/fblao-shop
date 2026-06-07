@@ -21,10 +21,54 @@ const StoreService = {
   },
 
   // Products
+  getProductsAdmin() {
+    return db
+      .prepare(`SELECT p.*, c.name AS category_name FROM products p
+                LEFT JOIN categories c ON c.id = p.category_id
+                ORDER BY c.sort_order, p.sort_order, p.id`)
+      .all();
+  },
+
   getProduct(id, onlyActive = true) {
     let sql = 'SELECT * FROM products WHERE id = ?';
     if (onlyActive) sql += ' AND active = 1';
     return db.prepare(sql).get(id);
+  },
+
+  createProduct(data) {
+    return db.prepare(
+      'INSERT INTO products (category_id, name, description, price, stock, active, sort_order, auto_deliver) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    ).run(
+      data.category_id || null,
+      data.name || 'Untitled',
+      data.description || '',
+      data.price || 0,
+      0,
+      data.active ? 1 : 0,
+      data.sort_order || 0,
+      data.auto_deliver ? 1 : 0
+    );
+  },
+
+  updateProduct(id, data) {
+    const result = db.prepare(
+      'UPDATE products SET category_id = ?, name = ?, description = ?, price = ?, active = ?, sort_order = ?, auto_deliver = ? WHERE id = ?'
+    ).run(
+      data.category_id || null,
+      data.name || '',
+      data.description || '',
+      data.price || 0,
+      data.active ? 1 : 0,
+      data.sort_order || 0,
+      data.auto_deliver ? 1 : 0,
+      id
+    );
+    this.syncProductStockCount(id);
+    return result;
+  },
+
+  deleteProduct(id) {
+    return db.prepare('DELETE FROM products WHERE id = ?').run(id);
   },
 
   updateProductStock(id, delta) {
@@ -33,21 +77,60 @@ const StoreService = {
     db.prepare('UPDATE products SET stock = MAX(0, stock + ?) WHERE id = ?').run(delta, id);
   },
 
+  // Categories
+  getCategories() {
+    return db.prepare('SELECT * FROM categories ORDER BY sort_order, id').all();
+  },
+
+  createCategory(name, sortOrder) {
+    return db.prepare('INSERT INTO categories (name, sort_order) VALUES (?, ?)').run(name, sortOrder);
+  },
+
+  updateCategory(id, name, sortOrder) {
+    return db.prepare('UPDATE categories SET name = ?, sort_order = ? WHERE id = ?').run(name, sortOrder, id);
+  },
+
+  deleteCategory(id) {
+    return db.prepare('DELETE FROM categories WHERE id = ?').run(id);
+  },
+
   // Stock Pool Management
   addStockToPool(productId, lines) {
-    const stmt = db.prepare('INSERT INTO product_stock_pool (product_id, content) VALUES (?, ?)');
+    const checkStmt = db.prepare('SELECT id FROM product_stock_pool WHERE product_id = ? AND content = ? AND is_sold = 0');
+    const insertStmt = db.prepare('INSERT INTO product_stock_pool (product_id, content) VALUES (?, ?)');
+
+    let added = 0;
     const tx = db.transaction(() => {
       for (let line of lines) {
-        if (line.trim()) stmt.run(productId, line.trim());
+        const content = line.trim();
+        if (!content) continue;
+
+        // Simple duplicate prevention within same product
+        const exists = checkStmt.get(productId, content);
+        if (!exists) {
+          insertStmt.run(productId, content);
+          added++;
+        }
       }
       this.syncProductStockCount(productId);
     });
     tx();
+    return added;
   },
 
   syncProductStockCount(productId) {
     const count = db.prepare('SELECT COUNT(*) c FROM product_stock_pool WHERE product_id = ? AND is_sold = 0').get(productId).c;
     db.prepare('UPDATE products SET stock = ? WHERE id = ?').run(count, productId);
+  },
+
+  syncAllProductStock() {
+    const products = db.prepare('SELECT id FROM products').all();
+    const tx = db.transaction(() => {
+      for (const p of products) {
+        this.syncProductStockCount(p.id);
+      }
+    });
+    tx();
   },
 
   // Public transactional method

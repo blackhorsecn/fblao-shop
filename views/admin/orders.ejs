@@ -13,9 +13,17 @@
 <div class="admin-bar">
   <div class="row-actions">
     <% ['all','pending','paid','delivered','failed','cancelled'].forEach(function(f){ %>
-      <a class="btn btn-sm <%= filter === f ? 'btn-primary' : '' %>" href="/admin?status=<%= f %>"><%= f %></a>
+      <a class="btn btn-sm <%= filter === f ? 'btn-primary' : '' %>" href="/admin?status=<%= f %><%= search ? '&search=' + encodeURIComponent(search) : '' %>"><%= f %></a>
     <% }) %>
   </div>
+  <form method="GET" action="/admin" style="display:flex; gap:5px;">
+    <input type="hidden" name="status" value="<%= filter %>">
+    <input type="text" name="search" value="<%= search || '' %>" placeholder="Search order/email/TG..." style="padding:4px 8px; border:1px solid #ddd; border-radius:4px;">
+    <button type="submit" class="btn btn-sm">Search</button>
+    <% if (search) { %>
+      <a href="/admin?status=<%= filter %>" class="btn btn-sm" style="background:#eee;color:#333;">Clear</a>
+    <% } %>
+  </form>
 </div>
 
 <table class="data-table">
