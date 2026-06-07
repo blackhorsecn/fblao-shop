@@ -2,6 +2,7 @@
 
 require('dotenv').config();
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
@@ -110,7 +111,17 @@ app.use((req, res) => {
 // Error handler
 app.use((err, req, res, _next) => {
   console.error(err);
-  res.status(500).render('error', { title: 'Error', message: err.message || 'Something went wrong.' });
+  // Ensure basic locals exist for error page
+  const locals = {
+    title: 'Error',
+    message: err.message || 'Something went wrong.',
+    shopName: res.locals.shopName || 'Shop',
+    settings: res.locals.settings || {},
+    currentPath: req.path,
+    isAdmin: !!(req.session && req.session.adminId),
+    user: req.session ? req.session.user : null
+  };
+  res.status(500).render('error', locals);
 });
 
 app.listen(PORT, () => {
