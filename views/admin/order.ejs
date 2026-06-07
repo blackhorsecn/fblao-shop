@@ -1,95 +1,122 @@
 <%- include('partials/head') %>
-<div class="admin-bar">
-  <h1 style="margin:0;">Order <%= order.order_number %></h1>
-  <a class="btn btn-sm" href="/admin">← Back to orders</a>
+<div class="admin-bar" style="margin-bottom: 25px;">
+  <div style="display: flex; align-items: center; gap: 15px;">
+    <a class="btn btn-sm" href="/admin" style="background: var(--panel-2);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg></a>
+    <h1 style="margin:0; font-size: 1.5rem;">Order <%= order.order_number %></h1>
+    <span class="status-pill status-<%= order.status %>" style="margin:0;"><%= order.status %></span>
+  </div>
+  <div class="muted" style="font-size: 13px;">Placed on <%= order.created_at %></div>
 </div>
 
 <div class="panel-grid">
-  <div class="subpanel">
-    <h2>Details</h2>
-    <span class="status-pill status-<%= order.status %>"><%= order.status %></span>
-    <table class="kv">
-      <tr><th>Telegram</th><td><strong>@<%= order.telegram_username %></strong></td></tr>
-      <% if (order.email) { %><tr><th>Email</th><td><%= order.email %></td></tr><% } %>
-      <tr><th>Product</th><td><%= order.product_name %></td></tr>
-      <tr><th>Acc Username</th><td><code><%= order.acc_username || '—' %></code></td></tr>
-      <tr><th>Acc Password</th><td><code><%= order.acc_password || '—' %></code></td></tr>
-      <tr><th>Quantity</th><td><%= order.quantity %></td></tr>
-      <tr><th>Unit price</th><td><%= money(order.unit_price) %></td></tr>
-      <tr><th>Total</th><td><strong><%= money(order.total) %></strong></td></tr>
-      <tr><th>Payment</th><td><%= order.payment_type %><%= manualMethod ? ' — ' + manualMethod.name : '' %></td></tr>
-      <tr><th>Maya checkout</th><td class="muted"><%= order.maya_checkout_id || '—' %></td></tr>
-      <tr><th>Placed</th><td><%= order.created_at %></td></tr>
-      <tr><th>Paid at</th><td><%= order.paid_at || '—' %></td></tr>
-      <tr><th>Delivered</th><td><%= order.delivered_at || '—' %></td></tr>
-    </table>
-
-    <div class="row-actions" style="margin-top:12px;">
-      <% if (order.status === 'pending') { %>
-        <form class="inline-form" method="POST" action="/admin/orders/<%= order.id %>/mark-paid">
-          <button class="btn btn-primary btn-sm" type="submit">Mark as paid</button>
-        </form>
-        <form class="inline-form" method="POST" action="/admin/orders/<%= order.id %>/cancel">
-          <button class="btn btn-danger btn-sm" type="submit">Cancel order</button>
-        </form>
-      <% } %>
+  <div class="stack" style="gap: 20px;">
+    <div class="subpanel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2 style="margin:0;">Customer Details</h2>
+        <a href="https://t.me/<%= order.telegram_username %>" target="_blank" class="btn btn-sm" style="background: #0088cc; color: white;">Open TG</a>
+      </div>
+      <table class="kv">
+        <tr><th>Telegram</th><td><strong style="color: var(--accent);">@<%= order.telegram_username %></strong></td></tr>
+        <% if (order.email) { %><tr><th>Email</th><td><%= order.email %></td></tr><% } %>
+        <tr><th>Payment</th><td><span style="text-transform: uppercase; font-size: 12px; font-weight: bold;"><%= order.payment_type %></span> <%= manualMethod ? ' — ' + manualMethod.name : '' %></td></tr>
+        <tr><th>Maya ID</th><td class="muted" style="font-size: 11px;"><%= order.maya_checkout_id || '—' %></td></tr>
+      </table>
     </div>
 
-    <form method="POST" action="/admin/orders/<%= order.id %>/notes" style="margin-top:16px;">
-      <label class="field"><span>Internal notes</span>
-        <textarea name="admin_notes"><%= order.admin_notes || '' %></textarea></label>
-      <button class="btn btn-sm" type="submit">Save notes</button>
-    </form>
+    <div class="subpanel">
+      <h2>Transaction Info</h2>
+      <table class="kv">
+        <tr><th>Product</th><td><%= order.product_name %></td></tr>
+        <tr><th>Quantity</th><td><%= order.quantity %></td></tr>
+        <tr><th>Unit Price</th><td><%= money(order.unit_price) %></td></tr>
+        <tr><th>Total Amount</th><td><strong style="color: var(--accent-2); font-size: 1.1rem;"><%= money(order.total) %></strong></td></tr>
+        <tr><th>Paid At</th><td><%= order.paid_at || 'Not yet' %></td></tr>
+        <tr><th>Delivered At</th><td><%= order.delivered_at || 'Not yet' %></td></tr>
+      </table>
+
+      <div class="row-actions" style="margin-top:20px; padding-top: 15px; border-top: 1px solid var(--border);">
+        <% if (order.status === 'pending') { %>
+          <form class="inline-form" method="POST" action="/admin/orders/<%= order.id %>/mark-paid">
+            <button class="btn btn-primary btn-sm" type="submit">Confirm Payment</button>
+          </form>
+          <form class="inline-form" method="POST" action="/admin/orders/<%= order.id %>/cancel">
+            <button class="btn btn-danger btn-sm" type="submit">Cancel Order</button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="subpanel">
+      <h2>Internal Admin Notes</h2>
+      <form method="POST" action="/admin/orders/<%= order.id %>/notes" class="stack">
+        <textarea name="admin_notes" placeholder="Private notes for staff only..." style="min-height: 80px;"><%= order.admin_notes || '' %></textarea>
+        <button class="btn btn-sm" type="submit">Save Notes</button>
+      </form>
+    </div>
   </div>
 
-  <div class="subpanel">
-    <h2>Edit Order Details</h2>
-    <form method="POST" action="/admin/orders/<%= order.id %>/update-details" class="stack">
-      <label class="field"><span>Status</span>
-        <select name="status">
-          <% ['pending','paid','delivered','failed','cancelled'].forEach(function(s){ %>
-            <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= s.toUpperCase() %></option>
-          <% }) %>
-        </select></label>
+  <div class="stack" style="gap: 20px;">
+    <div class="subpanel" style="border-top: 3px solid var(--accent);">
+      <h2>Edit Order Data (Public)</h2>
+      <p class="muted" style="font-size: 12px; margin-bottom: 15px;">Information entered here is visible to the customer on the Order Status page.</p>
+      <form method="POST" action="/admin/orders/<%= order.id %>/update-details" class="stack" style="gap: 12px;">
+        <label class="field"><span>Manual Status Overide</span>
+          <select name="status">
+            <% ['pending','paid','delivered','failed','cancelled'].forEach(function(s){ %>
+              <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= s.toUpperCase() %></option>
+            <% }) %>
+          </select></label>
 
-      <label class="field"><span>Account Ordered</span>
-        <input type="text" name="acc_ordered" value="<%= order.acc_ordered || order.product_name %>"></label>
+        <label class="field"><span>Account Product Name</span>
+          <input type="text" name="acc_ordered" value="<%= order.acc_ordered || order.product_name %>"></label>
 
-      <label class="field"><span>Account Number</span>
-        <input type="text" name="acc_number" value="<%= order.acc_number || '' %>"></label>
+        <div class="field-row">
+            <label class="field"><span>Account Number / ID</span>
+              <input type="text" name="acc_number" value="<%= order.acc_number || '' %>"></label>
+            <label class="field"><span>Account Display Name</span>
+              <input type="text" name="acc_name" value="<%= order.acc_name || '' %>"></label>
+        </div>
 
-      <label class="field"><span>Account Name</span>
-        <input type="text" name="acc_name" value="<%= order.acc_name || '' %>"></label>
+        <div class="field-row">
+            <label class="field"><span>Acc Username</span>
+              <input type="text" name="acc_username" value="<%= order.acc_username || '' %>"></label>
+            <label class="field"><span>Acc Password</span>
+              <input type="text" name="acc_password" value="<%= order.acc_password || '' %>"></label>
+        </div>
 
-      <label class="field"><span>Account Username</span>
-        <input type="text" name="acc_username" value="<%= order.acc_username || '' %>"></label>
+        <label class="field"><span>Warranty Details</span>
+          <input type="text" name="warranty_period" value="<%= order.warranty_period || '' %>" placeholder="e.g. 7 Days Replacement"></label>
 
-      <label class="field"><span>Account Password</span>
-        <input type="text" name="acc_password" value="<%= order.acc_password || '' %>"></label>
+        <button class="btn btn-primary btn-block" type="submit">Save Details to Status Page</button>
+      </form>
+    </div>
 
-      <label class="field"><span>Warranty Period</span>
-        <input type="text" name="warranty_period" value="<%= order.warranty_period || '' %>" placeholder="e.g. 7 Days, 1 Month"></label>
-
-      <button class="btn btn-primary btn-sm" type="submit">Update Details</button>
-    </form>
-  </div>
-
-  <div class="subpanel">
-    <h2>Deliver digital goods</h2>
-    <% if (order.status === 'pending') { %>
-      <div class="alert alert-error">This order is not paid yet. Mark it as paid first (or wait for the Maya webhook).</div>
-    <% } %>
-    <p class="muted">Paste the account credentials / keys. Once delivered, the customer sees this on their order &amp; query page.</p>
-    <form method="POST" action="/admin/orders/<%= order.id %>/deliver">
-      <label class="field">
-        <span>Delivery content</span>
-        <textarea name="delivered_content" rows="8" placeholder="email:pass | 2fa:XXXX | cookie:..."><%= order.delivered_content || '' %></textarea>
-      </label>
-      <button class="btn btn-primary" type="submit"><%= order.status === 'delivered' ? 'Update delivery' : 'Deliver to customer' %></button>
-    </form>
-    <% if (order.status === 'delivered') { %>
-      <div class="alert alert-ok" style="margin-top:12px;">Delivered. The customer can retrieve this from the Query Order page.</div>
-    <% } %>
+    <div class="subpanel">
+      <h2>Full Credentials / Delivery Content</h2>
+      <% if (order.status === 'pending') { %>
+        <div class="alert alert-error" style="margin-bottom: 15px;">Warning: This order is UNPAID.</div>
+      <% } %>
+      <form method="POST" action="/admin/orders/<%= order.id %>/deliver" class="stack">
+        <label class="field">
+          <span>Delivery Content (Plain Text / JSON / Cookies)</span>
+          <textarea name="delivered_content" rows="6" placeholder="Paste full access details here..." style="font-family: monospace; font-size: 12px;"><%= order.delivered_content || '' %></textarea>
+        </label>
+        <button class="btn btn-primary" type="submit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            <%= order.status === 'delivered' ? 'Update Credentials' : 'Send to Customer' %>
+        </button>
+      </form>
+      <% if (order.status === 'delivered') { %>
+        <div class="alert alert-ok" style="margin-top:12px; font-size: 12px;">Items delivered. Customer can retrieve them via Order Status.</div>
+      <% } %>
+    </div>
   </div>
 </div>
+
+<script>
+function copyVal(val, label) {
+  navigator.clipboard.writeText(val);
+  alert(label + ' copied to clipboard');
+}
+</script>
 <%- include('partials/foot') %>

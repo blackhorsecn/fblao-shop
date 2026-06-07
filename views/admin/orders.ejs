@@ -1,53 +1,98 @@
 <%- include('partials/head') %>
-<h1>Orders</h1>
-
-<div class="panel-grid" style="grid-template-columns: repeat(6, 1fr); gap:10px; margin-bottom:20px;">
-  <div class="subpanel" style="padding:12px;"><div class="muted">Total</div><strong style="font-size:20px;"><%= stats.orders %></strong></div>
-  <div class="subpanel" style="padding:12px;"><div class="muted">Pending</div><strong style="font-size:20px;"><%= stats.pending %></strong></div>
-  <div class="subpanel" style="padding:12px;"><div class="muted">Paid</div><strong style="font-size:20px;"><%= stats.paid %></strong></div>
-  <div class="subpanel" style="padding:12px;"><div class="muted">Delivered</div><strong style="font-size:20px;"><%= stats.delivered %></strong></div>
-  <div class="subpanel" style="padding:12px;"><div class="muted">Products</div><strong style="font-size:20px;"><%= stats.products %></strong></div>
-  <div class="subpanel" style="padding:12px;"><div class="muted">Revenue</div><strong style="font-size:20px;"><%= money(stats.revenue) %></strong></div>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+  <h1 style="margin:0;">Dashboard Overview</h1>
+  <div class="muted" style="font-size: 14px;">Last updated: <%= new Date().toLocaleTimeString() %></div>
 </div>
 
-<div class="admin-bar">
-  <div class="row-actions">
+<div class="panel-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:15px; margin-bottom:30px;">
+  <div class="subpanel" style="padding:15px; border-top: 3px solid var(--blue);">
+    <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Total Orders</div>
+    <div style="display: flex; align-items: baseline; gap: 8px;">
+      <strong style="font-size:24px; color: var(--text);"><%= stats.orders %></strong>
+    </div>
+  </div>
+  <div class="subpanel" style="padding:15px; border-top: 3px solid var(--accent-2);">
+    <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Pending</div>
+    <strong style="font-size:24px; color: var(--accent-2);"><%= stats.pending %></strong>
+  </div>
+  <div class="subpanel" style="padding:15px; border-top: 3px solid var(--green);">
+    <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Paid</div>
+    <strong style="font-size:24px; color: var(--green);"><%= stats.paid %></strong>
+  </div>
+  <div class="subpanel" style="padding:15px; border-top: 3px solid var(--accent);">
+    <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Delivered</div>
+    <strong style="font-size:24px; color: var(--accent);"><%= stats.delivered %></strong>
+  </div>
+  <div class="subpanel" style="padding:15px; border-top: 3px solid var(--gold-gradient);">
+    <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Revenue</div>
+    <strong style="font-size:24px; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><%= money(stats.revenue) %></strong>
+  </div>
+</div>
+
+<div class="admin-bar" style="background: var(--panel); padding: 15px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+  <div class="row-actions" style="margin:0;">
     <% ['all','pending','paid','delivered','failed','cancelled'].forEach(function(f){ %>
-      <a class="btn btn-sm <%= filter === f ? 'btn-primary' : '' %>" href="/admin?status=<%= f %><%= search ? '&search=' + encodeURIComponent(search) : '' %>"><%= f %></a>
+      <a class="btn btn-sm <%= filter === f ? 'btn-primary' : '' %>" href="/admin?status=<%= f %><%= search ? '&search=' + encodeURIComponent(search) : '' %>" style="text-transform: capitalize;"><%= f %></a>
     <% }) %>
   </div>
-  <form method="GET" action="/admin" style="display:flex; gap:5px;">
+  <form method="GET" action="/admin" style="display:flex; gap:5px; flex-grow: 1; max-width: 400px;">
     <input type="hidden" name="status" value="<%= filter %>">
-    <input type="text" name="search" value="<%= search || '' %>" placeholder="Search order/email/TG..." style="padding:4px 8px; border:1px solid #ddd; border-radius:4px;">
-    <button type="submit" class="btn btn-sm">Search</button>
+    <div style="position: relative; flex-grow: 1;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" name="search" value="<%= search || '' %>" placeholder="Search order/TG/details..." style="padding:8px 12px 8px 32px; border:1px solid var(--border); border-radius:6px; background: var(--panel-2); color: var(--text); width: 100%;">
+    </div>
+    <button type="submit" class="btn btn-sm btn-primary">Search</button>
     <% if (search) { %>
-      <a href="/admin?status=<%= filter %>" class="btn btn-sm" style="background:#eee;color:#333;">Clear</a>
+      <a href="/admin?status=<%= filter %>" class="btn btn-sm" style="background:var(--panel-2);color:var(--muted);">Clear</a>
     <% } %>
   </form>
 </div>
 
-<table class="data-table">
+<div class="table-wrap" style="border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;">
+<table class="product-table">
   <thead>
-    <tr><th>#</th><th>Order</th><th>Email / TG</th><th>Product</th><th>Qty</th><th>Total</th><th>Pay</th><th>Status</th><th>Placed</th><th></th></tr>
+    <tr>
+      <th style="width: 50px;">ID</th>
+      <th>Order Info</th>
+      <th>Customer (TG)</th>
+      <th>Product Details</th>
+      <th>Financials</th>
+      <th>Status</th>
+      <th style="text-align: right;">Action</th>
+    </tr>
   </thead>
   <tbody>
     <% if (!orders.length) { %>
-      <tr><td colspan="10" class="muted">No orders.</td></tr>
+      <tr><td colspan="7" class="muted" style="text-align: center; padding: 40px;">No matching orders found.</td></tr>
     <% } %>
     <% orders.forEach(function(o){ %>
       <tr>
-        <td><%= o.id %></td>
-        <td><strong><%= o.order_number %></strong></td>
-        <td><span style="font-weight: bold; color: var(--accent);">@<%= o.telegram_username %></span><br><span class="muted"><%= o.email || '' %></span></td>
-        <td><%= o.product_name %></td>
-        <td><%= o.quantity %></td>
-        <td><%= money(o.total) %></td>
-        <td><%= o.payment_type %></td>
-        <td><span class="status-pill status-<%= o.status %>"><%= o.status %></span></td>
-        <td class="muted"><%= o.created_at %></td>
-        <td><a class="btn btn-sm" href="/admin/orders/<%= o.id %>">Open</a></td>
+        <td class="muted">#<%= o.id %></td>
+        <td>
+          <div style="font-weight: bold; color: var(--text);"><%= o.order_number %></div>
+          <div class="muted" style="font-size: 11px;"><%= o.created_at %></div>
+        </td>
+        <td>
+          <div style="color: var(--accent); font-weight: 600;">@<%= o.telegram_username %></div>
+          <div class="muted" style="font-size: 11px;"><%= o.email || 'No email' %></div>
+        </td>
+        <td>
+          <div style="font-weight: 500;"><%= o.product_name %></div>
+          <div class="muted" style="font-size: 11px;">Qty: <%= o.quantity %></div>
+        </td>
+        <td>
+          <div style="color: var(--accent-2); font-weight: 700;"><%= money(o.total) %></div>
+          <div class="muted" style="font-size: 10px; text-transform: uppercase;"><%= o.payment_type %></div>
+        </td>
+        <td>
+          <span class="status-pill status-<%= o.status %>" style="font-size: 10px; padding: 2px 10px;"><%= o.status %></span>
+        </td>
+        <td style="text-align: right;">
+          <a class="btn btn-sm" href="/admin/orders/<%= o.id %>" style="padding: 4px 12px; font-size: 12px;">Manage</a>
+        </td>
       </tr>
     <% }) %>
   </tbody>
 </table>
+</div>
 <%- include('partials/foot') %>
