@@ -44,12 +44,28 @@ app.use(
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use('/static', express.static(path.join(__dirname, '..', 'public')));
 
-const isProd = process.env.NODE_ENV === 'production';
-
 // Session storage path (persistent on Railway if DATA_DIR is set)
 const DATA_DIR = process.env.DATA_DIR
   ? path.resolve(process.env.DATA_DIR)
   : path.join(__dirname, '..', 'data');
+
+// Serve uploaded logo from persistent data dir
+app.get('/logo.png', (req, res) => {
+  const logoPath = path.join(DATA_DIR, 'logo.png');
+  if (fs.existsSync(logoPath)) {
+    res.sendFile(logoPath);
+  } else {
+    // Fallback to default if no custom logo uploaded
+    const defaultPath = path.join(__dirname, '..', 'public', 'img', 'logo.png');
+    if (fs.existsSync(defaultPath)) {
+       res.sendFile(defaultPath);
+    } else {
+       res.status(404).send('Not found');
+    }
+  }
+});
+
+const isProd = process.env.NODE_ENV === 'production';
 
 // Security: Ensure SESSION_SECRET is set in production
 if (isProd && (!process.env.SESSION_SECRET || process.env.SESSION_SECRET === 'dev-secret')) {

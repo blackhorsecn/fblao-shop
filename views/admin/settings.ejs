@@ -10,6 +10,20 @@
       <label class="field"><span>Currency code</span><input type="text" name="currency" value="<%= escapeHtml(s.currency) %>"></label>
       <button class="btn btn-primary" type="submit">Save shop settings</button>
     </form>
+
+    <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+
+    <form method="POST" action="/admin/settings/logo" enctype="multipart/form-data">
+      <label class="field">
+        <span>Shop Logo</span>
+        <div style="display:flex; align-items:center; gap: 15px; margin-top: 10px;">
+          <img src="/logo.png?v=<%= Date.now() %>" alt="Current Logo" style="height: 50px; border: 1px solid #ddd; padding: 4px; border-radius: 4px;">
+          <input type="file" name="logo" accept="image/png,image/jpeg,image/gif" required>
+        </div>
+        <small class="muted">Recommended: Transparent PNG, square or horizontal aspect ratio.</small>
+      </label>
+      <button class="btn btn-sm" type="submit">Upload New Logo</button>
+    </form>
   </div>
 
   <div class="subpanel">

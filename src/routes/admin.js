@@ -3,9 +3,36 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const { db, getSetting, setSetting } = require('../db');
 const { requireAdmin, asyncHandler, rateLimit } = require('../middleware');
 const StoreService = require('../services/store');
+
+// Setup multer for logo uploads
+const DATA_DIR = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : path.join(__dirname, '..', '..', 'data');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    cb(null, DATA_DIR);
+  },
+  filename: (req, file, cb) => {
+    cb(null, 'logo.png'); // Always save as logo.png
+  }
+});
+const upload = multer({
+  storage,
+  limits: { fileSize: 1024 * 1024 * 2 }, // 2MB limit
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/png', 'image/jpeg', 'image/gif'];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Only PNG, JPEG, and GIF are allowed.'));
+  }
+});
 
 // ---- Auth ------------------------------------------------------------------
 router.get('/login', (req, res) => {
@@ -376,6 +403,16 @@ router.post('/settings', (req, res) => {
   flash(req, 'Shop settings saved.');
   res.redirect('/admin/settings');
 });
+
+router.post('/settings/logo', upload.single('logo'), (req, res) => {
+  flash(req, 'Shop logo uploaded successfully.');
+  res.redirect('/admin/settings');
+}, (error, req, res, next) => {
+  // Error handler for multer errors
+  flash(req, error.message, 'error');
+  res.redirect('/admin/settings');
+});
+
 router.post('/settings/maya', (req, res) => {
   setSetting('maya_enabled', req.body.maya_enabled ? '1' : '0');
   setSetting('maya_mode', req.body.maya_mode === 'live' ? 'live' : 'sandbox');
