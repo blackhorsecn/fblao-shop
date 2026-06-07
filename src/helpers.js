@@ -74,26 +74,22 @@ function timeAgo(dateStr) {
 function getPaymentIcon(methodName, dbIconUrl) {
   if (dbIconUrl) return dbIconUrl;
   const name = (methodName || '').toLowerCase();
-  // Prefer local SVG assets served from the static path. These files live under public/img/payments/.
-  // Keep external fallbacks for unexpected names.
-  if (name.includes('gcash')) return '/static/img/payments/gcash.svg';
-  if (name.includes('paymaya') || name.includes('maya')) return '/static/img/payments/maya.svg';
-  if (name.includes('grab')) return '/static/img/payments/grab.svg';
-  if (name.includes('shopee')) return '/static/img/payments/shopee.svg';
-  if (name.includes('bpi')) return '/static/img/payments/bpi.svg';
-  if (name.includes('unionbank') || name.includes('union bank')) return '/static/img/payments/unionbank.svg';
-  if (name.includes('visa')) return '/static/img/payments/visa.svg';
-  if (name.includes('mastercard')) return '/static/img/payments/mastercard.svg';
 
-  // External fallbacks (kept for compatibility)
-  if (name.includes('gcash')) return 'https://logos-world.net/wp-content/uploads/2023/11/GCash-Logo.png';
-  if (name.includes('paymaya') || name.includes('maya')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Maya_logo.svg/512px-Maya_logo.svg.png';
-  if (name.includes('grab')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Grab_logo.svg/512px-Grab_logo.svg.png';
-  if (name.includes('shopee')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Shopee.svg/512px-Shopee.svg.png';
+  // Using high-stability PayMongo/Xendit CDN links for PH methods
+  if (name.includes('gcash')) return 'https://cdn.paymongo.com/images/gcash.png';
+  if (name.includes('paymaya') || name.includes('maya')) return 'https://cdn.paymongo.com/images/maya.png';
+  if (name.includes('grab')) return 'https://cdn.paymongo.com/images/grabpay.png';
+  if (name.includes('shopee')) return 'https://cdn.paymongo.com/images/shopeepay.png';
+
+  // High stability VectorLogoZone for cards
+  if (name.includes('visa')) return 'https://www.vectorlogo.zone/logos/visa/visa-ar21.png';
+  if (name.includes('mastercard')) return 'https://www.vectorlogo.zone/logos/mastercard/mastercard-ar21.png';
+
+  // Local/Common banks fallback to Wikimedia with reliable thumbnails
   if (name.includes('bpi')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/BPI_Logo.svg/512px-BPI_Logo.svg.png';
   if (name.includes('unionbank') || name.includes('union bank')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/UnionBank_of_the_Philippines_logo.svg/512px-UnionBank_of_the_Philippines_logo.svg.png';
-  if (name.includes('visa')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/512px-Visa_Inc._logo.svg.png';
-  if (name.includes('mastercard')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/512px-Mastercard-logo.svg.png';
+  if (name.includes('paypal')) return 'https://www.vectorlogo.zone/logos/paypal/paypal-ar21.png';
+
   return null;
 }
 
