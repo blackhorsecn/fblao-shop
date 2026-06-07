@@ -61,7 +61,8 @@ CREATE TABLE IF NOT EXISTS manual_payment_methods (
   name         TEXT NOT NULL,
   instructions TEXT NOT NULL DEFAULT '',
   enabled      INTEGER NOT NULL DEFAULT 1,
-  sort_order   INTEGER NOT NULL DEFAULT 0
+  sort_order   INTEGER NOT NULL DEFAULT 0,
+  icon_url     TEXT
 );
 
 CREATE TABLE IF NOT EXISTS banners (
@@ -71,10 +72,16 @@ CREATE TABLE IF NOT EXISTS banners (
   sort_order INTEGER NOT NULL DEFAULT 0
 );
 
+CREATE INDEX IF NOT EXISTS idx_orders_order_number ON orders(order_number);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_telegram ON orders(telegram_username);
+CREATE INDEX IF NOT EXISTS idx_products_active ON products(active, sort_order);
+CREATE INDEX IF NOT EXISTS idx_stock_product ON product_stock_pool(product_id, is_sold);
+
 CREATE TABLE IF NOT EXISTS orders (
   id               INTEGER PRIMARY KEY AUTOINCREMENT,
   order_number     TEXT UNIQUE NOT NULL,
-  email            TEXT NOT NULL,
+  email            TEXT,
   product_id       INTEGER REFERENCES products(id) ON DELETE SET NULL,
   product_name     TEXT NOT NULL,
   quantity         INTEGER NOT NULL DEFAULT 1,
@@ -83,12 +90,20 @@ CREATE TABLE IF NOT EXISTS orders (
   currency         TEXT NOT NULL DEFAULT 'PHP',
   payment_type     TEXT NOT NULL DEFAULT 'maya',
   manual_method_id INTEGER REFERENCES manual_payment_methods(id) ON DELETE SET NULL,
+  telegram_username TEXT,
+  telegram_id      TEXT,
   status           TEXT NOT NULL DEFAULT 'pending',
   maya_checkout_id TEXT,
   coins_request_id TEXT,
   maya_reference   TEXT,
   delivered_content TEXT,
   admin_notes      TEXT,
+  acc_ordered      TEXT,
+  acc_number       TEXT,
+  acc_name         TEXT,
+  acc_username     TEXT,
+  acc_password     TEXT,
+  warranty_period  TEXT,
   created_at       TEXT NOT NULL DEFAULT (datetime('now')),
   paid_at          TEXT,
   delivered_at     TEXT
@@ -97,15 +112,30 @@ CREATE TABLE IF NOT EXISTS orders (
 
 // Migrations for existing database
 try { db.exec("ALTER TABLE products ADD COLUMN auto_deliver INTEGER NOT NULL DEFAULT 1"); } catch(e){}
+try { db.exec("ALTER TABLE products ADD COLUMN min_quantity INTEGER NOT NULL DEFAULT 1"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN telegram_username TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN telegram_id TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN acc_ordered TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN acc_number TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN acc_name TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN acc_username TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN acc_password TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN warranty_period TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN coins_request_id TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE categories ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
+try { db.exec("ALTER TABLE products ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
+try { db.exec("ALTER TABLE manual_payment_methods ADD COLUMN icon_url TEXT"); } catch(e){}
+// email is already nullable in the CREATE TABLE statement above.
+// SQLite doesn't support ALTER COLUMN, so we skip this migration.
 
 // Add Coins.ph Enterprise if it doesn't exist
 const coinsExist = db.prepare('SELECT id FROM manual_payment_methods WHERE name = ?').get('Coins.ph Enterprise');
 if (!coinsExist) {
-  db.prepare('INSERT INTO manual_payment_methods (name, instructions, enabled, sort_order) VALUES (?, ?, 1, ?)').run(
+  db.prepare('INSERT INTO manual_payment_methods (name, instructions, enabled, sort_order, icon_url) VALUES (?, ?, 1, ?, ?)').run(
     'Coins.ph Enterprise',
     'Send the exact total to Coins.ph Wallet: 0917-000-0000 (Lion King Studio).\nUse your ORDER NUMBER as the reference/note.',
-    4
+    4,
+    'https://static.coingecko.com/s/exchanges/images/1114/large/coinsph.png'
   );
 }
 

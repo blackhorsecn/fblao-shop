@@ -123,7 +123,11 @@ app.use((err, req, res, _next) => {
     settings: res.locals.settings || {},
     currentPath: req.path,
     isAdmin: !!(req.session && req.session.adminId),
-    user: req.session ? req.session.user : null
+    user: req.session ? req.session.user : null,
+    mayaEnabled: res.locals.mayaEnabled || false,
+    footerMethods: res.locals.footerMethods || [],
+    date: res.locals.date || ((d) => d),
+    getIcon: res.locals.getIcon || (() => null)
   };
   res.status(500).render('error', locals);
 });
