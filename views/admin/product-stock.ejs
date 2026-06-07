@@ -6,28 +6,54 @@
 <h1>Manage Stock: <%= product.name %></h1>
 
 <div class="subpanel" style="margin-bottom: 25px;">
-  <h2>Add Stock Lines</h2>
-  <p class="muted">Enter one item per line (e.g., email:password or account cookie). These will be automatically delivered to customers on purchase.</p>
-  <form method="POST" action="/admin/products/<%= product.id %>/stock/add">
-    <textarea name="lines" style="width:100%; min-height:150px; font-family:monospace; margin-bottom:10px;" placeholder="item1
-item2
-item3"></textarea>
-    <button class="btn btn-primary" type="submit">Import Stock Lines</button>
-  </form>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+    <h2 style="margin:0;">Add Stock Items</h2>
+    <a href="/admin/products/<%= product.id %>/stock/download-template" class="btn btn-sm" style="background: var(--panel-2);">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      Download CSV Template
+    </a>
+  </div>
+
+  <div class="panel-grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+    <form method="POST" action="/admin/products/<%= product.id %>/stock/add" class="stack">
+      <span class="muted" style="font-size: 13px; margin-bottom: 8px;">Option 1: Paste multiple lines</span>
+      <textarea name="lines" style="width:100%; min-height:120px; font-family:monospace; margin-bottom:10px; font-size: 12px;" placeholder="item1:pass
+item2:pass
+item3:pass"></textarea>
+      <button class="btn btn-primary" type="submit">Import from Text</button>
+    </form>
+
+    <form method="POST" action="/admin/products/<%= product.id %>/stock/add" enctype="multipart/form-data" class="stack" style="border-left: 1px solid var(--border); padding-left: 20px;">
+      <span class="muted" style="font-size: 13px; margin-bottom: 8px;">Option 2: Upload CSV file</span>
+      <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 2px dashed var(--border); border-radius: 8px; padding: 20px; background: rgba(255,255,255,0.02);">
+        <input type="file" name="csv_file" accept=".csv,.txt" id="csv_file" style="display: none;" onchange="document.getElementById('file-name').innerText = this.files[0].name">
+        <label for="csv_file" class="btn btn-sm" style="margin-bottom: 10px; cursor: pointer;">Choose File</label>
+        <div id="file-name" class="muted" style="font-size: 11px;">No file selected</div>
+      </div>
+      <button class="btn btn-primary" type="submit" style="margin-top: 10px;">Upload & Import CSV</button>
+    </form>
+  </div>
 </div>
 
 <div class="field-row" style="align-items: flex-start; gap: 20px;">
-  <div class="subpanel" style="flex: 1;">
-    <h2>Current Pool (<%= pool.length %> items)</h2>
-    <div style="max-height: 400px; overflow-y: auto;">
+  <div class="subpanel" style="flex: 1; border-top: 3px solid var(--green);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <h2 style="margin:0;">Available Stock (<%= pool.length %>)</h2>
+    </div>
+    <div style="max-height: 500px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid var(--border);">
       <% if (!pool.length) { %>
-        <p class="muted">No items in pool.</p>
+        <div style="padding: 30px; text-align: center;" class="muted">No items in pool.</div>
       <% } else { %>
-        <table class="table-full">
-          <thead><tr><th>Content</th></tr></thead>
+        <table class="product-table" style="font-size: 13px;">
+          <thead style="position: sticky; top: 0; z-index: 1;">
+            <tr><th>Content</th><th style="width: 40px;"></th></tr>
+          </thead>
           <tbody>
             <% pool.forEach(function(item){ %>
-              <tr><td style="font-family:monospace; font-size:0.9em;"><%= escapeHtml(item.content) %></td></tr>
+              <tr>
+                <td style="font-family:monospace; word-break: break-all;"><%= item.content %></td>
+                <td><button class="btn btn-sm" style="padding: 2px 6px;" onclick="copyVal('<%= item.content %>', 'Item', this)">Copy</button></td>
+              </tr>
             <% }) %>
           </tbody>
         </table>
@@ -35,24 +61,26 @@ item3"></textarea>
     </div>
     <% if (pool.length) { %>
       <form method="POST" action="/admin/products/<%= product.id %>/stock/clear" onsubmit="return confirm('Clear ALL unsold stock for this product?');" style="margin-top:15px;">
-        <button class="btn btn-sm btn-danger" type="submit">Clear Pool</button>
+        <button class="btn btn-sm btn-danger" type="submit">Delete All Unsold Stock</button>
       </form>
     <% } %>
   </div>
 
-  <div class="subpanel" style="flex: 1;">
-    <h2>Recent Deliveries (Sold)</h2>
-    <div style="max-height: 400px; overflow-y: auto;">
+  <div class="subpanel" style="flex: 1; border-top: 3px solid var(--muted);">
+    <h2 style="margin-bottom: 15px;">Sold / Delivered History</h2>
+    <div style="max-height: 500px; overflow-y: auto; background: rgba(0,0,0,0.1); border-radius: 8px; border: 1px solid var(--border);">
       <% if (!sold.length) { %>
-        <p class="muted">No items sold yet.</p>
+        <div style="padding: 30px; text-align: center;" class="muted">No items sold yet.</div>
       <% } else { %>
-        <table class="table-full">
-          <thead><tr><th>Content</th><th>Order</th></tr></thead>
+        <table class="product-table" style="font-size: 12px;">
+          <thead style="position: sticky; top: 0; z-index: 1;">
+            <tr><th>Content</th><th style="width: 100px;">Order</th></tr>
+          </thead>
           <tbody>
             <% sold.forEach(function(item){ %>
               <tr>
-                <td style="font-family:monospace; font-size:0.85em; color:#777;"><%= escapeHtml(item.content) %></td>
-                <td><a href="/admin/orders?status=all&search=<%= item.order_number %>">#<%= item.order_number %></a></td>
+                <td style="font-family:monospace; color: var(--muted); word-break: break-all;"><%= item.content %></td>
+                <td><a href="/admin/orders/<%= item.order_id %>" style="font-weight: bold; color: var(--accent-2);">#<%= item.order_number %></a></td>
               </tr>
             <% }) %>
           </tbody>
@@ -63,3 +91,21 @@ item3"></textarea>
 </div>
 
 <%- include('partials/foot') %>
+
+<script>
+function copyVal(val, label, btn) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(val).then(() => {
+      const oldText = btn.innerText;
+      btn.innerText = 'Copied!';
+      btn.style.color = 'var(--green)';
+      setTimeout(() => {
+        btn.innerText = oldText;
+        btn.style.color = '';
+      }, 1500);
+    });
+  } else {
+    alert('Clipboard not supported');
+  }
+}
+</script>

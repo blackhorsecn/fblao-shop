@@ -13,15 +13,75 @@
     <div class="subpanel">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h2 style="margin:0;">Customer Details</h2>
-        <a href="https://t.me/<%= order.telegram_username %>" target="_blank" class="btn btn-sm" style="background: #0088cc; color: white;">Open TG</a>
+        <div style="display: flex; gap: 8px;">
+           <button class="btn btn-sm" onclick="copyVal('@<%= order.telegram_username %>', 'TG', this)">Copy @</button>
+           <a href="https://t.me/<%= order.telegram_username %>" target="_blank" class="btn btn-sm" style="background: #0088cc; color: white;">Open TG</a>
+        </div>
       </div>
       <table class="kv">
         <tr><th>Telegram</th><td><strong style="color: var(--accent);">@<%= order.telegram_username %></strong></td></tr>
-        <% if (order.email) { %><tr><th>Email</th><td><%= order.email %></td></tr><% } %>
-        <tr><th>Payment</th><td><span style="text-transform: uppercase; font-size: 12px; font-weight: bold;"><%= order.payment_type %></span> <%= manualMethod ? ' — ' + manualMethod.name : '' %></td></tr>
-        <tr><th>Maya ID</th><td class="muted" style="font-size: 11px;"><%= order.maya_checkout_id || '—' %></td></tr>
+        <% if (order.email) { %>
+          <tr>
+            <th>Email</th>
+            <td>
+              <%= order.email %>
+              <button class="btn btn-sm" style="padding: 2px 6px; font-size: 10px; margin-left: 5px;" onclick="copyVal('<%= order.email %>', 'Email', this)">Copy</button>
+            </td>
+          </tr>
+        <% } %>
+        <tr>
+          <th>Payment</th>
+          <td>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <% if (order.payment_type === 'maya') { %>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Maya_logo.svg" alt="Maya" style="height: 14px;">
+              <% } else if (manualMethod && manualMethod.name.toLowerCase().includes('gcash')) { %>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/GCash_logo.svg" alt="GCash" style="height: 14px;">
+              <% } %>
+              <span style="text-transform: uppercase; font-size: 12px; font-weight: bold;"><%= order.payment_type %></span>
+              <%= manualMethod ? ' — ' + manualMethod.name : '' %>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th>Maya ID</th>
+          <td class="muted" style="font-size: 11px;">
+            <%= order.maya_checkout_id || '—' %>
+            <% if (order.maya_checkout_id) { %>
+              <button class="btn btn-sm" style="padding: 2px 6px; font-size: 10px; margin-left: 5px;" onclick="copyVal('<%= order.maya_checkout_id %>', 'Maya ID', this)">Copy</button>
+            <% } %>
+          </td>
+        </tr>
       </table>
     </div>
+
+    <% if (typeof poolItems !== 'undefined' && poolItems.length > 0) { %>
+      <div class="subpanel">
+        <h2>Auto-Delivered Items</h2>
+        <div class="stack" style="gap: 8px;">
+          <% poolItems.forEach(function(item) { %>
+            <div style="background: var(--panel-2); border: 1px solid var(--border); padding: 8px 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+              <code style="font-size: 11px; color: var(--accent-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 10px;"><%= item.content %></code>
+              <button class="btn btn-sm" style="padding: 2px 8px; font-size: 10px;" onclick="copyVal('<%= item.content %>', 'Item', this)">Copy</button>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (typeof customerHistory !== 'undefined' && customerHistory.length > 0) { %>
+      <div class="subpanel">
+        <h2>Customer History (Last 5)</h2>
+        <div class="stack" style="gap: 5px;">
+          <% customerHistory.forEach(function(h) { %>
+            <a href="/admin/orders/<%= h.id %>" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 6px; text-decoration: none; border: 1px solid transparent;" onmouseover="this.style.borderColor='var(--border)'" onmouseout="this.style.borderColor='transparent'">
+              <span style="font-size: 13px; font-weight: 600;">#<%= h.order_number %></span>
+              <span class="status-pill status-<%= h.status %>" style="min-width: 65px; font-size: 9px; padding: 2px 6px; margin:0;"><%= h.status %></span>
+            </a>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
 
     <div class="subpanel">
       <h2>Transaction Info</h2>
@@ -97,11 +157,14 @@
         <div class="alert alert-error" style="margin-bottom: 15px;">Warning: This order is UNPAID.</div>
       <% } %>
       <form method="POST" action="/admin/orders/<%= order.id %>/deliver" class="stack">
-        <label class="field">
-          <span>Delivery Content (Plain Text / JSON / Cookies)</span>
-          <textarea name="delivered_content" rows="6" placeholder="Paste full access details here..." style="font-family: monospace; font-size: 12px;"><%= order.delivered_content || '' %></textarea>
-        </label>
-        <button class="btn btn-primary" type="submit">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="muted" style="font-size: 13px;">Delivery Content (Plain Text / JSON / Cookies)</span>
+          <% if (order.delivered_content) { %>
+            <button type="button" class="btn btn-sm" style="padding: 2px 8px; font-size: 11px;" onclick="copyVal(this.form.delivered_content.value, 'Content', this)">Copy All</button>
+          <% } %>
+        </div>
+        <textarea name="delivered_content" rows="6" placeholder="Paste full access details here..." style="font-family: monospace; font-size: 12px;"><%= order.delivered_content || '' %></textarea>
+        <button class="btn btn-primary" type="submit" style="margin-top: 10px;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
             <%= order.status === 'delivered' ? 'Update Credentials' : 'Send to Customer' %>
         </button>
@@ -114,9 +177,20 @@
 </div>
 
 <script>
-function copyVal(val, label) {
-  navigator.clipboard.writeText(val);
-  alert(label + ' copied to clipboard');
+function copyVal(val, label, btn) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(val).then(() => {
+      const oldText = btn.innerText;
+      btn.innerText = 'Copied!';
+      btn.style.color = 'var(--green)';
+      setTimeout(() => {
+        btn.innerText = oldText;
+        btn.style.color = '';
+      }, 1500);
+    });
+  } else {
+    alert('Clipboard not supported');
+  }
 }
 </script>
 <%- include('partials/foot') %>

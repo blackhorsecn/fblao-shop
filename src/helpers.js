@@ -28,4 +28,46 @@ function nl2br(str) {
   return escapeHtml(str).replace(/\n/g, '<br>');
 }
 
-module.exports = { generateOrderNumber, formatMoney, escapeHtml, nl2br };
+function formatDate(dateStr, includeTime = true) {
+  if (!dateStr) return '—';
+  // SQLite dates are UTC (YYYY-MM-DD HH:MM:SS).
+  // Append 'Z' to treat as UTC when parsing.
+  const d = new Date(dateStr.replace(' ', 'T') + 'Z');
+  if (isNaN(d.getTime())) return dateStr;
+
+  const options = {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  };
+
+  if (includeTime) {
+    options.hour = '2-digit';
+    options.minute = '2-digit';
+    options.hour12 = true;
+  }
+
+  return d.toLocaleString('en-PH', options);
+}
+
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr.replace(' ', 'T') + 'Z');
+  if (isNaN(d.getTime())) return '';
+
+  const seconds = Math.floor((new Date() - d) / 1000);
+  let interval = Math.floor(seconds / 31536000);
+
+  if (interval > 1) return interval + " years ago";
+  interval = Math.floor(seconds / 2592000);
+  if (interval > 1) return interval + " months ago";
+  interval = Math.floor(seconds / 86400);
+  if (interval > 1) return interval + " days ago";
+  interval = Math.floor(seconds / 3600);
+  if (interval > 1) return interval + " hours ago";
+  interval = Math.floor(seconds / 60);
+  if (interval > 1) return interval + " minutes ago";
+  return Math.floor(seconds) + " seconds ago";
+}
+
+module.exports = { generateOrderNumber, formatMoney, escapeHtml, nl2br, formatDate, timeAgo };

@@ -81,9 +81,9 @@ router.get('/', (req, res) => {
   }
 
   if (search) {
-    conditions.push('(order_number LIKE ? OR email LIKE ? OR telegram_username LIKE ?)');
+    conditions.push('(order_number LIKE ? OR email LIKE ? OR telegram_username LIKE ? OR CAST(id AS TEXT) = ?)');
     const p = `%${search}%`;
-    params.push(p, p, p);
+    params.push(p, p, p, search);
   }
 
   if (conditions.length > 0) {
@@ -99,10 +99,34 @@ router.get('/', (req, res) => {
 router.get('/orders/:id', (req, res) => {
   const order = StoreService.getOrder(req.params.id);
   if (!order) return res.redirect('/admin');
+
   const manualMethod = order.manual_method_id
     ? db.prepare('SELECT * FROM manual_payment_methods WHERE id = ?').get(order.manual_method_id)
     : null;
-  res.render('admin/order', { title: 'Order ' + order.order_number, active: 'orders', order, manualMethod, flash: takeFlash(req) });
+
+  const poolItems = db.prepare('SELECT * FROM product_stock_pool WHERE order_id = ?').all(order.id);
+
+  const customerHistory = (order.telegram_username || order.email)
+    ? db.prepare(`
+        SELECT * FROM orders
+        WHERE (
+          (telegram_username IS NOT NULL AND telegram_username = ?)
+          OR (email IS NOT NULL AND email = ?)
+        )
+        AND id != ?
+        ORDER BY created_at DESC LIMIT 5
+      `).all(order.telegram_username, order.email, order.id)
+    : [];
+
+  res.render('admin/order', {
+    title: 'Order ' + order.order_number,
+    active: 'orders',
+    order,
+    manualMethod,
+    poolItems,
+    customerHistory,
+    flash: takeFlash(req)
+  });
 });
 
 // Mark a manual (or pending) order as paid.
@@ -326,11 +350,38 @@ router.get('/products/:id/stock', (req, res) => {
   res.render('admin/product-stock', { title: 'Manage Stock: ' + product.name, active: 'products', product, pool, sold, flash: takeFlash(req) });
 });
 
-router.post('/products/:id/stock/add', (req, res) => {
-  const lines = String(req.body.lines || '').split('\n').map(l => l.trim()).filter(l => l);
+router.get('/products/:id/stock/download-template', (req, res) => {
+  const product = StoreService.getProduct(req.params.id);
+  if (!product) return res.redirect('/admin/products');
+
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', `attachment; filename="stock_template_${product.id}.csv"`);
+  res.send('content\n' +
+           'example_item_1\n' +
+           'example_item_2\n' +
+           'email:password:2fa_token');
+});
+
+router.post('/products/:id/stock/add', multer().single('csv_file'), (req, res) => {
+  let lines = [];
+
+  // Handle file upload
+  if (req.file) {
+    const content = req.file.buffer.toString('utf8');
+    lines = content.split(/\r?\n/)
+      .map(l => l.trim())
+      .filter(l => l && l.toLowerCase() !== 'content'); // skip header
+  }
+  // Handle textarea (keep existing)
+  else if (req.body.lines) {
+    lines = String(req.body.lines || '').split('\n').map(l => l.trim()).filter(l => l);
+  }
+
   if (lines.length > 0) {
     const added = StoreService.addStockToPool(req.params.id, lines);
     flash(req, `Processed ${lines.length} lines. ${added} new items added to stock.`);
+  } else {
+    flash(req, 'No valid stock lines found.', 'error');
   }
   res.redirect(`/admin/products/${req.params.id}/stock`);
 });

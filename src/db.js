@@ -47,7 +47,8 @@ CREATE TABLE IF NOT EXISTS admins (
 CREATE TABLE IF NOT EXISTS categories (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   name       TEXT NOT NULL,
-  sort_order INTEGER NOT NULL DEFAULT 0
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS products (
@@ -60,7 +61,8 @@ CREATE TABLE IF NOT EXISTS products (
   active      INTEGER NOT NULL DEFAULT 1,
   sort_order  INTEGER NOT NULL DEFAULT 0,
   auto_deliver INTEGER NOT NULL DEFAULT 1,
-  min_quantity INTEGER NOT NULL DEFAULT 1
+  min_quantity INTEGER NOT NULL DEFAULT 1,
+  updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS product_stock_pool (
@@ -129,9 +131,10 @@ try { db.exec("ALTER TABLE orders ADD COLUMN acc_name TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN acc_username TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN acc_password TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN warranty_period TEXT"); } catch(e){}
-try { db.exec("ALTER TABLE orders ALTER COLUMN email DROP NOT NULL"); } catch(e){
-  // SQLite doesn't support DROP NOT NULL directly, we'll just ignore it as it usually allows nulls if not strictly checked
-}
+try { db.exec("ALTER TABLE categories ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
+try { db.exec("ALTER TABLE products ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
+// email is already nullable in the CREATE TABLE statement above.
+// SQLite doesn't support ALTER COLUMN, so we skip this migration.
 
 // ---------------------------------------------------------------------------
 // Settings helpers

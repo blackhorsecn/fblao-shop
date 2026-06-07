@@ -95,16 +95,28 @@
       <fieldset class="field pay-methods">
         <legend>Payment method</legend>
         <% if (mayaEnabled) { %>
-          <label class="pay-option">
+          <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
             <input type="radio" name="payment_type" value="maya" checked>
-            <span><strong>Maya / Card</strong> — pay online & get instant access (redirects to Maya)</span>
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+               <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Maya_logo.svg" alt="Maya" style="height: 20px;">
+               <span><strong>Maya Checkout</strong> — pay with Maya, GCash, or Card</span>
+            </div>
           </label>
         <% } %>
         <% manualMethods.forEach(function(m, i){ %>
-          <label class="pay-option">
+          <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
             <input type="radio" name="payment_type" value="manual"
                    data-manual="<%= m.id %>" <%= (!mayaEnabled && i === 0) ? 'checked' : '' %>>
-            <span><strong><%= m.name %></strong> — manual payment (instructions shown after)</span>
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+               <% if (m.name.toLowerCase().includes('gcash')) { %>
+                 <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/GCash_logo.svg" alt="GCash" style="height: 20px;">
+               <% } else if (m.name.toLowerCase().includes('maya')) { %>
+                 <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Maya_logo.svg" alt="Maya" style="height: 20px;">
+               <% } else { %>
+                 <div style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; background: var(--panel-2); border-radius: 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg></div>
+               <% } %>
+               <span><strong><%= m.name %></strong> — manual transfer</span>
+            </div>
           </label>
         <% }) %>
         <% if (!mayaEnabled && !manualMethods.length) { %>

@@ -1,7 +1,7 @@
 'use strict';
 
 const { getSettings } = require('./db');
-const { formatMoney, nl2br, escapeHtml } = require('./helpers');
+const { formatMoney, nl2br, escapeHtml, formatDate, timeAgo } = require('./helpers');
 
 function shopContext(req, res, next) {
   const settings = getSettings();
@@ -10,6 +10,8 @@ function shopContext(req, res, next) {
   res.locals.shopTagline = settings.shop_tagline || '';
   res.locals.currency = settings.currency || 'PHP';
   res.locals.money = (amt) => formatMoney(amt, settings.currency || 'PHP');
+  res.locals.date = formatDate;
+  res.locals.timeAgo = timeAgo;
   res.locals.nl2br = nl2br;
   res.locals.escapeHtml = escapeHtml;
   res.locals.isAdmin = !!(req.session && req.session.adminId);

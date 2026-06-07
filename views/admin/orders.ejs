@@ -27,6 +27,12 @@
     <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Revenue</div>
     <strong style="font-size:24px; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><%= money(stats.revenue) %></strong>
   </div>
+  <% if (stats.lowStock > 0) { %>
+    <a href="/admin/products" class="subpanel" style="padding:15px; border-top: 3px solid var(--red); text-decoration: none;">
+      <div class="muted" style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Low Stock</div>
+      <strong style="font-size:24px; color: var(--red);"><%= stats.lowStock %></strong>
+    </a>
+  <% } %>
 </div>
 
 <div class="admin-bar" style="background: var(--panel); padding: 15px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">

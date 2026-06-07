@@ -28,36 +28,58 @@
 
   <% if (order) { %>
     <hr>
-    <div style="text-align: center; margin-bottom: 20px;">
-        <div class="status-pill status-<%= order.status %>" style="font-size: 1.2rem; padding: 8px 24px;"><%= order.status.toUpperCase() %></div>
+    <div style="text-align: center; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <div class="status-pill status-<%= order.status %>" style="font-size: 1.2rem; padding: 8px 24px; margin:0;"><%= order.status.toUpperCase() %></div>
+        <% if (user && user.username === order.telegram_username) { %>
+          <a href="/account" class="btn btn-sm btn-light">← Back to My Orders</a>
+        <% } %>
     </div>
 
     <div class="subpanel" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;">
         <table class="kv" style="margin: 0;">
           <tr style="border-bottom: 1px solid var(--border);">
             <th style="padding: 12px; background: rgba(255,255,255,0.02);">Order Number</th>
-            <td style="padding: 12px;"><strong><%= order.order_number %></strong></td>
+            <td style="padding: 12px;">
+              <strong><%= order.order_number %></strong>
+              <button class="btn btn-sm" style="padding: 2px 6px; font-size: 10px; margin-left: 10px;" onclick="copyStatusVal('<%= order.order_number %>', this)">Copy</button>
+            </td>
           </tr>
           <tr style="border-bottom: 1px solid var(--border);">
             <th style="padding: 12px; background: rgba(255,255,255,0.02);">Account Ordered</th>
             <td style="padding: 12px;"><%= order.acc_ordered || order.product_name %></td>
           </tr>
-          <tr style="border-bottom: 1px solid var(--border);">
-            <th style="padding: 12px; background: rgba(255,255,255,0.02);">Account Number</th>
-            <td style="padding: 12px;"><%= order.acc_number || 'Processing...' %></td>
-          </tr>
-          <tr style="border-bottom: 1px solid var(--border);">
-            <th style="padding: 12px; background: rgba(255,255,255,0.02);">Account Name</th>
-            <td style="padding: 12px;"><%= order.acc_name || 'Processing...' %></td>
-          </tr>
+          <% if (order.acc_username) { %>
           <tr style="border-bottom: 1px solid var(--border);">
             <th style="padding: 12px; background: rgba(255,255,255,0.02);">Username</th>
-            <td style="padding: 12px;"><code><%= order.acc_username || 'Processing...' %></code></td>
+            <td style="padding: 12px;">
+              <code id="val-user"><%= order.acc_username %></code>
+              <button class="btn btn-sm" style="padding: 2px 6px; font-size: 10px; margin-left: 10px;" onclick="copyStatusVal('<%= order.acc_username %>', this)">Copy</button>
+            </td>
           </tr>
+          <% } %>
+          <% if (order.acc_password) { %>
           <tr style="border-bottom: 1px solid var(--border);">
             <th style="padding: 12px; background: rgba(255,255,255,0.02);">Password</th>
-            <td style="padding: 12px;"><code><%= order.acc_password || 'Processing...' %></code></td>
+            <td style="padding: 12px;">
+              <code id="val-pass"><%= order.acc_password %></code>
+              <button class="btn btn-sm" style="padding: 2px 6px; font-size: 10px; margin-left: 10px;" onclick="copyStatusVal('<%= order.acc_password %>', this)">Copy</button>
+            </td>
           </tr>
+          <% } %>
+          <% if (order.acc_number || order.acc_name) { %>
+            <% if (order.acc_number) { %>
+            <tr style="border-bottom: 1px solid var(--border);">
+              <th style="padding: 12px; background: rgba(255,255,255,0.02);">Account ID</th>
+              <td style="padding: 12px;"><%= order.acc_number %></td>
+            </tr>
+            <% } %>
+            <% if (order.acc_name) { %>
+            <tr style="border-bottom: 1px solid var(--border);">
+              <th style="padding: 12px; background: rgba(255,255,255,0.02);">Display Name</th>
+              <td style="padding: 12px;"><%= order.acc_name %></td>
+            </tr>
+            <% } %>
+          <% } %>
           <tr style="border-bottom: 1px solid var(--border);">
             <th style="padding: 12px; background: rgba(255,255,255,0.02);">Warranty Period</th>
             <td style="padding: 12px;"><span style="color: var(--accent); font-weight: bold;"><%= order.warranty_period || 'Standard' %></span></td>
@@ -65,6 +87,18 @@
           <tr style="border-bottom: 1px solid var(--border);">
             <th style="padding: 12px; background: rgba(255,255,255,0.02);">Placed On</th>
             <td style="padding: 12px;"><%= order.created_at %></td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border);">
+            <th style="padding: 12px; background: rgba(255,255,255,0.02);">Payment Method</th>
+            <td style="padding: 12px; display: flex; align-items: center; gap: 8px;">
+               <% if (order.payment_type === 'maya') { %>
+                 <img src="https://upload.wikimedia.org/wikipedia/commons/9/9a/Maya_logo.svg" alt="Maya" style="height: 14px;">
+               <% } else if (manualMethod && manualMethod.name.toLowerCase().includes('gcash')) { %>
+                 <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/GCash_logo.svg" alt="GCash" style="height: 14px;">
+               <% } %>
+               <span style="text-transform: uppercase; font-size: 11px; font-weight: bold;"><%= order.payment_type %></span>
+               <%= manualMethod ? ' — ' + manualMethod.name : '' %>
+            </td>
           </tr>
           <tr>
             <th style="padding: 12px; background: rgba(255,255,255,0.02);">Total Paid</th>
@@ -83,8 +117,11 @@
 
     <% if (order.status === 'delivered' && order.delivered_content) { %>
       <div class="delivery">
-        <h3>Your delivery credentials</h3>
-        <pre class="delivery-body"><%= order.delivered_content %></pre>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h3 style="margin:0;">Your delivery credentials</h3>
+          <button class="btn btn-sm" onclick="copyStatusVal(document.getElementById('delivery-content').innerText, this)">Copy All</button>
+        </div>
+        <pre class="delivery-body" id="delivery-content"><%= order.delivered_content %></pre>
       </div>
     <% } else if (order.status === 'paid') { %>
       <div class="alert alert-ok" style="margin-top: 20px; text-align: center;">
@@ -93,5 +130,17 @@
     <% } %>
   <% } %>
 </div>
+
+<script>
+function copyStatusVal(val, btn) {
+  navigator.clipboard.writeText(val).then(() => {
+    const oldText = btn.innerText;
+    btn.innerText = 'Copied!';
+    setTimeout(() => {
+      btn.innerText = oldText;
+    }, 1500);
+  });
+}
+</script>
 
 <%- include('partials/foot') %>

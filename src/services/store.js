@@ -226,10 +226,17 @@ const StoreService = {
     if (!order) return;
 
     const tx = db.transaction(() => {
-      const updateSql = paidAt
-        ? "UPDATE orders SET status = ?, paid_at = ? WHERE id = ?"
-        : "UPDATE orders SET status = ? WHERE id = ?";
-      const params = paidAt ? [status, paidAt, orderId] : [status, orderId];
+      let updateSql, params;
+      if (paidAt === "datetime('now')") {
+        updateSql = "UPDATE orders SET status = ?, paid_at = datetime('now') WHERE id = ?";
+        params = [status, orderId];
+      } else if (paidAt) {
+        updateSql = "UPDATE orders SET status = ?, paid_at = ? WHERE id = ?";
+        params = [status, paidAt, orderId];
+      } else {
+        updateSql = "UPDATE orders SET status = ? WHERE id = ?";
+        params = [status, orderId];
+      }
 
       db.prepare(updateSql).run(...params);
 
@@ -271,6 +278,7 @@ const StoreService = {
       delivered: db.prepare("SELECT COUNT(*) c FROM orders WHERE status = 'delivered'").get().c,
       revenue: db.prepare("SELECT COALESCE(SUM(total),0) s FROM orders WHERE status IN ('paid','delivered')").get().s,
       products: db.prepare('SELECT COUNT(*) c FROM products').get().c,
+      lowStock: db.prepare('SELECT COUNT(*) c FROM products WHERE stock <= 5 AND active = 1').get().c,
     };
   }
 };
