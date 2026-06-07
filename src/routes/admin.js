@@ -493,6 +493,12 @@ router.get('/settings', (req, res) => {
       coins_api_key: getSetting('coins_api_key', ''),
       coins_api_secret: getSetting('coins_api_secret', ''),
       coins_webhook_secret: getSetting('coins_webhook_secret', ''),
+      paymongo_enabled: getSetting('paymongo_enabled', '0'),
+      paymongo_secret_key: getSetting('paymongo_secret_key', ''),
+      paymongo_webhook_secret: getSetting('paymongo_webhook_secret', ''),
+      xendit_enabled: getSetting('xendit_enabled', '0'),
+      xendit_secret_key: getSetting('xendit_secret_key', ''),
+      xendit_callback_token: getSetting('xendit_callback_token', ''),
       cf_turnstile_site_key: getSetting('cf_turnstile_site_key', ''),
       cf_turnstile_secret_key: getSetting('cf_turnstile_secret_key', ''),
       cf_site_verification: getSetting('cf_site_verification', ''),
@@ -578,6 +584,22 @@ router.post('/settings/coins', (req, res) => {
   setSetting('coins_api_secret', String(req.body.coins_api_secret || '').trim());
   setSetting('coins_webhook_secret', String(req.body.coins_webhook_secret || '').trim());
   flash(req, 'Coins.ph configuration saved.');
+  res.redirect('/admin/settings');
+});
+
+router.post('/settings/paymongo', (req, res) => {
+  setSetting('paymongo_enabled', req.body.paymongo_enabled ? '1' : '0');
+  setSetting('paymongo_secret_key', String(req.body.paymongo_secret_key || '').trim());
+  setSetting('paymongo_webhook_secret', String(req.body.paymongo_webhook_secret || '').trim());
+  flash(req, 'PayMongo configuration saved.');
+  res.redirect('/admin/settings');
+});
+
+router.post('/settings/xendit', (req, res) => {
+  setSetting('xendit_enabled', req.body.xendit_enabled ? '1' : '0');
+  setSetting('xendit_secret_key', String(req.body.xendit_secret_key || '').trim());
+  setSetting('xendit_callback_token', String(req.body.xendit_callback_token || '').trim());
+  flash(req, 'Xendit configuration saved.');
   res.redirect('/admin/settings');
 });
 

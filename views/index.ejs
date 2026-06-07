@@ -112,6 +112,24 @@
             </div>
           </label>
         <% } %>
+        <% if (paymongoEnabled) { %>
+          <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
+            <input type="radio" name="payment_type" value="paymongo" <%= (!mayaEnabled && !coinsEnabled) ? 'checked' : '' %>>
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+               <img src="https://cdn.paymongo.com/images/paymongo-logo.png" alt="PayMongo" style="height: 16px;">
+               <span><strong>PayMongo</strong> — GCash, Maya, Cards, BillEase</span>
+            </div>
+          </label>
+        <% } %>
+        <% if (xenditEnabled) { %>
+          <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
+            <input type="radio" name="payment_type" value="xendit" <%= (!mayaEnabled && !coinsEnabled && !paymongoEnabled) ? 'checked' : '' %>>
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+               <img src="https://xendit.co/wp-content/uploads/2020/08/logo-xendit.png" alt="Xendit" style="height: 16px;">
+               <span><strong>Xendit</strong> — Invoices (PH/ID Local Payments)</span>
+            </div>
+          </label>
+        <% } %>
         <% manualMethods.forEach(function(m, i){ %>
           <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
             <input type="radio" name="payment_type" value="manual"

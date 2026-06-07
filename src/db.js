@@ -89,6 +89,8 @@ CREATE TABLE IF NOT EXISTS orders (
   status           TEXT NOT NULL DEFAULT 'pending',
   maya_checkout_id TEXT,
   coins_request_id TEXT,
+  paymongo_session_id TEXT,
+  xendit_invoice_id TEXT,
   maya_reference   TEXT,
   delivered_content TEXT,
   admin_notes      TEXT,
@@ -122,6 +124,8 @@ try { db.exec("ALTER TABLE orders ADD COLUMN acc_username TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN acc_password TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN warranty_period TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN coins_request_id TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN paymongo_session_id TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN xendit_invoice_id TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE categories ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
 try { db.exec("ALTER TABLE products ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
 try { db.exec("ALTER TABLE manual_payment_methods ADD COLUMN icon_url TEXT"); } catch(e){}
@@ -184,6 +188,12 @@ function seed() {
     coins_api_secret: process.env.COINS_API_SECRET || '',
     coins_webhook_secret: process.env.COINS_WEBHOOK_SECRET || '',
     coins_enabled: process.env.COINS_API_KEY ? '1' : '0',
+    paymongo_enabled: '0',
+    paymongo_secret_key: '',
+    paymongo_webhook_secret: '',
+    xendit_enabled: '0',
+    xendit_secret_key: '',
+    xendit_callback_token: '',
   };
   for (const [k, v] of Object.entries(defaults)) setSetting(k, v);
 

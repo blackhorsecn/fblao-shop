@@ -6,6 +6,8 @@ const crypto = require('crypto');
 const { db, getSetting } = require('../db');
 const maya = require('../maya');
 const coins = require('../coins');
+const paymongo = require('../paymongo');
+const xendit = require('../xendit');
 const { generateOrderNumber } = require('../helpers');
 const { asyncHandler, rateLimit } = require('../middleware');
 const StoreService = require('../services/store');
@@ -60,6 +62,10 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
     return res.status(400).render('error', { title: 'Unavailable', message: 'Online card/Maya payment is not available right now. Please choose another method.' });
   } else if (paymentType === 'coins' && !coins.isConfigured()) {
     return res.status(400).render('error', { title: 'Unavailable', message: 'Coins.ph payment is not available right now. Please choose another method.' });
+  } else if (paymentType === 'paymongo' && !paymongo.isConfigured()) {
+    return res.status(400).render('error', { title: 'Unavailable', message: 'PayMongo payment is not available right now. Please choose another method.' });
+  } else if (paymentType === 'xendit' && !xendit.isConfigured()) {
+    return res.status(400).render('error', { title: 'Unavailable', message: 'Xendit payment is not available right now. Please choose another method.' });
   }
 
   const orderNumber = generateOrderNumber();
@@ -112,6 +118,40 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
       return res.status(502).render('error', {
         title: 'Payment error',
         message: 'Could not start the Coins.ph payment. ' + e.message + ` Your reference is ${orderNumber}.`,
+      });
+    }
+  }
+
+  if (paymentType === 'paymongo') {
+    try {
+      const { sessionId, checkoutUrl } = await paymongo.createCheckoutSession(order, res.locals.baseUrl);
+      db.prepare('UPDATE orders SET paymongo_session_id = ? WHERE id = ?').run(sessionId, order.id);
+      return res.redirect(checkoutUrl);
+    } catch (e) {
+      db.prepare("UPDATE orders SET status = 'failed', admin_notes = ? WHERE id = ?").run(
+        'PayMongo checkout error: ' + e.message,
+        order.id
+      );
+      return res.status(502).render('error', {
+        title: 'Payment error',
+        message: 'Could not start PayMongo checkout. ' + e.message + ` Your reference is ${orderNumber}.`,
+      });
+    }
+  }
+
+  if (paymentType === 'xendit') {
+    try {
+      const { invoiceId, invoiceUrl } = await xendit.createInvoice(order, res.locals.baseUrl);
+      db.prepare('UPDATE orders SET xendit_invoice_id = ? WHERE id = ?').run(invoiceId, order.id);
+      return res.redirect(invoiceUrl);
+    } catch (e) {
+      db.prepare("UPDATE orders SET status = 'failed', admin_notes = ? WHERE id = ?").run(
+        'Xendit checkout error: ' + e.message,
+        order.id
+      );
+      return res.status(502).render('error', {
+        title: 'Payment error',
+        message: 'Could not start Xendit checkout. ' + e.message + ` Your reference is ${orderNumber}.`,
       });
     }
   }

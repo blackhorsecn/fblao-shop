@@ -4,7 +4,72 @@ const express = require('express');
 const router = express.Router();
 const maya = require('../maya');
 const coins = require('../coins');
+const paymongo = require('../paymongo');
+const xendit = require('../xendit');
 const StoreService = require('../services/store');
+
+// PayMongo webhook
+router.post('/paymongo', async (req, res) => {
+  try {
+    const signature = req.get('Paymongo-Signature') || '';
+    const rawBody = req.rawBody ? req.rawBody.toString('utf8') : JSON.stringify(req.body);
+    const sig = paymongo.verifyWebhookSignature(rawBody, signature);
+
+    if (!sig.skipped && !sig.verified) {
+      return res.status(401).json({ error: 'invalid signature' });
+    }
+
+    const body = req.body || {};
+    const eventType = body.data?.attributes?.type;
+
+    if (eventType === 'checkout_session.payment.paid') {
+      const session = body.data.attributes.data;
+      const orderNumber = session.attributes.reference_number;
+      const order = StoreService.getOrder(orderNumber);
+      if (order) {
+        StoreService.updateOrderStatus(order.id, 'paid', "datetime('now')");
+      }
+    }
+
+    return res.status(200).json({ ok: true });
+  } catch (e) {
+    console.error('paymongo webhook error', e);
+    return res.status(200).json({ ok: false, error: e.message });
+  }
+});
+
+// Xendit webhook
+router.post('/xendit', async (req, res) => {
+  try {
+    const token = req.get('x-callback-token');
+    if (!xendit.verifyWebhookToken(token)) {
+      return res.status(401).json({ error: 'invalid token' });
+    }
+
+    const body = req.body || {};
+    // Xendit Invoices send 'status' in the body
+    const orderNumber = body.external_id;
+    const status = body.status;
+
+    if (orderNumber) {
+      const order = StoreService.getOrder(orderNumber);
+      if (order) {
+        if (status === 'PAID' || status === 'SETTLED') {
+          StoreService.updateOrderStatus(order.id, 'paid', "datetime('now')");
+        } else if (status === 'EXPIRED') {
+          if (order.status === 'pending') {
+            StoreService.updateOrderStatus(order.id, 'failed');
+          }
+        }
+      }
+    }
+
+    return res.status(200).json({ ok: true });
+  } catch (e) {
+    console.error('xendit webhook error', e);
+    return res.status(200).json({ ok: false, error: e.message });
+  }
+});
 
 // Maya payment-status webhook.
 // Configure this URL in your Maya dashboard:

@@ -130,5 +130,33 @@
       <strong>Webhook URL:</strong> <code><%= baseUrl %>/webhooks/coins/payment-status</code>
     </div>
   </div>
+
+  <div class="subpanel">
+    <h2>PayMongo (Cards, GCash, Maya)</h2>
+    <p class="muted">Enter your Secret Key from PayMongo Dashboard.</p>
+    <form method="POST" action="/admin/settings/paymongo">
+      <label class="field" style="flex:0 0 130px;"><span>Enabled</span><input type="checkbox" name="paymongo_enabled" <%= s.paymongo_enabled === '1' ? 'checked' : '' %>></label>
+      <label class="field"><span>Secret Key (sk_...)</span><input type="text" name="paymongo_secret_key" value="<%= escapeHtml(s.paymongo_secret_key) %>"></label>
+      <label class="field"><span>Webhook Secret (whsec_...)</span><input type="text" name="paymongo_webhook_secret" value="<%= escapeHtml(s.paymongo_webhook_secret) %>"></label>
+      <button class="btn btn-primary" type="submit">Save PayMongo configuration</button>
+    </form>
+    <div class="alert alert-ok" style="margin-top:14px; font-size: 11px;">
+      <strong>Webhook URL:</strong> <code><%= baseUrl %>/webhooks/paymongo</code>
+    </div>
+  </div>
+
+  <div class="subpanel">
+    <h2>Xendit (Invoices & PH/ID Payments)</h2>
+    <p class="muted">Enter your Secret Key from Xendit Dashboard.</p>
+    <form method="POST" action="/admin/settings/xendit">
+      <label class="field" style="flex:0 0 130px;"><span>Enabled</span><input type="checkbox" name="xendit_enabled" <%= s.xendit_enabled === '1' ? 'checked' : '' %>></label>
+      <label class="field"><span>Secret Key (xnd_...)</span><input type="text" name="xendit_secret_key" value="<%= escapeHtml(s.xendit_secret_key) %>"></label>
+      <label class="field"><span>Callback Verification Token</span><input type="text" name="xendit_callback_token" value="<%= escapeHtml(s.xendit_callback_token) %>"></label>
+      <button class="btn btn-primary" type="submit">Save Xendit configuration</button>
+    </form>
+    <div class="alert alert-ok" style="margin-top:14px; font-size: 11px;">
+      <strong>Webhook URL:</strong> <code><%= baseUrl %>/webhooks/xendit</code>
+    </div>
+  </div>
 </div>
 <%- include('partials/foot') %>

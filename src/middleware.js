@@ -3,6 +3,9 @@
 const { getSettings, db } = require('./db');
 const { formatMoney, nl2br, escapeHtml, formatDate, timeAgo, getPaymentIcon } = require('./helpers');
 const maya = require('./maya');
+const coins = require('./coins');
+const paymongo = require('./paymongo');
+const xendit = require('./xendit');
 
 function shopContext(req, res, next) {
   const settings = getSettings();
@@ -20,6 +23,9 @@ function shopContext(req, res, next) {
   // Fetch enabled manual methods for footer
   res.locals.footerMethods = db.prepare('SELECT name, icon_url FROM manual_payment_methods WHERE enabled = 1 ORDER BY sort_order').all();
   res.locals.mayaEnabled = maya.isConfigured();
+  res.locals.coinsEnabled = coins.isConfigured();
+  res.locals.paymongoEnabled = paymongo.isConfigured();
+  res.locals.xenditEnabled = xendit.isConfigured();
 
   res.locals.isAdmin = !!(req.session && req.session.adminId);
   res.locals.user = req.session.user || null;
