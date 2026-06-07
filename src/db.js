@@ -240,4 +240,7 @@ function seed() {
 
 seed();
 
+const productCount = db.prepare('SELECT COUNT(*) c FROM products').get().c;
+console.log(`[Database] Seeding complete. Current product count: ${productCount}`);
+
 module.exports = { db, getSetting, setSetting, getSettings };
