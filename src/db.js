@@ -65,15 +65,6 @@ CREATE TABLE IF NOT EXISTS products (
   updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE TABLE IF NOT EXISTS product_stock_pool (
-  id         INTEGER PRIMARY KEY AUTOINCREMENT,
-  product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
-  content    TEXT NOT NULL,
-  is_sold    INTEGER NOT NULL DEFAULT 0,
-  order_id   INTEGER REFERENCES orders(id) ON DELETE SET NULL,
-  added_at   TEXT NOT NULL DEFAULT (datetime('now'))
-);
-
 CREATE TABLE IF NOT EXISTS manual_payment_methods (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
   name         TEXT NOT NULL,
@@ -88,12 +79,6 @@ CREATE TABLE IF NOT EXISTS banners (
   enabled    INTEGER NOT NULL DEFAULT 1,
   sort_order INTEGER NOT NULL DEFAULT 0
 );
-
-CREATE INDEX IF NOT EXISTS idx_orders_order_number ON orders(order_number);
-CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
-CREATE INDEX IF NOT EXISTS idx_orders_telegram ON orders(telegram_username);
-CREATE INDEX IF NOT EXISTS idx_products_active ON products(active, sort_order);
-CREATE INDEX IF NOT EXISTS idx_stock_product ON product_stock_pool(product_id, is_sold);
 
 CREATE TABLE IF NOT EXISTS orders (
   id               INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -124,6 +109,21 @@ CREATE TABLE IF NOT EXISTS orders (
   paid_at          TEXT,
   delivered_at     TEXT
 );
+
+CREATE TABLE IF NOT EXISTS product_stock_pool (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+  content    TEXT NOT NULL,
+  is_sold    INTEGER NOT NULL DEFAULT 0,
+  order_id   INTEGER REFERENCES orders(id) ON DELETE SET NULL,
+  added_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_orders_order_number ON orders(order_number);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_telegram ON orders(telegram_username);
+CREATE INDEX IF NOT EXISTS idx_products_active ON products(active, sort_order);
+CREATE INDEX IF NOT EXISTS idx_stock_product ON product_stock_pool(product_id, is_sold);
 `);
 
 // Migrations for existing database
