@@ -56,12 +56,25 @@ Now your `shop.db` will be stored in the persistent volume and survive redeploym
 | Var | Purpose |
 |-----|---------|
 | `PORT` | Server port (default 3000) |
+| `NODE_ENV` | Node environment (`development`, `production`) |
+| `DATA_DIR` | Persistent data directory path for Railway and file storage |
 | `BASE_URL` | Public URL, used to build Maya redirect + webhook URLs |
 | `SESSION_SECRET` | Session cookie signing secret |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Seed the first admin on initial DB creation |
+| `TELEGRAM_BOT_TOKEN` | Optional Telegram bot token for notifications and login |
+| `ADMIN_TELEGRAM_ID` | Optional Telegram chat ID for admin notifications |
+| `PAYMONGO_ENABLED` | `1` to enable PayMongo checkout on first-run seed |
+| `PAYMONGO_SECRET_KEY` | PayMongo secret key for checkout API |
+| `PAYMONGO_WEBHOOK_SECRET` | Optional webhook secret for PayMongo |
+| `XENDIT_ENABLED` | `1` to enable Xendit invoices on first-run seed |
+| `XENDIT_SECRET_KEY` | Xendit secret key for invoice API |
+| `XENDIT_CALLBACK_TOKEN` | Optional callback verification token for Xendit |
 | `MAYA_MODE` | `sandbox` or `live` |
 | `MAYA_PUBLIC_KEY` / `MAYA_SECRET_KEY` | Maya Business API keys |
 | `MAYA_WEBHOOK_SECRET` | Optional — enables HMAC verification of webhooks |
+| `COINS_MODE` | `sandbox` or `live` for Coins.ph integration |
+| `COINS_API_KEY` / `COINS_API_SECRET` | Coins.ph API credentials |
+| `COINS_WEBHOOK_SECRET` | Optional webhook secret for Coins.ph |
 
 `.env` only seeds the database on **first run**. After that, change everything in **Admin → Settings**.
 

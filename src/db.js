@@ -195,12 +195,12 @@ function seed() {
     coins_api_secret: process.env.COINS_API_SECRET || '',
     coins_webhook_secret: process.env.COINS_WEBHOOK_SECRET || '',
     coins_enabled: process.env.COINS_API_KEY ? '1' : '0',
-    paymongo_enabled: '0',
-    paymongo_secret_key: '',
-    paymongo_webhook_secret: '',
-    xendit_enabled: '0',
-    xendit_secret_key: '',
-    xendit_callback_token: '',
+    paymongo_enabled: process.env.PAYMONGO_ENABLED === '1' || !!process.env.PAYMONGO_SECRET_KEY ? '1' : '0',
+    paymongo_secret_key: process.env.PAYMONGO_SECRET_KEY || '',
+    paymongo_webhook_secret: process.env.PAYMONGO_WEBHOOK_SECRET || '',
+    xendit_enabled: process.env.XENDIT_ENABLED === '1' || !!process.env.XENDIT_SECRET_KEY ? '1' : '0',
+    xendit_secret_key: process.env.XENDIT_SECRET_KEY || '',
+    xendit_callback_token: process.env.XENDIT_CALLBACK_TOKEN || '',
   };
   for (const [k, v] of Object.entries(defaults)) setSetting(k, v);
 
