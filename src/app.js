@@ -56,6 +56,7 @@ app.get('/logo.png', (req, res) => {
   if (fs.existsSync(logoPath)) {
     res.sendFile(logoPath);
   } else {
+    res.type('svg+xml');
     res.sendFile(path.join(__dirname, '..', 'public', 'img', 'logo.svg'));
   }
 });
