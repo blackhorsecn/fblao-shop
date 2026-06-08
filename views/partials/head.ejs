@@ -17,7 +17,7 @@
   <div class="container header-inner">
     <a class="brand" href="/">
       <img id="siteLogo" src="/static/img/logo.svg" alt="Site Logo" style="height: 40px; margin-right: 10px; border-radius: 4px;">
-      <span class="brand-text" style="background: linear-gradient(135deg, #fff, #bbb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><%= shopName %></span>
+      <span class="brand-text"><%= shopName %></span>
     </a>
     <script>
       // Prefer the persisted uploaded logo (served at /logo.png) when available.
@@ -65,7 +65,7 @@
             <% if (user.photo_url) { %>
               <img src="<%= user.photo_url %>" alt="Profile" class="user-avatar">
             <% } %>
-            <span class="user-name" style="font-weight: bold; color: #fff;">@<%= user.username %></span>
+            <span class="user-name" style="font-weight: bold; color: var(--text);">@<%= user.username %></span>
           </div>
           <div style="display: flex; flex-direction: column; gap: 8px;">
             <a href="https://t.me/mm6668mm" target="_blank" class="btn btn-sm btn-primary" style="background: #0088cc; color: white; width: 100%;">
