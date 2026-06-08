@@ -56,8 +56,8 @@ app.get('/logo.png', (req, res) => {
   if (fs.existsSync(logoPath)) {
     res.sendFile(logoPath);
   } else {
-    // Fallback to high-quality default if no custom logo uploaded.
-    res.redirect('https://www.vectorlogo.zone/logos/lionking/lionking-icon.png');
+    // High-quality generic shopping/store icon
+    res.redirect('https://www.vectorlogo.zone/logos/shopify/shopify-icon.png');
   }
 });
 
