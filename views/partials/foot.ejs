@@ -4,25 +4,25 @@
     <div class="footer-brand">
       <img src="/logo.png" alt="<%= escapeHtml(shopName) %>" loading="lazy">
     </div>
-    <div class="payment-methods" style="margin-bottom: 20px; display: flex; justify-content: center; gap: 25px; align-items: center; flex-wrap: wrap;">
-       <img src="<%= getIcon('visa') %>" alt="Visa" style="height: 18px;">
-       <img src="<%= getIcon('mastercard') %>" alt="Mastercard" style="height: 30px;">
+    <div class="payment-methods">
+       <img class="payment-icon payment-icon-visa" src="<%= getIcon('visa') %>" alt="Visa">
+       <img class="payment-icon payment-icon-mastercard" src="<%= getIcon('mastercard') %>" alt="Mastercard">
        <% if (mayaEnabled) { %>
-         <img src="<%= getIcon('maya') %>" alt="Maya" style="height: 24px;">
+         <img class="payment-icon" src="<%= getIcon('maya') %>" alt="Maya">
        <% } %>
        <% if (coinsEnabled) { %>
-         <img src="<%= getIcon('coins') %>" alt="Coins.ph" style="height: 24px;">
+         <img class="payment-icon" src="<%= getIcon('coins') %>" alt="Coins.ph">
        <% } %>
        <% if (paymongoEnabled) { %>
-         <img src="<%= getIcon('paymongo') %>" alt="PayMongo" style="height: 24px;">
+         <img class="payment-icon" src="<%= getIcon('paymongo') %>" alt="PayMongo">
        <% } %>
        <% if (xenditEnabled) { %>
-         <img src="<%= getIcon('xendit') %>" alt="Xendit" style="height: 24px;">
+         <img class="payment-icon" src="<%= getIcon('xendit') %>" alt="Xendit">
        <% } %>
        <% footerMethods.forEach(function(m){ %>
          <% var icon = getIcon(m.name, m.icon_url); %>
          <% if (icon && !['visa','mastercard','maya','paymaya','paymongo','xendit','coins','coins.ph','coinsph'].some(v => m.name.toLowerCase().includes(v))) { %>
-           <img src="<%= icon %>" alt="<%= m.name %>" style="height: 24px;">
+           <img class="payment-icon" src="<%= icon %>" alt="<%= m.name %>">
          <% } %>
        <% }) %>
     </div>
