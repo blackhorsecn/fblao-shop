@@ -56,8 +56,7 @@ app.get('/logo.png', (req, res) => {
   if (fs.existsSync(logoPath)) {
     res.sendFile(logoPath);
   } else {
-    // High-quality generic shopping/store icon
-    res.redirect('https://www.vectorlogo.zone/logos/shopify/shopify-icon.png');
+    res.sendFile(path.join(__dirname, '..', 'public', 'img', 'logo.svg'));
   }
 });
 
