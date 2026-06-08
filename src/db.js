@@ -125,14 +125,14 @@ CREATE INDEX IF NOT EXISTS idx_orders_manual_method_id ON orders(manual_method_i
 CREATE INDEX IF NOT EXISTS idx_orders_telegram ON orders(telegram_username);
 CREATE INDEX IF NOT EXISTS idx_orders_telegram_id ON orders(telegram_id);
 CREATE INDEX IF NOT EXISTS idx_orders_paid_at ON orders(paid_at);
-CREATE INDEX IF NOT EXISTS idx_orders_status_created ON orders(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_orders_status_created ON orders(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_products_active ON products(active, sort_order);
 CREATE INDEX IF NOT EXISTS idx_stock_product ON product_stock_pool(product_id, is_sold);
 CREATE INDEX IF NOT EXISTS idx_stock_order ON product_stock_pool(order_id);
 CREATE INDEX IF NOT EXISTS idx_stock_pool_created_at ON product_stock_pool(created_at);
 CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name);
 CREATE INDEX IF NOT EXISTS idx_audit_log_order ON order_audit_log(order_id);
-CREATE INDEX IF NOT EXISTS idx_audit_log_changed_at ON order_audit_log(changed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_log_changed_at ON order_audit_log(changed_at);
 `);
 
 // Migrations for existing database
