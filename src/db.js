@@ -12,7 +12,22 @@ const DATA_DIR = process.env.DATA_DIR
   : path.join(__dirname, '..', 'data');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
-const db = openDatabase(path.join(DATA_DIR, 'shop.db'));
+const DB_PATH = (() => {
+  const envPath = process.env.DATABASE_URL || process.env.SQLITE_PATH;
+  if (envPath) {
+    return envPath.replace(/^sqlite:\/\//i, '');
+  }
+  return path.join(DATA_DIR, 'shop.db');
+})();
+
+const db = (() => {
+  try {
+    return openDatabase(DB_PATH);
+  } catch (err) {
+    console.error('Failed to open SQLite database:', DB_PATH);
+    throw err;
+  }
+})();
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
@@ -319,4 +334,4 @@ function seed() {
 
 seed();
 
-module.exports = { db, getSetting, setSetting, getSettings, DATA_DIR };
+module.exports = { db, getSetting, setSetting, getSettings, DATA_DIR, DB_PATH };

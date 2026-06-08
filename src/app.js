@@ -8,6 +8,8 @@ const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 
 const { shopContext } = require('./middleware');
+const { db, DB_PATH } = require('./db');
+console.log('SQLite database connected at:', DB_PATH);
 const publicRoutes = require('./routes/public');
 const adminRoutes = require('./routes/admin');
 const webhookRoutes = require('./routes/webhook');

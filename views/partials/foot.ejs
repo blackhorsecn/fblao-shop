@@ -1,6 +1,9 @@
 </main>
 <footer class="site-footer">
   <div class="container">
+    <div class="footer-brand">
+      <img src="/logo.png" alt="<%= escapeHtml(shopName) %>" loading="lazy">
+    </div>
     <div class="payment-methods" style="margin-bottom: 20px; display: flex; justify-content: center; gap: 25px; align-items: center; flex-wrap: wrap;">
        <img src="<%= getIcon('visa') %>" alt="Visa" style="height: 18px;">
        <img src="<%= getIcon('mastercard') %>" alt="Mastercard" style="height: 30px;">
