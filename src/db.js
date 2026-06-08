@@ -129,7 +129,7 @@ CREATE INDEX IF NOT EXISTS idx_orders_status_created ON orders(status, created_a
 CREATE INDEX IF NOT EXISTS idx_products_active ON products(active, sort_order);
 CREATE INDEX IF NOT EXISTS idx_stock_product ON product_stock_pool(product_id, is_sold);
 CREATE INDEX IF NOT EXISTS idx_stock_order ON product_stock_pool(order_id);
-CREATE INDEX IF NOT EXISTS idx_stock_pool_created_at ON product_stock_pool(created_at);
+CREATE INDEX IF NOT EXISTS idx_stock_pool_added_at ON product_stock_pool(added_at);
 CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name);
 CREATE INDEX IF NOT EXISTS idx_audit_log_order ON order_audit_log(order_id);
 CREATE INDEX IF NOT EXISTS idx_audit_log_changed_at ON order_audit_log(changed_at);
