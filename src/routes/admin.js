@@ -192,6 +192,14 @@ router.post('/orders/:id/update-details', (req, res) => {
     req.params.id
   );
 
+  // Log status change to audit log if status changed
+  if (oldOrder.status !== newStatus) {
+    db.prepare(`
+      INSERT INTO order_audit_log (order_id, old_status, new_status, change_type, admin_username, notes)
+      VALUES (?, ?, ?, 'admin', ?, 'Admin updated order status')
+    `).run(req.params.id, oldOrder.status, newStatus, req.session.adminUsername || 'admin');
+  }
+
   const updatedOrder = StoreService.getOrder(req.params.id);
   const NotificationService = require('../services/notifications');
 
@@ -206,7 +214,18 @@ router.post('/orders/:id/update-details', (req, res) => {
 });
 
 router.post('/orders/:id/cancel', (req, res) => {
+  const order = StoreService.getOrder(req.params.id);
   db.prepare("UPDATE orders SET status = 'cancelled', updated_at = datetime('now') WHERE id = ? AND status = 'pending'").run(req.params.id);
+
+  // Log cancellation to audit log if it was actually cancelled
+  const updatedOrder = StoreService.getOrder(req.params.id);
+  if (order && order.status === 'pending' && updatedOrder.status === 'cancelled') {
+    db.prepare(`
+      INSERT INTO order_audit_log (order_id, old_status, new_status, change_type, admin_username, notes)
+      VALUES (?, ?, 'cancelled', 'admin', ?, 'Admin cancelled order')
+    `).run(req.params.id, order.status, req.session.adminUsername || 'admin');
+  }
+
   flash(req, 'Order cancelled.');
   res.redirect('/admin/orders/' + req.params.id);
 });

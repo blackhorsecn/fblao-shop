@@ -6,9 +6,9 @@ const NotificationService = require('./notifications');
 const StoreService = {
   // Catalog
   getCatalog() {
-    const categories = db.prepare('SELECT * FROM categories ORDER BY sort_order, id').all();
+    const categories = db.prepare('SELECT * FROM categories WHERE deleted_at IS NULL ORDER BY sort_order, id').all();
     const products = db
-      .prepare('SELECT * FROM products WHERE active = 1 ORDER BY sort_order, id')
+      .prepare('SELECT * FROM products WHERE active = 1 AND deleted_at IS NULL ORDER BY sort_order, id')
       .all();
     return categories
       .map((c) => ({ ...c, products: products.filter((p) => p.category_id === c.id) }))
@@ -26,6 +26,7 @@ const StoreService = {
     return db
       .prepare(`SELECT p.*, c.name AS category_name FROM products p
                 LEFT JOIN categories c ON c.id = p.category_id
+                WHERE p.deleted_at IS NULL
                 ORDER BY c.sort_order, p.sort_order, p.id`)
       .all();
   },
@@ -90,7 +91,7 @@ const StoreService = {
 
   // Categories
   getCategories() {
-    return db.prepare('SELECT * FROM categories ORDER BY sort_order, id').all();
+    return db.prepare('SELECT * FROM categories WHERE deleted_at IS NULL ORDER BY sort_order, id').all();
   },
 
   createCategory(name, sortOrder) {
@@ -239,6 +240,14 @@ const StoreService = {
       }
 
       db.prepare(updateSql).run(...params);
+
+      // Log status change to audit log
+      if (order.status !== status) {
+        db.prepare(`
+          INSERT INTO order_audit_log (order_id, old_status, new_status, change_type, notes)
+          VALUES (?, ?, ?, 'auto', null)
+        `).run(orderId, order.status, status);
+      }
 
       // If transition to paid, decrease stock
       if (status === 'paid' && order.status !== 'paid' && order.status !== 'delivered' && order.product_id) {
