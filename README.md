@@ -1,4 +1,4 @@
-# Lion King Studio — Digital Goods Storefront
+# BlackHorse — Digital Goods Storefront
 
 A simple, self-contained storefront for selling digital goods (accounts, BMs, emails, etc.)
 with **Maya Checkout** online payments and **manual payment** methods (GCash / bank transfer).

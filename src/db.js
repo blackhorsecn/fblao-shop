@@ -137,7 +137,7 @@ const coinsExist = db.prepare('SELECT id FROM manual_payment_methods WHERE name 
 if (!coinsExist) {
   db.prepare('INSERT INTO manual_payment_methods (name, instructions, enabled, sort_order, icon_url) VALUES (?, ?, 1, ?, ?)').run(
     'Coins.ph Enterprise',
-    'Send the exact total to Coins.ph Wallet: 0917-000-0000 (Lion King Studio).\nUse your ORDER NUMBER as the reference/note.',
+    'Send the exact total to Coins.ph Wallet: 0917-000-0000 (BlackHorse).\nUse your ORDER NUMBER as the reference/note.',
     4,
     'https://static.coingecko.com/s/exchanges/images/1114/large/coinsph.png'
   );
@@ -175,8 +175,8 @@ function seed() {
   if (seeded === '1' || hasCategories) return;
 
   const defaults = {
-    shop_name: '狮子王工作室 — FB账号BM批发',
-    shop_tagline: 'Premium digital accounts · Instant delivery · 24/7 auto-shop',
+    shop_name: 'BlackHorse',
+    shop_tagline: 'Premium digital goods · Instant delivery · 24/7 support',
     currency: process.env.CURRENCY || 'PHP',
     maya_mode: process.env.MAYA_MODE || 'sandbox',
     maya_public_key: process.env.MAYA_PUBLIC_KEY || '',
@@ -225,13 +225,13 @@ function seed() {
   );
   insManual.run(
     'Bank Transfer (BPI)',
-    'Transfer the exact total to:\nBank: BPI\nAccount Name: Lion King Studio\nAccount No: 1234-5678-90\nUse your ORDER NUMBER as the reference.\nUpload nothing — we verify by reference number.',
+    'Transfer the exact total to:\nBank: BPI\nAccount Name: BlackHorse\nAccount No: 1234-5678-90\nUse your ORDER NUMBER as the reference.\nUpload nothing — we verify by reference number.',
     2,
     'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/BPI_Logo.svg/512px-BPI_Logo.svg.png'
   );
   insManual.run(
     'UnionBank',
-    'Transfer the exact total to:\nBank: UnionBank\nAccount Name: Lion King Studio\nAccount No: 9876-5432-10\nUse your ORDER NUMBER as the reference.',
+    'Transfer the exact total to:\nBank: UnionBank\nAccount Name: BlackHorse\nAccount No: 9876-5432-10\nUse your ORDER NUMBER as the reference.',
     3,
     'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/UnionBank_of_the_Philippines_logo.svg/512px-UnionBank_of_the_Philippines_logo.svg.png'
   );
