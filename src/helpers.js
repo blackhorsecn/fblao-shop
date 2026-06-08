@@ -2,6 +2,8 @@
 
 const crypto = require('crypto');
 
+const { getIcon } = require('./icons');
+
 function generateOrderNumber() {
   // e.g. LK-7F3A9C2B
   const rand = crypto.randomBytes(4).toString('hex').toUpperCase();
@@ -71,31 +73,4 @@ function timeAgo(dateStr) {
   return Math.floor(seconds) + " seconds ago";
 }
 
-function getPaymentIcon(methodName, dbIconUrl) {
-  if (dbIconUrl) return dbIconUrl;
-  const name = (methodName || '').toLowerCase();
-
-  // Using high-stability professional CDN links
-  if (name.includes('gcash')) return 'https://cdn.paymongo.com/images/gcash.png';
-  if (name.includes('paymaya') || name.includes('maya')) return 'https://cdn.paymongo.com/images/maya.png';
-  if (name.includes('grab')) return 'https://cdn.paymongo.com/images/grabpay.png';
-  if (name.includes('shopee')) return 'https://cdn.paymongo.com/images/shopeepay.png';
-  if (name.includes('coins.ph') || name.includes('coinsph') || name === 'coins') return 'https://static.coingecko.com/s/exchanges/images/1114/large/coinsph.png';
-  if (name.includes('paymongo')) return 'https://cdn.paymongo.com/images/paymongo-logo.png';
-  if (name.includes('xendit')) return 'https://www.vectorlogo.zone/logos/xendit/xendit-ar21.png';
-
-  // High stability VectorLogoZone for cards
-  if (name.includes('visa')) return 'https://www.vectorlogo.zone/logos/visa/visa-ar21.png';
-  if (name.includes('mastercard')) return 'https://www.vectorlogo.zone/logos/mastercard/mastercard-ar21.png';
-
-  // Local/Common banks with verified professional logos
-  if (name.includes('bpi')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/BPI_Logo.svg/512px-BPI_Logo.svg.png';
-  if (name.includes('unionbank') || name.includes('union bank')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/UnionBank_of_the_Philippines_logo.svg/512px-UnionBank_of_the_Philippines_logo.svg.png';
-  if (name.includes('bdo')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/BDO_Unibank_%28logo%29.svg/512px-BDO_Unibank_%28logo%29.svg.png';
-  if (name.includes('metrobank')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Metrobank_%28Philippines%29_logo.svg/512px-Metrobank_%28Philippines%29_logo.svg.png';
-  if (name.includes('paypal')) return 'https://www.vectorlogo.zone/logos/paypal/paypal-ar21.png';
-
-  return null;
-}
-
-module.exports = { generateOrderNumber, formatMoney, escapeHtml, nl2br, formatDate, timeAgo, getPaymentIcon };
+module.exports = { generateOrderNumber, formatMoney, escapeHtml, nl2br, formatDate, timeAgo, getPaymentIcon: getIcon };

@@ -56,17 +56,8 @@ app.get('/logo.png', (req, res) => {
   if (fs.existsSync(logoPath)) {
     res.sendFile(logoPath);
   } else {
-    // Fallback to default if no custom logo uploaded.
-    // Prefer a vector SVG (logo.svg) if present, otherwise fallback to PNG.
-    const defaultSvg = path.join(__dirname, '..', 'public', 'img', 'logo.svg');
-    const defaultPng = path.join(__dirname, '..', 'public', 'img', 'logo.png');
-    if (fs.existsSync(defaultSvg)) {
-      res.sendFile(defaultSvg);
-    } else if (fs.existsSync(defaultPng)) {
-      res.sendFile(defaultPng);
-    } else {
-      res.status(404).send('Not found');
-    }
+    // High-quality generic shopping/store icon
+    res.redirect('https://www.vectorlogo.zone/logos/shopify/shopify-icon.png');
   }
 });
 
