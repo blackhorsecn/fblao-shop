@@ -7,6 +7,9 @@
        <% if (mayaEnabled) { %>
          <img src="<%= getIcon('maya') %>" alt="Maya" style="height: 24px;">
        <% } %>
+       <% if (coinsEnabled) { %>
+         <img src="<%= getIcon('coins') %>" alt="Coins.ph" style="height: 24px;">
+       <% } %>
        <% if (paymongoEnabled) { %>
          <img src="<%= getIcon('paymongo') %>" alt="PayMongo" style="height: 24px;">
        <% } %>
@@ -15,7 +18,7 @@
        <% } %>
        <% footerMethods.forEach(function(m){ %>
          <% var icon = getIcon(m.name, m.icon_url); %>
-         <% if (icon && !['visa','mastercard','maya','paymongo','xendit'].includes(m.name.toLowerCase())) { %>
+         <% if (icon && !['visa','mastercard','maya','coins','paymongo','xendit'].includes(m.name.toLowerCase())) { %>
            <img src="<%= icon %>" alt="<%= m.name %>" style="height: 24px;">
          <% } %>
        <% }) %>
