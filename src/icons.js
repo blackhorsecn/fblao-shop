@@ -2,7 +2,7 @@
 
 /**
  * High-stability professional CDN links for payment and brand logos.
- * Centralized here for easy maintenance.
+ * Using Wikipedia and PayMongo CDNs which are highly reliable.
  */
 const ICONS = {
   // E-Wallets & Digital Payments
@@ -17,14 +17,14 @@ const ICONS = {
   'coins.ph': 'https://static.coingecko.com/s/exchanges/images/1114/large/coinsph.png',
   coinsph: 'https://static.coingecko.com/s/exchanges/images/1114/large/coinsph.png',
   paymongo: 'https://cdn.paymongo.com/images/paymongo-logo.png',
-  xendit: 'https://www.vectorlogo.zone/logos/xendit/xendit-ar21.png',
+  xendit: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Xendit_Logo.png/512px-Xendit_Logo.png',
   billease: 'https://cdn.paymongo.com/images/billease.png',
 
   // Cards
-  visa: 'https://www.vectorlogo.zone/logos/visa/visa-ar21.png',
-  mastercard: 'https://www.vectorlogo.zone/logos/mastercard/mastercard-ar21.png',
-  jcb: 'https://www.vectorlogo.zone/logos/jcb/jcb-ar21.png',
-  amex: 'https://www.vectorlogo.zone/logos/amex/amex-ar21.png',
+  visa: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/512px-Visa_Inc._logo.svg.png',
+  mastercard: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/512px-Mastercard-logo.svg.png',
+  jcb: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/JCB_logo.svg/512px-JCB_logo.svg.png',
+  amex: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/American_Express_logo_%282018%29.svg/512px-American_Express_logo_%282018%29.svg.png',
 
   // Banks (PH & International)
   bpi: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/BPI_Logo.svg/512px-BPI_Logo.svg.png',
@@ -35,16 +35,12 @@ const ICONS = {
   rcbc: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/RCBC_logo.svg/512px-RCBC_logo.svg.png',
   landbank: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Land_Bank_of_the_Philippines_logo.svg/512px-Land_Bank_of_the_Philippines_logo.svg.png',
   securitybank: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Security_Bank_logo.svg/512px-Security_Bank_logo.svg.png',
-  chinabank: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/China_Bank_logo.svg/512px-China_Bank_logo.svg.png',
-  pnb: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Philippine_National_Bank_logo.svg/512px-Philippine_National_Bank_logo.svg.png',
 
   // Other
-  paypal: 'https://www.vectorlogo.zone/logos/paypal/paypal-ar21.png',
-  binance: 'https://www.vectorlogo.zone/logos/binance/binance-ar21.png',
-  usdt: 'https://www.vectorlogo.zone/logos/tether/tether-ar21.png',
-  bitcoin: 'https://www.vectorlogo.zone/logos/bitcoin/bitcoin-ar21.png',
-  ethereum: 'https://www.vectorlogo.zone/logos/ethereum/ethereum-ar21.png',
-  telegram: 'https://www.vectorlogo.zone/logos/telegram/telegram-ar21.png',
+  paypal: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/512px-PayPal.svg.png',
+  binance: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Binance_Logo.svg/512px-Binance_Logo.svg.png',
+  usdt: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Tether_Logo.svg/512px-Tether_Logo.svg.png',
+  bitcoin: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/512px-Bitcoin.svg.png',
 };
 
 function getIcon(name, dbIconUrl) {
