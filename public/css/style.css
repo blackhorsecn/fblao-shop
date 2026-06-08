@@ -33,6 +33,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
 .site-header { background: #ffffff; border-bottom: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 .header-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; position: relative; }
 .brand { display: flex; align-items: center; gap: 10px; color: var(--text); font-weight: 700; font-size: 19px; z-index: 101; }
+.brand img { border: 1px solid var(--border); background: #fff; }
 .brand:hover { text-decoration: none; }
 .brand-text { background: var(--gold-gradient) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; }
 .main-nav { display: flex; align-items: center; }
