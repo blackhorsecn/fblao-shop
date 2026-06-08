@@ -53,7 +53,8 @@ CREATE TABLE IF NOT EXISTS product_stock_pool (
   content    TEXT NOT NULL,
   is_sold    INTEGER NOT NULL DEFAULT 0,
   order_id   INTEGER REFERENCES orders(id) ON DELETE SET NULL,
-  added_at   TEXT NOT NULL DEFAULT (datetime('now'))
+  added_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  sold_at    TEXT
 );
 
 CREATE TABLE IF NOT EXISTS manual_payment_methods (
@@ -107,9 +108,13 @@ CREATE TABLE IF NOT EXISTS orders (
 
 CREATE INDEX IF NOT EXISTS idx_orders_order_number ON orders(order_number);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at);
+CREATE INDEX IF NOT EXISTS idx_orders_payment_type ON orders(payment_type);
+CREATE INDEX IF NOT EXISTS idx_orders_manual_method_id ON orders(manual_method_id);
 CREATE INDEX IF NOT EXISTS idx_orders_telegram ON orders(telegram_username);
 CREATE INDEX IF NOT EXISTS idx_products_active ON products(active, sort_order);
 CREATE INDEX IF NOT EXISTS idx_stock_product ON product_stock_pool(product_id, is_sold);
+CREATE INDEX IF NOT EXISTS idx_stock_order ON product_stock_pool(order_id);
 `);
 
 // Migrations for existing database
@@ -117,6 +122,7 @@ try { db.exec("ALTER TABLE products ADD COLUMN auto_deliver INTEGER NOT NULL DEF
 try { db.exec("ALTER TABLE products ADD COLUMN min_quantity INTEGER NOT NULL DEFAULT 1"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN telegram_username TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN telegram_id TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN acc_ordered TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN acc_number TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN acc_name TEXT"); } catch(e){}
@@ -126,6 +132,7 @@ try { db.exec("ALTER TABLE orders ADD COLUMN warranty_period TEXT"); } catch(e){
 try { db.exec("ALTER TABLE orders ADD COLUMN coins_request_id TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN paymongo_session_id TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN xendit_invoice_id TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE product_stock_pool ADD COLUMN sold_at TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE categories ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
 try { db.exec("ALTER TABLE products ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
 try { db.exec("ALTER TABLE manual_payment_methods ADD COLUMN icon_url TEXT"); } catch(e){}
@@ -137,7 +144,7 @@ const coinsExist = db.prepare('SELECT id FROM manual_payment_methods WHERE name 
 if (!coinsExist) {
   db.prepare('INSERT INTO manual_payment_methods (name, instructions, enabled, sort_order, icon_url) VALUES (?, ?, 1, ?, ?)').run(
     'Coins.ph Enterprise',
-    'Send the exact total to Coins.ph Wallet: 0917-000-0000 (Lion King Studio).\nUse your ORDER NUMBER as the reference/note.',
+    'Send the exact total to Coins.ph Wallet: 0917-000-0000 (BlackHorse).\nUse your ORDER NUMBER as the reference/note.',
     4,
     'https://static.coingecko.com/s/exchanges/images/1114/large/coinsph.png'
   );
@@ -175,8 +182,8 @@ function seed() {
   if (seeded === '1' || hasCategories) return;
 
   const defaults = {
-    shop_name: '狮子王工作室 — FB账号BM批发',
-    shop_tagline: 'Premium digital accounts · Instant delivery · 24/7 auto-shop',
+    shop_name: 'BlackHorse',
+    shop_tagline: 'Premium digital goods · Instant delivery · 24/7 support',
     currency: process.env.CURRENCY || 'PHP',
     maya_mode: process.env.MAYA_MODE || 'sandbox',
     maya_public_key: process.env.MAYA_PUBLIC_KEY || '',
@@ -188,12 +195,12 @@ function seed() {
     coins_api_secret: process.env.COINS_API_SECRET || '',
     coins_webhook_secret: process.env.COINS_WEBHOOK_SECRET || '',
     coins_enabled: process.env.COINS_API_KEY ? '1' : '0',
-    paymongo_enabled: '0',
-    paymongo_secret_key: '',
-    paymongo_webhook_secret: '',
-    xendit_enabled: '0',
-    xendit_secret_key: '',
-    xendit_callback_token: '',
+    paymongo_enabled: process.env.PAYMONGO_ENABLED === '1' || !!process.env.PAYMONGO_SECRET_KEY ? '1' : '0',
+    paymongo_secret_key: process.env.PAYMONGO_SECRET_KEY || '',
+    paymongo_webhook_secret: process.env.PAYMONGO_WEBHOOK_SECRET || '',
+    xendit_enabled: process.env.XENDIT_ENABLED === '1' || !!process.env.XENDIT_SECRET_KEY ? '1' : '0',
+    xendit_secret_key: process.env.XENDIT_SECRET_KEY || '',
+    xendit_callback_token: process.env.XENDIT_CALLBACK_TOKEN || '',
   };
   for (const [k, v] of Object.entries(defaults)) setSetting(k, v);
 
@@ -225,13 +232,13 @@ function seed() {
   );
   insManual.run(
     'Bank Transfer (BPI)',
-    'Transfer the exact total to:\nBank: BPI\nAccount Name: Lion King Studio\nAccount No: 1234-5678-90\nUse your ORDER NUMBER as the reference.\nUpload nothing — we verify by reference number.',
+    'Transfer the exact total to:\nBank: BPI\nAccount Name: BlackHorse\nAccount No: 1234-5678-90\nUse your ORDER NUMBER as the reference.\nUpload nothing — we verify by reference number.',
     2,
     'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/BPI_Logo.svg/512px-BPI_Logo.svg.png'
   );
   insManual.run(
     'UnionBank',
-    'Transfer the exact total to:\nBank: UnionBank\nAccount Name: Lion King Studio\nAccount No: 9876-5432-10\nUse your ORDER NUMBER as the reference.',
+    'Transfer the exact total to:\nBank: UnionBank\nAccount Name: BlackHorse\nAccount No: 9876-5432-10\nUse your ORDER NUMBER as the reference.',
     3,
     'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/UnionBank_of_the_Philippines_logo.svg/512px-UnionBank_of_the_Philippines_logo.svg.png'
   );

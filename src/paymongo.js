@@ -6,12 +6,14 @@ const { getSetting } = require('./db');
 const API_BASE = 'https://api.paymongo.com/v1';
 
 function basicAuth() {
-  const secretKey = getSetting('paymongo_secret_key');
+  const secretKey = getSetting('paymongo_secret_key') || process.env.PAYMONGO_SECRET_KEY;
   return 'Basic ' + Buffer.from(`${secretKey}:`).toString('base64');
 }
 
 function isConfigured() {
-  return getSetting('paymongo_enabled') === '1' && !!getSetting('paymongo_secret_key');
+  const enabled = getSetting('paymongo_enabled') === '1' || process.env.PAYMONGO_ENABLED === '1';
+  const secretKey = getSetting('paymongo_secret_key') || process.env.PAYMONGO_SECRET_KEY;
+  return enabled && !!secretKey;
 }
 
 /**
@@ -66,7 +68,7 @@ async function createCheckoutSession(order, baseUrl) {
 }
 
 function verifyWebhookSignature(rawBody, signature) {
-  const webhookSecret = getSetting('paymongo_webhook_secret');
+  const webhookSecret = getSetting('paymongo_webhook_secret') || process.env.PAYMONGO_WEBHOOK_SECRET;
   if (!webhookSecret) return { verified: false, skipped: true };
   if (!signature) return { verified: false, skipped: false };
 

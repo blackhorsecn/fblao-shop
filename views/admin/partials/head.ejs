@@ -10,7 +10,7 @@
 <div class="admin-shell">
   <aside class="admin-side">
     <div class="logo">
-      <img src="/logo.png" alt="PJ ADS" style="height: 30px; margin-right: 8px; vertical-align: middle;">
+      <img src="/logo.png" alt="<%= escapeHtml(shopName || 'BlackHorse') %>" style="height: 30px; margin-right: 8px; vertical-align: middle;">
       Admin
     </div>
     <a href="/admin" class="<%= active === 'orders' ? 'active' : '' %>">

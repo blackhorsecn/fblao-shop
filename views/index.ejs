@@ -116,7 +116,7 @@
           <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
             <input type="radio" name="payment_type" value="paymongo" <%= (!mayaEnabled && !coinsEnabled) ? 'checked' : '' %>>
             <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-               <img src="https://cdn.paymongo.com/images/paymongo-logo.png" alt="PayMongo" style="height: 16px;">
+               <img src="<%= getIcon('paymongo') %>" alt="PayMongo" style="height: 16px;">
                <span><strong>PayMongo</strong> — GCash, Maya, Cards, BillEase</span>
             </div>
           </label>
@@ -125,7 +125,7 @@
           <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
             <input type="radio" name="payment_type" value="xendit" <%= (!mayaEnabled && !coinsEnabled && !paymongoEnabled) ? 'checked' : '' %>>
             <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-               <img src="https://xendit.co/wp-content/uploads/2020/08/logo-xendit.png" alt="Xendit" style="height: 16px;">
+               <img src="<%= getIcon('xendit') %>" alt="Xendit" style="height: 16px;">
                <span><strong>Xendit</strong> — Invoices (PH/ID Local Payments)</span>
             </div>
           </label>

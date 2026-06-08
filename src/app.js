@@ -133,6 +133,6 @@ app.use((err, req, res, _next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n  Lion King Studio shop running:  http://localhost:${PORT}`);
-  console.log(`  Admin panel:                    http://localhost:${PORT}/admin\n`);
+  console.log(`\n  BlackHorse shop running:  http://localhost:${PORT}`);
+  console.log(`  Admin panel:             http://localhost:${PORT}/admin\n`);
 });

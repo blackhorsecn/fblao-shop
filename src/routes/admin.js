@@ -160,7 +160,8 @@ router.post('/orders/:id/deliver', (req, res) => {
 });
 
 router.post('/orders/:id/notes', (req, res) => {
-  db.prepare('UPDATE orders SET admin_notes = ? WHERE id = ?').run(String(req.body.admin_notes || ''), req.params.id);
+  db.prepare('UPDATE orders SET admin_notes = ?, updated_at = datetime(\'now\') WHERE id = ?')
+    .run(String(req.body.admin_notes || ''), req.params.id);
   flash(req, 'Notes saved.');
   res.redirect('/admin/orders/' + req.params.id);
 });
@@ -177,7 +178,8 @@ router.post('/orders/:id/update-details', (req, res) => {
         acc_name = ?,
         acc_username = ?,
         acc_password = ?,
-        warranty_period = ?
+        warranty_period = ?,
+        updated_at = datetime('now')
     WHERE id = ?
   `).run(
     newStatus,
@@ -204,9 +206,15 @@ router.post('/orders/:id/update-details', (req, res) => {
 });
 
 router.post('/orders/:id/cancel', (req, res) => {
-  db.prepare("UPDATE orders SET status = 'cancelled' WHERE id = ? AND status = 'pending'").run(req.params.id);
+  db.prepare("UPDATE orders SET status = 'cancelled', updated_at = datetime('now') WHERE id = ? AND status = 'pending'").run(req.params.id);
   flash(req, 'Order cancelled.');
   res.redirect('/admin/orders/' + req.params.id);
+});
+
+router.post('/sync-stock', (req, res) => {
+  StoreService.syncAllProductStock();
+  flash(req, 'Inventory sync completed from stock pool.');
+  res.redirect('/admin');
 });
 
 // ---- Categories ------------------------------------------------------------

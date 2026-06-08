@@ -174,11 +174,11 @@ const StoreService = {
     const itemIds = items.map(i => i.id);
 
     // Mark items as sold
-    const markSold = db.prepare('UPDATE product_stock_pool SET is_sold = 1, order_id = ? WHERE id = ?');
+    const markSold = db.prepare("UPDATE product_stock_pool SET is_sold = 1, order_id = ?, sold_at = datetime('now') WHERE id = ?");
     for (const id of itemIds) markSold.run(orderId, id);
 
     // Update order
-    db.prepare("UPDATE orders SET delivered_content = ?, status = 'delivered', delivered_at = datetime('now') WHERE id = ?")
+    db.prepare("UPDATE orders SET delivered_content = ?, status = 'delivered', delivered_at = datetime('now'), updated_at = datetime('now') WHERE id = ?")
       .run(content, orderId);
 
     this.syncProductStockCount(order.product_id);
@@ -228,13 +228,13 @@ const StoreService = {
     const tx = db.transaction(() => {
       let updateSql, params;
       if (paidAt === "datetime('now')") {
-        updateSql = "UPDATE orders SET status = ?, paid_at = datetime('now') WHERE id = ?";
+        updateSql = "UPDATE orders SET status = ?, paid_at = datetime('now'), updated_at = datetime('now') WHERE id = ?";
         params = [status, orderId];
       } else if (paidAt) {
-        updateSql = "UPDATE orders SET status = ?, paid_at = ? WHERE id = ?";
+        updateSql = "UPDATE orders SET status = ?, paid_at = ?, updated_at = datetime('now') WHERE id = ?";
         params = [status, paidAt, orderId];
       } else {
-        updateSql = "UPDATE orders SET status = ? WHERE id = ?";
+        updateSql = "UPDATE orders SET status = ?, updated_at = datetime('now') WHERE id = ?";
         params = [status, orderId];
       }
 
@@ -262,7 +262,7 @@ const StoreService = {
   },
 
   deliverOrder(orderId, content) {
-    db.prepare("UPDATE orders SET delivered_content = ?, status = 'delivered', delivered_at = datetime('now') WHERE id = ?")
+    db.prepare("UPDATE orders SET delivered_content = ?, status = 'delivered', delivered_at = datetime('now'), updated_at = datetime('now') WHERE id = ?")
       .run(content, orderId);
 
     const updatedOrder = this.getOrder(orderId);
@@ -296,7 +296,37 @@ const StoreService = {
         GROUP BY product_name
         ORDER BY total_sold DESC
         LIMIT 5
-      `).all()
+      `).all(),
+      paymentBreakdown: db.prepare(`
+        SELECT payment_type, COUNT(*) as count, COALESCE(SUM(total), 0) as sum
+        FROM orders
+        WHERE status IN ('paid', 'delivered')
+        GROUP BY payment_type
+        ORDER BY sum DESC
+      `).all(),
+      recentOrders: (() => {
+        const raw = db.prepare(`
+          SELECT date(created_at) AS day, COUNT(*) AS count, COALESCE(SUM(total), 0) AS revenue
+          FROM orders
+          WHERE created_at >= datetime('now','-6 days')
+          GROUP BY day
+          ORDER BY day ASC
+        `).all();
+
+        const list = [];
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(Date.now() - i * 86400000);
+          const dayKey = d.toISOString().slice(0, 10);
+          const row = raw.find((r) => r.day === dayKey);
+          list.push({
+            day: dayKey,
+            label: d.toLocaleDateString('en-PH', { month: 'short', day: '2-digit' }),
+            count: row ? row.count : 0,
+            revenue: row ? row.revenue : 0
+          });
+        }
+        return list;
+      })()
     };
   }
 };
