@@ -80,7 +80,9 @@ function getPaymentIcon(methodName, dbIconUrl) {
   if (name.includes('paymaya') || name.includes('maya')) return 'https://cdn.paymongo.com/images/maya.png';
   if (name.includes('grab')) return 'https://cdn.paymongo.com/images/grabpay.png';
   if (name.includes('shopee')) return 'https://cdn.paymongo.com/images/shopeepay.png';
-  if (name.includes('coins.ph') || name.includes('coinsph')) return 'https://static.coingecko.com/s/exchanges/images/1114/large/coinsph.png';
+  if (name.includes('coins.ph') || name.includes('coinsph') || name === 'coins') return 'https://static.coingecko.com/s/exchanges/images/1114/large/coinsph.png';
+  if (name.includes('paymongo')) return 'https://cdn.paymongo.com/images/paymongo-logo.png';
+  if (name.includes('xendit')) return 'https://www.vectorlogo.zone/logos/xendit/xendit-ar21.png';
 
   // High stability VectorLogoZone for cards
   if (name.includes('visa')) return 'https://www.vectorlogo.zone/logos/visa/visa-ar21.png';

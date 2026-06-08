@@ -53,7 +53,8 @@ CREATE TABLE IF NOT EXISTS product_stock_pool (
   content    TEXT NOT NULL,
   is_sold    INTEGER NOT NULL DEFAULT 0,
   order_id   INTEGER REFERENCES orders(id) ON DELETE SET NULL,
-  added_at   TEXT NOT NULL DEFAULT (datetime('now'))
+  added_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  sold_at    TEXT
 );
 
 CREATE TABLE IF NOT EXISTS manual_payment_methods (
@@ -107,9 +108,13 @@ CREATE TABLE IF NOT EXISTS orders (
 
 CREATE INDEX IF NOT EXISTS idx_orders_order_number ON orders(order_number);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at);
+CREATE INDEX IF NOT EXISTS idx_orders_payment_type ON orders(payment_type);
+CREATE INDEX IF NOT EXISTS idx_orders_manual_method_id ON orders(manual_method_id);
 CREATE INDEX IF NOT EXISTS idx_orders_telegram ON orders(telegram_username);
 CREATE INDEX IF NOT EXISTS idx_products_active ON products(active, sort_order);
 CREATE INDEX IF NOT EXISTS idx_stock_product ON product_stock_pool(product_id, is_sold);
+CREATE INDEX IF NOT EXISTS idx_stock_order ON product_stock_pool(order_id);
 `);
 
 // Migrations for existing database
@@ -117,6 +122,7 @@ try { db.exec("ALTER TABLE products ADD COLUMN auto_deliver INTEGER NOT NULL DEF
 try { db.exec("ALTER TABLE products ADD COLUMN min_quantity INTEGER NOT NULL DEFAULT 1"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN telegram_username TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN telegram_id TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN acc_ordered TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN acc_number TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN acc_name TEXT"); } catch(e){}
@@ -126,6 +132,7 @@ try { db.exec("ALTER TABLE orders ADD COLUMN warranty_period TEXT"); } catch(e){
 try { db.exec("ALTER TABLE orders ADD COLUMN coins_request_id TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN paymongo_session_id TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN xendit_invoice_id TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE product_stock_pool ADD COLUMN sold_at TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE categories ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
 try { db.exec("ALTER TABLE products ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
 try { db.exec("ALTER TABLE manual_payment_methods ADD COLUMN icon_url TEXT"); } catch(e){}
