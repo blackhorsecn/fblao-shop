@@ -133,27 +133,6 @@ CREATE INDEX IF NOT EXISTS idx_stock_pool_created_at ON product_stock_pool(creat
 CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(name);
 CREATE INDEX IF NOT EXISTS idx_audit_log_order ON order_audit_log(order_id);
 CREATE INDEX IF NOT EXISTS idx_audit_log_changed_at ON order_audit_log(changed_at DESC);
-
-CREATE TRIGGER IF NOT EXISTS update_products_updated_at
-AFTER UPDATE ON products
-FOR EACH ROW
-BEGIN
-  UPDATE products SET updated_at = datetime('now') WHERE id = NEW.id;
-END;
-
-CREATE TRIGGER IF NOT EXISTS update_categories_updated_at
-AFTER UPDATE ON categories
-FOR EACH ROW
-BEGIN
-  UPDATE categories SET updated_at = datetime('now') WHERE id = NEW.id;
-END;
-
-CREATE TRIGGER IF NOT EXISTS update_orders_updated_at
-AFTER UPDATE ON orders
-FOR EACH ROW
-BEGIN
-  UPDATE orders SET updated_at = datetime('now') WHERE id = NEW.id;
-END;
 `);
 
 // Migrations for existing database
@@ -181,6 +160,34 @@ try { db.exec("CREATE INDEX IF NOT EXISTS idx_products_deleted ON products(delet
 try { db.exec("CREATE INDEX IF NOT EXISTS idx_categories_deleted ON categories(deleted_at)"); } catch(e){}
 // email is already nullable in the CREATE TABLE statement above.
 // SQLite doesn't support ALTER COLUMN, so we skip this migration.
+
+// Create triggers AFTER columns are added
+try { db.exec(`
+  CREATE TRIGGER IF NOT EXISTS update_products_updated_at
+  AFTER UPDATE ON products
+  FOR EACH ROW
+  BEGIN
+    UPDATE products SET updated_at = datetime('now') WHERE id = NEW.id;
+  END;
+`); } catch(e){}
+
+try { db.exec(`
+  CREATE TRIGGER IF NOT EXISTS update_categories_updated_at
+  AFTER UPDATE ON categories
+  FOR EACH ROW
+  BEGIN
+    UPDATE categories SET updated_at = datetime('now') WHERE id = NEW.id;
+  END;
+`); } catch(e){}
+
+try { db.exec(`
+  CREATE TRIGGER IF NOT EXISTS update_orders_updated_at
+  AFTER UPDATE ON orders
+  FOR EACH ROW
+  BEGIN
+    UPDATE orders SET updated_at = datetime('now') WHERE id = NEW.id;
+  END;
+`); } catch(e){}
 
 // Add Coins.ph Enterprise if it doesn't exist
 const coinsExist = db.prepare('SELECT id FROM manual_payment_methods WHERE name = ?').get('Coins.ph Enterprise');
