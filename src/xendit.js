@@ -6,12 +6,14 @@ const { getSetting } = require('./db');
 const API_BASE = 'https://api.xendit.co';
 
 function basicAuth() {
-  const secretKey = getSetting('xendit_secret_key');
+  const secretKey = getSetting('xendit_secret_key') || process.env.XENDIT_SECRET_KEY;
   return 'Basic ' + Buffer.from(`${secretKey}:`).toString('base64');
 }
 
 function isConfigured() {
-  return (getSetting('xendit_enabled') === '1' || getSetting('xedit_enabled') === '1') && !!getSetting('xendit_secret_key');
+  const enabled = getSetting('xendit_enabled') === '1' || getSetting('xedit_enabled') === '1' || process.env.XENDIT_ENABLED === '1';
+  const secretKey = getSetting('xendit_secret_key') || process.env.XENDIT_SECRET_KEY;
+  return enabled && !!secretKey;
 }
 
 /**
@@ -60,7 +62,7 @@ async function createInvoice(order, baseUrl) {
 }
 
 function verifyWebhookToken(token) {
-  const callbackToken = getSetting('xendit_callback_token');
+  const callbackToken = getSetting('xendit_callback_token') || process.env.XENDIT_CALLBACK_TOKEN;
   if (!callbackToken) return true; // If not set, we can't verify but we'll accept (or skip)
   return token === callbackToken;
 }
