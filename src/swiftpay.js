@@ -44,9 +44,9 @@ function checkoutResultUrl(baseUrl, orderNumber, statusKey, settingKey, envKey) 
   if (custom) {
     return custom
       .replace(/\{ORDER_NO\}/g, encodeURIComponent(String(orderNumber)))
-      .replace(/\{STATUS\}/g, encodeURIComponent(String(statusKey)));
+      .replace(/\{STATUS\}/g, String(statusKey));
   }
-  return `${baseUrl}/order/result?ref=${encodeURIComponent(orderNumber)}&status=${statusKey}`;
+  return `${baseUrl}/swiftpay/status?ref=${encodeURIComponent(orderNumber)}&status=${statusKey}`;
 }
 
 async function createCheckout(order, baseUrl) {
@@ -99,6 +99,27 @@ async function createCheckout(order, baseUrl) {
   };
 }
 
+async function getCheckoutStatus(checkoutId) {
+  if (!checkoutId) return null;
+
+  const res = await fetch(`${apiBase()}/v1/checkouts/${encodeURIComponent(checkoutId)}`, {
+    method: 'GET',
+    headers: authHeaders(),
+  });
+
+  const text = await res.text();
+  let data = {};
+  try { data = JSON.parse(text); } catch (_) { /* keep raw body */ }
+
+  if (!res.ok) {
+    const message = data.message || data.error || text || 'Swiftpay API error';
+    throw new Error(`Swiftpay status lookup failed (${res.status}): ${message}`);
+  }
+
+  const d = data.data || data;
+  return normalizeStatus(d.payment_status || d.status || d.checkout_status || d.state);
+}
+
 function normalizeStatus(raw) {
   if (!raw) return 'pending';
   const s = String(raw).trim().toUpperCase();
@@ -127,6 +148,7 @@ function verifyWebhookSignature(rawBody, signature) {
 module.exports = {
   isConfigured,
   createCheckout,
+  getCheckoutStatus,
   normalizeStatus,
   verifyWebhookSignature,
 };

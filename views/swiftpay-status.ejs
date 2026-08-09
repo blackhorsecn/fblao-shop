@@ -1,0 +1,81 @@
+<%- include('partials/head') %>
+
+<div class="card">
+  <div class="swiftpay-hero">
+    <div>
+      <% if (order.status === 'delivered') { %>
+        <div class="status-pill status-delivered">Delivered</div>
+        <h2 style="margin: 0 0 8px;">Your Swiftpay order is complete</h2>
+      <% } else if (order.status === 'paid') { %>
+        <div class="status-pill status-paid">Paid</div>
+        <h2 style="margin: 0 0 8px;">Payment confirmed</h2>
+      <% } else if (order.status === 'failed') { %>
+        <div class="status-pill status-failed">Payment failed</div>
+        <h2 style="margin: 0 0 8px;">We could not confirm your payment</h2>
+      <% } else { %>
+        <div class="status-pill status-pending">Pending</div>
+        <h2 style="margin: 0 0 8px;">Waiting for Swiftpay confirmation</h2>
+      <% } %>
+      <p class="muted" style="margin: 0;">
+        <% if (order.status === 'pending' && queryStatus === 'cancel') { %>
+          Your Swiftpay session was cancelled. You can reopen checkout any time below.
+        <% } else if (order.status === 'pending' && queryStatus === 'failure') { %>
+          Swiftpay reported a failed attempt. You can retry checkout or refresh this page.
+        <% } else if (order.status === 'pending' && queryStatus === 'success') { %>
+          Swiftpay sent you back successfully. We are still waiting for final payment confirmation.
+        <% } else if (order.status === 'paid') { %>
+          Your payment is locked in and your delivery is being prepared.
+        <% } else if (order.status === 'delivered') { %>
+          Your delivery details are available below.
+        <% } else { %>
+          This page checks the latest order state using the same storefront styling as the rest of the shop.
+        <% } %>
+      </p>
+    </div>
+    <img class="swiftpay-badge" src="<%= getIcon('swiftpay') %>" alt="Swiftpay PH">
+  </div>
+
+  <div class="swiftpay-layout">
+    <div class="subpanel">
+      <h3 style="margin-top:0;">Order details</h3>
+      <table class="kv" style="margin-bottom:0;">
+        <tr><th>Order number</th><td><strong><%= order.order_number %></strong></td></tr>
+        <tr><th>Telegram</th><td>@<%= order.telegram_username %></td></tr>
+        <tr><th>Product</th><td><%= order.product_name %></td></tr>
+        <tr><th>Quantity</th><td><%= order.quantity %></td></tr>
+        <tr><th>Total</th><td><strong><%= money(order.total) %></strong></td></tr>
+        <tr><th>Placed on</th><td><%= date(order.created_at) %></td></tr>
+      </table>
+    </div>
+
+    <div class="subpanel">
+      <h3 style="margin-top:0;">Actions</h3>
+      <div class="actions" style="margin-top:0;">
+        <a class="btn" href="/swiftpay/status?ref=<%= encodeURIComponent(order.order_number) %>">Refresh status</a>
+        <% if (order.status === 'pending' && checkoutUrl) { %>
+          <a class="btn btn-primary" href="<%= checkoutUrl %>" target="_blank" rel="noopener noreferrer">Reopen checkout</a>
+        <% } %>
+        <a class="btn btn-light" href="/status?ref=<%= encodeURIComponent(order.order_number) %>&tg=<%= encodeURIComponent(order.telegram_username) %>">General status page</a>
+      </div>
+
+      <% if (order.status === 'paid') { %>
+        <div class="alert alert-ok">
+          <strong>Payment confirmed.</strong> Your goods will appear here as soon as delivery is ready.
+        </div>
+      <% } else if (order.status === 'failed') { %>
+        <div class="alert alert-error">
+          Please retry the payment or contact support with order number <strong><%= order.order_number %></strong>.
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <% if (order.status === 'delivered' && order.delivered_content) { %>
+    <div class="delivery">
+      <h3>Your delivery</h3>
+      <pre class="delivery-body"><%= order.delivered_content %></pre>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/foot') %>

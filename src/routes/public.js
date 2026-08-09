@@ -14,6 +14,26 @@ const { generateOrderNumber } = require('../helpers');
 const { asyncHandler, rateLimit } = require('../middleware');
 const StoreService = require('../services/store');
 
+async function syncSwiftpayOrderStatus(order) {
+  if (!order || order.payment_type !== 'swiftpay' || order.status !== 'pending' || !order.swiftpay_checkout_id) {
+    return order;
+  }
+
+  try {
+    const status = await swiftpay.getCheckoutStatus(order.swiftpay_checkout_id);
+    if (status === 'paid') {
+      StoreService.updateOrderStatus(order.id, 'paid', "datetime('now')");
+      return StoreService.getOrder(order.id);
+    }
+    if (status === 'failed') {
+      StoreService.updateOrderStatus(order.id, 'failed');
+      return StoreService.getOrder(order.id);
+    }
+  } catch (_) { /* show current state */ }
+
+  return order;
+}
+
 // Homepage -------------------------------------------------------------------
 router.get('/', (req, res) => {
   const banners = db.prepare('SELECT * FROM banners WHERE enabled = 1 ORDER BY sort_order, id').all();
@@ -165,8 +185,8 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
   if (paymentType === 'swiftpay') {
     try {
       const { checkoutId, checkoutUrl } = await swiftpay.createCheckout(order, res.locals.baseUrl);
-      db.prepare('UPDATE orders SET swiftpay_checkout_id = ? WHERE id = ?').run(checkoutId, order.id);
-      return res.redirect(checkoutUrl);
+      db.prepare('UPDATE orders SET swiftpay_checkout_id = ?, swiftpay_checkout_url = ? WHERE id = ?').run(checkoutId, checkoutUrl, order.id);
+      return res.redirect(`/swiftpay/checkout?ref=${encodeURIComponent(orderNumber)}`);
     } catch (e) {
       db.prepare("UPDATE orders SET status = 'failed', admin_notes = ? WHERE id = ?").run(
         'Swiftpay checkout error: ' + e.message,
@@ -201,6 +221,28 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
   return res.redirect(`/order/result?ref=${encodeURIComponent(orderNumber)}`);
 }));
 
+router.get('/swiftpay/checkout', asyncHandler(async (req, res) => {
+  const ref = String(req.query.ref || '').trim();
+  let order = StoreService.getOrder(ref);
+  if (!order) {
+    return res.status(404).render('error', { title: 'Not found', message: 'Order not found.' });
+  }
+  if (order.payment_type !== 'swiftpay') {
+    return res.redirect(`/order/result?ref=${encodeURIComponent(order.order_number)}`);
+  }
+
+  order = await syncSwiftpayOrderStatus(order);
+  if (order.status !== 'pending') {
+    return res.redirect(`/swiftpay/status?ref=${encodeURIComponent(order.order_number)}`);
+  }
+
+  res.render('swiftpay-checkout', {
+    title: `Swiftpay Checkout · ${order.order_number}`,
+    order,
+    checkoutUrl: order.swiftpay_checkout_url || '',
+  });
+}));
+
 // Order result / instructions page (after checkout or manual order) ----------
 router.get('/order/result', asyncHandler(async (req, res) => {
   const ref = String(req.query.ref || '').trim();
@@ -222,6 +264,7 @@ router.get('/order/result', asyncHandler(async (req, res) => {
       order = StoreService.getOrder(order.id);
     } catch (_) { /* show current state */ }
   }
+  order = await syncSwiftpayOrderStatus(order);
 
   const manualMethod = order.manual_method_id
     ? db.prepare('SELECT * FROM manual_payment_methods WHERE id = ?').get(order.manual_method_id)
@@ -231,6 +274,25 @@ router.get('/order/result', asyncHandler(async (req, res) => {
     order,
     manualMethod,
     queryStatus: String(req.query.status || ''),
+  });
+}));
+
+router.get('/swiftpay/status', asyncHandler(async (req, res) => {
+  const ref = String(req.query.ref || '').trim();
+  let order = StoreService.getOrder(ref);
+  if (!order) {
+    return res.status(404).render('error', { title: 'Not found', message: 'Order not found.' });
+  }
+  if (order.payment_type !== 'swiftpay') {
+    return res.redirect(`/order/result?ref=${encodeURIComponent(order.order_number)}`);
+  }
+
+  order = await syncSwiftpayOrderStatus(order);
+  res.render('swiftpay-status', {
+    title: `Swiftpay Status · ${order.order_number}`,
+    order,
+    queryStatus: String(req.query.status || '').trim().toLowerCase(),
+    checkoutUrl: order.swiftpay_checkout_url || '',
   });
 }));
 
