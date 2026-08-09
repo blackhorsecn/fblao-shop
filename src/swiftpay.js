@@ -49,7 +49,7 @@ function checkoutResultUrl(baseUrl, orderNumber, statusKey, settingKey, envKey) 
   return `${baseUrl}/swiftpay/status?ref=${encodeURIComponent(orderNumber)}&status=${statusKey}`;
 }
 
-async function createCheckout(order, baseUrl) {
+async function createCheckout(order, baseUrl, channel = null) {
   const customer = {
     telegram_username: order.telegram_username || '',
   };
@@ -72,6 +72,9 @@ async function createCheckout(order, baseUrl) {
       quantity: order.quantity,
     },
   };
+
+  // If a specific payment channel is requested (e.g. 'maya' or 'qrph'), hint it to the API.
+  if (channel) payload.payment_method = channel;
 
   const res = await fetch(`${apiBase()}/v1/checkouts`, {
     method: 'POST',

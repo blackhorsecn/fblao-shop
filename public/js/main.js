@@ -162,18 +162,39 @@
 
     elQty.addEventListener('input', recalc);
 
-    // Keep the hidden manual_method_id in sync with the chosen radio option.
-    form.querySelectorAll('input[name="payment_type"]').forEach(function (radio) {
-      radio.addEventListener('change', function () {
-        var manual = radio.getAttribute('data-manual');
-        elManualId.value = radio.value === 'manual' && manual ? manual : '';
+    var elPaymentType = document.getElementById('m-payment-type');
+    var elTelegram = document.getElementById('m-telegram');
+
+    // Payment method buttons — set hidden fields then submit the form.
+    form.querySelectorAll('.pay-method-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var tg = elTelegram ? elTelegram.value.trim() : '';
+        if (!tg) {
+          if (elTelegram) {
+            elTelegram.focus();
+            elTelegram.setCustomValidity('Please enter your Telegram username.');
+            elTelegram.reportValidity();
+            elTelegram.setCustomValidity('');
+          }
+          return;
+        }
+        var pay = btn.getAttribute('data-pay');
+        var manual = btn.getAttribute('data-manual') || '';
+        if (elPaymentType) elPaymentType.value = pay;
+        if (elManualId) elManualId.value = manual;
+        if (form.requestSubmit) {
+          form.requestSubmit();
+        } else {
+          form.submit();
+        }
       });
     });
-    // Initialize on load (first radio may be a manual method when Maya is disabled).
-    var checked = form.querySelector('input[name="payment_type"]:checked');
-    if (checked) {
-      var m = checked.getAttribute('data-manual');
-      elManualId.value = checked.value === 'manual' && m ? m : '';
+
+    // Clear telegram validation on input.
+    if (elTelegram) {
+      elTelegram.addEventListener('input', function () {
+        elTelegram.setCustomValidity('');
+      });
     }
   }
 

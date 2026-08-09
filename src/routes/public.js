@@ -17,7 +17,7 @@ const StoreService = require('../services/store');
 async function syncSwiftpayOrderStatus(order) {
   if (
     !order ||
-    order.payment_type !== 'swiftpay' ||
+    !['swiftpay', 'swiftpay_maya', 'swiftpay_qrph'].includes(order.payment_type) ||
     !['pending', 'failed'].includes(order.status) ||
     !order.swiftpay_checkout_id
   ) {
@@ -56,7 +56,7 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
   const telegramUsername = String(req.body.telegram_username || '').trim().replace(/^@/, '');
   const productId = parseInt(req.body.product_id, 10);
   const quantity = Math.max(1, parseInt(req.body.quantity, 10) || 1);
-  const paymentType = req.body.payment_type; // 'manual', 'maya', 'coins', 'paymongo', 'xendit', or 'swiftpay'
+  const paymentType = req.body.payment_type; // 'manual', 'maya', 'coins', 'paymongo', 'xendit', 'swiftpay', 'swiftpay_maya', 'swiftpay_qrph', 'magpie_alipay', 'magpie_wechat'
   const manualMethodId = req.body.manual_method_id ? parseInt(req.body.manual_method_id, 10) : null;
 
   if (!telegramUsername) {
@@ -93,7 +93,7 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
     return res.status(400).render('error', { title: 'Unavailable', message: 'PayMongo payment is not available right now. Please choose another method.' });
   } else if (paymentType === 'xendit' && !xendit.isConfigured()) {
     return res.status(400).render('error', { title: 'Unavailable', message: 'Xendit payment is not available right now. Please choose another method.' });
-  } else if (paymentType === 'swiftpay' && !swiftpay.isConfigured()) {
+  } else if ((paymentType === 'swiftpay' || paymentType === 'swiftpay_maya' || paymentType === 'swiftpay_qrph') && !swiftpay.isConfigured()) {
     return res.status(400).render('error', { title: 'Unavailable', message: 'Swiftpay PH payment is not available right now. Please choose another method.' });
   } else if ((paymentType === 'magpie_alipay' || paymentType === 'magpie_wechat') && !magpie.isConfigured()) {
     return res.status(400).render('error', { title: 'Unavailable', message: 'Magpie payment is not available right now. Please choose another method.' });
@@ -187,9 +187,12 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
     }
   }
 
-  if (paymentType === 'swiftpay') {
+  if (paymentType === 'swiftpay' || paymentType === 'swiftpay_maya' || paymentType === 'swiftpay_qrph') {
+    // Map customer-facing type to Swiftpay channel hint
+    const channelMap = { swiftpay_maya: 'maya', swiftpay_qrph: 'qrph' };
+    const channel = channelMap[paymentType] || null;
     try {
-      const { checkoutId, checkoutUrl } = await swiftpay.createCheckout(order, res.locals.baseUrl);
+      const { checkoutId, checkoutUrl } = await swiftpay.createCheckout(order, res.locals.baseUrl, channel);
       db.prepare('UPDATE orders SET swiftpay_checkout_id = ?, swiftpay_checkout_url = ? WHERE id = ?').run(checkoutId, checkoutUrl, order.id);
       return res.redirect(`/swiftpay/checkout?ref=${encodeURIComponent(orderNumber)}`);
     } catch (e) {
@@ -232,7 +235,7 @@ router.get('/swiftpay/checkout', asyncHandler(async (req, res) => {
   if (!order) {
     return res.status(404).render('error', { title: 'Not found', message: 'Order not found.' });
   }
-  if (order.payment_type !== 'swiftpay') {
+  if (!['swiftpay', 'swiftpay_maya', 'swiftpay_qrph'].includes(order.payment_type)) {
     return res.redirect(`/order/result?ref=${encodeURIComponent(order.order_number)}`);
   }
 
@@ -288,7 +291,7 @@ router.get('/swiftpay/status', asyncHandler(async (req, res) => {
   if (!order) {
     return res.status(404).render('error', { title: 'Not found', message: 'Order not found.' });
   }
-  if (order.payment_type !== 'swiftpay') {
+  if (!['swiftpay', 'swiftpay_maya', 'swiftpay_qrph'].includes(order.payment_type)) {
     return res.redirect(`/order/result?ref=${encodeURIComponent(order.order_number)}`);
   }
 
