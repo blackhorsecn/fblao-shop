@@ -16,10 +16,10 @@ function openDatabase(filePath) {
     // Mimic better-sqlite3's db.transaction(fn): returns a wrapped function that
     // runs fn inside BEGIN/COMMIT, rolling back on any thrown error.
     transaction: (fn) =>
-      function (...args) {
+      (...args) => {
         handle.exec('BEGIN');
         try {
-          const result = fn.apply(this, args);
+          const result = fn(...args);
           handle.exec('COMMIT');
           return result;
         } catch (err) {
