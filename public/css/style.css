@@ -13,6 +13,7 @@
   --red: #d73a49;
   --blue: #0366d6;
   --radius: 12px;
+  --pill-radius: 999px;
 }
 
 * { box-sizing: border-box; }
@@ -255,7 +256,7 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
   object-fit: contain;
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--pill-radius);
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
 }
 .pay-option-logo {
@@ -386,7 +387,7 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--pill-radius);
   padding: 6px 12px;
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
 }
