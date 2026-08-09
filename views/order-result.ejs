@@ -39,6 +39,8 @@
     <tr><th>Total</th><td><%= money(order.total) %></td></tr>
   </table>
 
+  <p class="muted">How you receive your product: after payment is confirmed, the delivered account or product details will appear on this page. You can check it again later with your Telegram username and order number. / 收货方式：付款确认后，发货的账号或商品内容会显示在此页面。之后也可以使用电报用户名和订单号再次查询。</p>
+
   <% if (order.payment_type === 'manual' && (order.status === 'pending') && manualMethod) { %>
     <div class="instructions">
       <h3>Payment instructions / 支付说明 — <%= manualMethod.name %></h3>
@@ -53,7 +55,7 @@
       <pre class="delivery-body"><%= order.delivered_content %></pre>
     </div>
   <% } else if (order.status === 'paid') { %>
-    <p class="muted">Your payment is confirmed. Your goods will appear here and are sent to your email shortly.</p>
+    <p class="muted">Your payment is confirmed. Your goods will appear here soon. / 付款已确认，商品内容将很快显示在这里。</p>
   <% } %>
 
   <div class="actions">

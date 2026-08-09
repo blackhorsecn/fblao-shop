@@ -2,7 +2,7 @@
 
 <div class="card narrow">
   <h2>Order Status / 订单查询</h2>
-  <p class="muted">Enter your Telegram username and order number to check your order status.</p>
+  <p class="muted">Enter your Telegram username and order number to check your order status and view delivered product details after payment. / 输入电报用户名和订单号即可查询订单状态，并在付款后查看发货内容。</p>
   <form method="POST" action="/status" class="stack">
     <label class="field">
       <span>Telegram Username / 电报用户名</span>
@@ -122,11 +122,12 @@
           <h3 style="margin:0;">Your delivery credentials</h3>
           <button class="btn btn-sm" onclick="copyStatusVal(document.getElementById('delivery-content').innerText, this)">Copy All</button>
         </div>
+        <p class="ref-note">Your product is shown below and stays available on this page when you look up the same Telegram username and order number again. / 您的商品内容显示在下方，之后再次使用相同的电报用户名和订单号查询时，仍可在此页面查看。</p>
         <pre class="delivery-body" id="delivery-content"><%= order.delivered_content %></pre>
       </div>
     <% } else if (order.status === 'paid') { %>
       <div class="alert alert-ok" style="margin-top: 20px; text-align: center;">
-        <strong>Payment confirmed!</strong> Your account is being prepared and will be displayed here soon.
+        <strong>Payment confirmed!</strong> Your account is being prepared and will be displayed here soon. / 付款已确认，商品内容将很快显示在这里。
       </div>
     <% } %>
   <% } %>
