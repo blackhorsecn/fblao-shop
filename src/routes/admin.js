@@ -532,6 +532,9 @@ router.get('/settings', (req, res) => {
       swiftpay_api_key: getSetting('swiftpay_api_key', ''),
       swiftpay_api_secret: getSetting('swiftpay_api_secret', ''),
       swiftpay_webhook_secret: getSetting('swiftpay_webhook_secret', ''),
+      swiftpay_success_url: getSetting('swiftpay_success_url', ''),
+      swiftpay_failure_url: getSetting('swiftpay_failure_url', ''),
+      swiftpay_cancel_url: getSetting('swiftpay_cancel_url', ''),
       magpie_enabled: getSetting('magpie_enabled', '0'),
       magpie_api_base_url: getSetting('magpie_api_base_url', ''),
       magpie_api_key: getSetting('magpie_api_key', ''),
@@ -649,6 +652,9 @@ router.post('/settings/swiftpay', (req, res) => {
   setSetting('swiftpay_api_key', String(req.body.swiftpay_api_key || '').trim());
   setSetting('swiftpay_api_secret', String(req.body.swiftpay_api_secret || '').trim());
   setSetting('swiftpay_webhook_secret', String(req.body.swiftpay_webhook_secret || '').trim());
+  setSetting('swiftpay_success_url', String(req.body.swiftpay_success_url || '').trim());
+  setSetting('swiftpay_failure_url', String(req.body.swiftpay_failure_url || '').trim());
+  setSetting('swiftpay_cancel_url', String(req.body.swiftpay_cancel_url || '').trim());
   flash(req, 'Swiftpay PH configuration saved.');
   res.redirect('/admin/settings');
 });

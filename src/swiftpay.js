@@ -8,22 +8,27 @@ const HOSTS = {
   live: 'https://api.swiftpay.ph',
 };
 
+function settingOrEnv(settingKey, envKey, fallback = '') {
+  const value = getSetting(settingKey, '') || process.env[envKey] || fallback;
+  return String(value || '').trim();
+}
+
 function apiBase() {
-  const custom = (getSetting('swiftpay_api_base_url') || process.env.SWIFTPAY_API_BASE_URL || '').trim();
+  const custom = settingOrEnv('swiftpay_api_base_url', 'SWIFTPAY_API_BASE_URL');
   if (custom) return custom.replace(/\/$/, '');
-  const mode = (getSetting('swiftpay_mode', 'sandbox') || 'sandbox').toLowerCase();
+  const mode = settingOrEnv('swiftpay_mode', 'SWIFTPAY_MODE', 'sandbox').toLowerCase();
   return HOSTS[mode] || HOSTS.sandbox;
 }
 
 function isConfigured() {
   const enabled = getSetting('swiftpay_enabled') === '1' || process.env.SWIFTPAY_ENABLED === '1';
-  const apiKey = getSetting('swiftpay_api_key') || process.env.SWIFTPAY_API_KEY;
+  const apiKey = settingOrEnv('swiftpay_api_key', 'SWIFTPAY_API_KEY');
   return enabled && !!apiKey;
 }
 
 function authHeaders() {
-  const apiKey = getSetting('swiftpay_api_key') || process.env.SWIFTPAY_API_KEY;
-  const apiSecret = getSetting('swiftpay_api_secret') || process.env.SWIFTPAY_API_SECRET;
+  const apiKey = settingOrEnv('swiftpay_api_key', 'SWIFTPAY_API_KEY');
+  const apiSecret = settingOrEnv('swiftpay_api_secret', 'SWIFTPAY_API_SECRET');
   if (!apiKey) throw new Error('Swiftpay API key is not configured');
 
   const headers = {
@@ -34,20 +39,28 @@ function authHeaders() {
   return headers;
 }
 
+function checkoutResultUrl(baseUrl, orderNumber, statusKey, settingKey, envKey) {
+  const custom = settingOrEnv(settingKey, envKey);
+  if (custom) return custom;
+  return `${baseUrl}/order/result?ref=${encodeURIComponent(orderNumber)}&status=${statusKey}`;
+}
+
 async function createCheckout(order, baseUrl) {
+  const customer = {
+    telegram_username: order.telegram_username || '',
+  };
+  if (order.email) customer.email = order.email;
+
   const payload = {
     reference_number: order.order_number,
     amount: Number(order.total).toFixed(2),
     currency: order.currency || 'PHP',
     description: `Order ${order.order_number} - ${order.product_name}`,
-    customer: {
-      telegram_username: order.telegram_username || '',
-      email: order.email || `${order.telegram_username}@t.me`,
-    },
+    customer,
     redirect_urls: {
-      success: `${baseUrl}/order/result?ref=${encodeURIComponent(order.order_number)}&status=success`,
-      failure: `${baseUrl}/order/result?ref=${encodeURIComponent(order.order_number)}&status=failure`,
-      cancel: `${baseUrl}/order/result?ref=${encodeURIComponent(order.order_number)}&status=cancel`,
+      success: checkoutResultUrl(baseUrl, order.order_number, 'success', 'swiftpay_success_url', 'SWIFTPAY_SUCCESS_URL'),
+      failure: checkoutResultUrl(baseUrl, order.order_number, 'failure', 'swiftpay_failure_url', 'SWIFTPAY_FAILURE_URL'),
+      cancel: checkoutResultUrl(baseUrl, order.order_number, 'cancel', 'swiftpay_cancel_url', 'SWIFTPAY_CANCEL_URL'),
     },
     webhook_url: `${baseUrl}/webhooks/swiftpay`,
     metadata: {
@@ -91,7 +104,7 @@ function normalizeStatus(raw) {
 }
 
 function verifyWebhookSignature(rawBody, signature) {
-  const secret = getSetting('swiftpay_webhook_secret') || process.env.SWIFTPAY_WEBHOOK_SECRET;
+  const secret = settingOrEnv('swiftpay_webhook_secret', 'SWIFTPAY_WEBHOOK_SECRET');
   if (!secret) return { verified: false, skipped: true };
   if (!signature) return { verified: false, skipped: false };
 

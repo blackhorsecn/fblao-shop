@@ -160,8 +160,13 @@
   </div>
 
   <div class="subpanel">
-    <h2>Swiftpay PH (Hosted Checkout)</h2>
-    <p class="muted">Enable Swiftpay PH and provide your API credentials. Leave API Base URL empty to use the default host for the selected mode.</p>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+      <img src="<%= getIcon('swiftpay') %>" alt="Swiftpay PH" style="height:36px; width:auto; padding:6px 10px; border:1px solid var(--border); border-radius:10px; background:#fff;">
+      <div>
+        <h2 style="margin:0;">Swiftpay PH</h2>
+        <p class="muted" style="margin:4px 0 0;">Hosted checkout integration with redirect URLs and webhook confirmation.</p>
+      </div>
+    </div>
     <form method="POST" action="/admin/settings/swiftpay">
       <div class="field-row">
         <label class="field" style="flex:0 0 130px;"><span>Enabled</span><input type="checkbox" name="swiftpay_enabled" <%= s.swiftpay_enabled === '1' ? 'checked' : '' %>></label>
@@ -173,9 +178,19 @@
         </label>
       </div>
       <label class="field"><span>API Base URL (optional)</span><input type="text" name="swiftpay_api_base_url" value="<%= escapeHtml(s.swiftpay_api_base_url) %>" placeholder="https://api.swiftpay.ph"></label>
-      <label class="field"><span>API Key</span><input type="text" name="swiftpay_api_key" value="<%= escapeHtml(s.swiftpay_api_key) %>"></label>
-      <label class="field"><span>API Secret (optional header)</span><input type="text" name="swiftpay_api_secret" value="<%= escapeHtml(s.swiftpay_api_secret) %>"></label>
-      <label class="field"><span>Webhook Secret (optional HMAC)</span><input type="text" name="swiftpay_webhook_secret" value="<%= escapeHtml(s.swiftpay_webhook_secret) %>"></label>
+      <label class="field"><span>API Key / Token</span><input type="text" name="swiftpay_api_key" value="<%= escapeHtml(s.swiftpay_api_key) %>" placeholder="Paste the Swiftpay API key or token from your merchant dashboard"></label>
+      <label class="field"><span>API Secret (optional)</span><input type="text" name="swiftpay_api_secret" value="<%= escapeHtml(s.swiftpay_api_secret) %>" placeholder="Only fill this if Swiftpay gave you a secondary secret header value"></label>
+      <div class="field-row">
+        <label class="field"><span>Success URL override (optional)</span><input type="text" name="swiftpay_success_url" value="<%= escapeHtml(s.swiftpay_success_url) %>" placeholder="<%= baseUrl %>/order/result?ref={ORDER_NO}&status=success"></label>
+        <label class="field"><span>Failure URL override (optional)</span><input type="text" name="swiftpay_failure_url" value="<%= escapeHtml(s.swiftpay_failure_url) %>" placeholder="<%= baseUrl %>/order/result?ref={ORDER_NO}&status=failure"></label>
+      </div>
+      <label class="field"><span>Cancel URL override (optional)</span><input type="text" name="swiftpay_cancel_url" value="<%= escapeHtml(s.swiftpay_cancel_url) %>" placeholder="<%= baseUrl %>/order/result?ref={ORDER_NO}&status=cancel"></label>
+      <label class="field"><span>Webhook Secret (optional HMAC)</span><input type="text" name="swiftpay_webhook_secret" value="<%= escapeHtml(s.swiftpay_webhook_secret) %>" placeholder="Add this only if you enabled signed Swiftpay webhooks"></label>
+      <div class="alert alert-ok" style="margin:14px 0; font-size:11px;">
+        <strong>Default Success URL:</strong> <code><%= baseUrl %>/order/result?ref={ORDER_NO}&status=success</code><br>
+        <strong>Default Failure URL:</strong> <code><%= baseUrl %>/order/result?ref={ORDER_NO}&status=failure</code><br>
+        <strong>Default Cancel URL:</strong> <code><%= baseUrl %>/order/result?ref={ORDER_NO}&status=cancel</code>
+      </div>
       <button class="btn btn-primary" type="submit">Save Swiftpay PH configuration</button>
     </form>
     <div class="alert alert-ok" style="margin-top:14px; font-size: 11px;">

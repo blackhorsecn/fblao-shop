@@ -75,6 +75,13 @@ Now your `shop.db` will be stored in the persistent volume and survive redeploym
 | `COINS_MODE` | `sandbox` or `live` for Coins.ph integration |
 | `COINS_API_KEY` / `COINS_API_SECRET` | Coins.ph API credentials |
 | `COINS_WEBHOOK_SECRET` | Optional webhook secret for Coins.ph |
+| `SWIFTPAY_MODE` | `sandbox` or `live` for Swiftpay PH |
+| `SWIFTPAY_API_BASE_URL` | Optional custom Swiftpay API host |
+| `SWIFTPAY_API_KEY` / `SWIFTPAY_API_SECRET` | Swiftpay API credentials |
+| `SWIFTPAY_WEBHOOK_SECRET` | Optional HMAC secret for Swiftpay webhooks |
+| `SWIFTPAY_SUCCESS_URL` | Optional hosted-checkout success redirect override |
+| `SWIFTPAY_FAILURE_URL` | Optional hosted-checkout failure redirect override |
+| `SWIFTPAY_CANCEL_URL` | Optional hosted-checkout cancel redirect override |
 
 `.env` only seeds the database on **first run**. After that, change everything in **Admin → Settings**.
 
@@ -90,6 +97,18 @@ Now your `shop.db` will be stored in the persistent volume and survive redeploym
    with a tunnel (ngrok/cloudflared) and set `BASE_URL` to the tunnel URL.
 3. The site confirms payment two ways for reliability: the webhook **and** a live status re-check
    when the buyer returns to the result page.
+
+## Swiftpay PH setup
+
+1. In **Admin → Settings → Swiftpay PH**, enable the gateway, choose Sandbox/Live, and paste your
+   Swiftpay API key or token.
+2. Leave the API base URL empty unless Swiftpay gave you a custom host.
+3. Register this webhook URL in Swiftpay:
+   ```
+   {BASE_URL}/webhooks/swiftpay
+   ```
+4. The app now exposes optional admin-managed success, failure, and cancel redirect URLs. Leave them
+   blank to use the built-in order result routes, or set them explicitly if Swiftpay requires your own URLs.
 
 ### ⚠️ Note on the keys currently in `.env`
 The keys copied from `API.txt` are **rejected by Maya's sandbox** with
