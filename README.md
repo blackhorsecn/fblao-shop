@@ -45,9 +45,18 @@ Railway has an ephemeral filesystem, meaning the database will be deleted every 
 
 1.  In your Railway project, click **+ New** → **Volume**.
 2.  Set the **Mount Path** to `/data`.
-3.  Go to your service's **Variables** tab and add:
+3.  Go to your service's **Variables** tab and add at minimum:
     - `DATA_DIR` = `/data`
-4.  (Optional but recommended) Set a strong `SESSION_SECRET`.
+    - `NODE_ENV` = `production`
+    - `BASE_URL` = your Railway public domain or custom domain
+    - `SESSION_SECRET` = a long random secret
+    - `ADMIN_USERNAME` / `ADMIN_PASSWORD` = first-run admin seed credentials
+4.  Optional Railway variables:
+    - `PORT` = leave unset unless your host requires it explicitly
+    - `DATABASE_URL` = `sqlite:///data/shop.db` if you want to override the default SQLite file path
+    - `SQLITE_PATH` = `/data/shop.db` as an alternative to `DATABASE_URL`
+    - Payment gateway credentials only for the providers you want enabled
+5.  After the first boot, most gateway/admin settings are stored in SQLite. Updating Railway variables later will **not** overwrite existing settings unless you reset the database.
 
 Now your `shop.db` will be stored in the persistent volume and survive redeployments.
 
@@ -58,11 +67,13 @@ Now your `shop.db` will be stored in the persistent volume and survive redeploym
 | `PORT` | Server port (default 3000) |
 | `NODE_ENV` | Node environment (`development`, `production`) |
 | `DATA_DIR` | Persistent data directory path for Railway and file storage |
+| `DATABASE_URL` / `SQLITE_PATH` | Optional SQLite file path override |
 | `BASE_URL` | Public URL, used to build Maya redirect + webhook URLs |
 | `SESSION_SECRET` | Session cookie signing secret |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Seed the first admin on initial DB creation |
 | `TELEGRAM_BOT_TOKEN` | Optional Telegram bot token for notifications and login |
 | `ADMIN_TELEGRAM_ID` | Optional Telegram chat ID for admin notifications |
+| `CURRENCY` | Seed currency code (default `PHP`) |
 | `PAYMONGO_ENABLED` | `1` to enable PayMongo checkout on first-run seed |
 | `PAYMONGO_SECRET_KEY` | PayMongo secret key for checkout API |
 | `PAYMONGO_WEBHOOK_SECRET` | Optional webhook secret for PayMongo |
@@ -75,6 +86,7 @@ Now your `shop.db` will be stored in the persistent volume and survive redeploym
 | `COINS_MODE` | `sandbox` or `live` for Coins.ph integration |
 | `COINS_API_KEY` / `COINS_API_SECRET` | Coins.ph API credentials |
 | `COINS_WEBHOOK_SECRET` | Optional webhook secret for Coins.ph |
+| `SWIFTPAY_ENABLED` | `1` to enable Swiftpay checkout on first-run seed |
 | `SWIFTPAY_MODE` | `sandbox` or `live` for Swiftpay PH |
 | `SWIFTPAY_API_BASE_URL` | Optional custom Swiftpay API host |
 | `SWIFTPAY_API_KEY` / `SWIFTPAY_API_SECRET` | Swiftpay API credentials |
@@ -82,6 +94,11 @@ Now your `shop.db` will be stored in the persistent volume and survive redeploym
 | `SWIFTPAY_SUCCESS_URL` | Optional hosted-checkout success redirect override |
 | `SWIFTPAY_FAILURE_URL` | Optional hosted-checkout failure redirect override |
 | `SWIFTPAY_CANCEL_URL` | Optional hosted-checkout cancel redirect override |
+| `MAGPIE_ENABLED` | `1` to enable Magpie checkout on first-run seed |
+| `MAGPIE_API_BASE_URL` | Optional custom Magpie API host |
+| `MAGPIE_API_KEY` / `MAGPIE_API_SECRET` | Magpie API credentials |
+| `MAGPIE_WEBHOOK_SECRET` | Optional webhook secret for Magpie |
+| `MAGPIE_TARGET_CURRENCY` | Target currency for Magpie checkouts (default `CNY`) |
 
 `.env` only seeds the database on **first run**. After that, change everything in **Admin → Settings**.
 
