@@ -1,8 +1,7 @@
 'use strict';
 
 /**
- * High-stability professional CDN links for payment and brand logos.
- * Using Wikipedia and PayMongo CDNs which are highly reliable.
+ * Payment and brand logos served from local SVG assets.
  */
 const ICONS = {
   // E-Wallets & Digital Payments
