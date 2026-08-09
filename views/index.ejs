@@ -135,17 +135,33 @@
         <% } %>
         <% if (swiftpayEnabled) { %>
           <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
-            <input type="radio" name="payment_type" value="swiftpay" <%= (!mayaEnabled && !coinsEnabled && !paymongoEnabled && !xenditEnabled) ? 'checked' : '' %>>
+            <input type="radio" name="payment_type" value="swiftpay" <%= (!mayaEnabled && !coinsEnabled && !paymongoEnabled && !xenditEnabled && !magpieEnabled) ? 'checked' : '' %>>
             <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
                <img src="<%= getIcon('swiftpay') %>" alt="Swiftpay PH" style="height: 16px;">
                <span><strong>Swiftpay PH</strong> — Fast online checkout</span>
             </div>
           </label>
         <% } %>
+        <% if (magpieEnabled) { %>
+          <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
+            <input type="radio" name="payment_type" value="magpie_alipay" <%= (!mayaEnabled && !coinsEnabled && !paymongoEnabled && !xenditEnabled && !swiftpayEnabled) ? 'checked' : '' %>>
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+               <img src="<%= getIcon('alipay') %>" alt="Alipay" style="height: 16px;">
+               <span><strong>Magpie Alipay</strong> — auto-converted to CNY</span>
+            </div>
+          </label>
+          <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
+            <input type="radio" name="payment_type" value="magpie_wechat" <%= (!mayaEnabled && !coinsEnabled && !paymongoEnabled && !xenditEnabled && !swiftpayEnabled) ? 'checked' : '' %>>
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+               <img src="<%= getIcon('wechat') %>" alt="WeChat Pay" style="height: 16px;">
+               <span><strong>Magpie WeChat Pay</strong> — auto-converted to CNY</span>
+            </div>
+          </label>
+        <% } %>
         <% manualMethods.forEach(function(m, i){ %>
           <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
             <input type="radio" name="payment_type" value="manual"
-                   data-manual="<%= m.id %>" <%= (!mayaEnabled && !coinsEnabled && !paymongoEnabled && !xenditEnabled && !swiftpayEnabled && i === 0) ? 'checked' : '' %>>
+                   data-manual="<%= m.id %>" <%= (!mayaEnabled && !coinsEnabled && !paymongoEnabled && !xenditEnabled && !swiftpayEnabled && !magpieEnabled && i === 0) ? 'checked' : '' %>>
             <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
                <% var icon = getIcon(m.name, m.icon_url); %>
                <% if (icon) { %>
@@ -157,7 +173,7 @@
             </div>
           </label>
         <% }) %>
-        <% if (!mayaEnabled && !coinsEnabled && !paymongoEnabled && !xenditEnabled && !swiftpayEnabled && !manualMethods.length) { %>
+        <% if (!mayaEnabled && !coinsEnabled && !paymongoEnabled && !xenditEnabled && !swiftpayEnabled && !magpieEnabled && !manualMethods.length) { %>
           <p class="muted">No payment methods are configured yet.</p>
         <% } %>
       </fieldset>

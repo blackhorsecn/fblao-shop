@@ -7,6 +7,7 @@ const coins = require('./coins');
 const paymongo = require('./paymongo');
 const xendit = require('./xendit');
 const swiftpay = require('./swiftpay');
+const magpie = require('./magpie');
 
 function shopContext(req, res, next) {
   const settings = getSettings();
@@ -28,6 +29,7 @@ function shopContext(req, res, next) {
   res.locals.paymongoEnabled = paymongo.isConfigured();
   res.locals.xenditEnabled = xendit.isConfigured();
   res.locals.swiftpayEnabled = swiftpay.isConfigured();
+  res.locals.magpieEnabled = magpie.isConfigured();
 
   res.locals.isAdmin = !!(req.session && req.session.adminId);
   res.locals.user = req.session.user || null;

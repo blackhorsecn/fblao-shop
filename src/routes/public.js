@@ -9,6 +9,7 @@ const coins = require('../coins');
 const paymongo = require('../paymongo');
 const xendit = require('../xendit');
 const swiftpay = require('../swiftpay');
+const magpie = require('../magpie');
 const { generateOrderNumber } = require('../helpers');
 const { asyncHandler, rateLimit } = require('../middleware');
 const StoreService = require('../services/store');
@@ -69,6 +70,8 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
     return res.status(400).render('error', { title: 'Unavailable', message: 'Xendit payment is not available right now. Please choose another method.' });
   } else if (paymentType === 'swiftpay' && !swiftpay.isConfigured()) {
     return res.status(400).render('error', { title: 'Unavailable', message: 'Swiftpay PH payment is not available right now. Please choose another method.' });
+  } else if ((paymentType === 'magpie_alipay' || paymentType === 'magpie_wechat') && !magpie.isConfigured()) {
+    return res.status(400).render('error', { title: 'Unavailable', message: 'Magpie payment is not available right now. Please choose another method.' });
   }
 
   const orderNumber = generateOrderNumber();
@@ -172,6 +175,24 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
       return res.status(502).render('error', {
         title: 'Payment error',
         message: 'Could not start Swiftpay PH checkout. ' + e.message + ` Your reference is ${orderNumber}.`,
+      });
+    }
+  }
+
+  if (paymentType === 'magpie_alipay' || paymentType === 'magpie_wechat') {
+    try {
+      const method = paymentType === 'magpie_wechat' ? 'wechat' : 'alipay';
+      const { checkoutId, checkoutUrl } = await magpie.createCheckout(order, res.locals.baseUrl, method);
+      db.prepare('UPDATE orders SET magpie_checkout_id = ? WHERE id = ?').run(checkoutId, order.id);
+      return res.redirect(checkoutUrl);
+    } catch (e) {
+      db.prepare("UPDATE orders SET status = 'failed', admin_notes = ? WHERE id = ?").run(
+        'Magpie checkout error: ' + e.message,
+        order.id
+      );
+      return res.status(502).render('error', {
+        title: 'Payment error',
+        message: 'Could not start Magpie payment. ' + e.message + ` Your reference is ${orderNumber}.`,
       });
     }
   }

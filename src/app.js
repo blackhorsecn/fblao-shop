@@ -52,14 +52,13 @@ const DATA_DIR = process.env.DATA_DIR
   ? path.resolve(process.env.DATA_DIR)
   : path.join(__dirname, '..', 'data');
 
-// Serve uploaded logo from persistent data dir
+// Serve uploaded logo from persistent data dir, falling back to the real PNG asset.
 app.get('/logo.png', (req, res) => {
   const logoPath = path.join(DATA_DIR, 'logo.png');
   if (fs.existsSync(logoPath)) {
     res.sendFile(logoPath);
   } else {
-    res.type('svg+xml');
-    res.sendFile(path.join(__dirname, '..', 'public', 'img', 'logo.svg'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'img', 'logo.png'));
   }
 });
 

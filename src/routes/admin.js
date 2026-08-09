@@ -532,6 +532,12 @@ router.get('/settings', (req, res) => {
       swiftpay_api_key: getSetting('swiftpay_api_key', ''),
       swiftpay_api_secret: getSetting('swiftpay_api_secret', ''),
       swiftpay_webhook_secret: getSetting('swiftpay_webhook_secret', ''),
+      magpie_enabled: getSetting('magpie_enabled', '0'),
+      magpie_api_base_url: getSetting('magpie_api_base_url', ''),
+      magpie_api_key: getSetting('magpie_api_key', ''),
+      magpie_api_secret: getSetting('magpie_api_secret', ''),
+      magpie_webhook_secret: getSetting('magpie_webhook_secret', ''),
+      magpie_target_currency: getSetting('magpie_target_currency', 'CNY'),
       cf_turnstile_site_key: getSetting('cf_turnstile_site_key', ''),
       cf_turnstile_secret_key: getSetting('cf_turnstile_secret_key', ''),
       cf_site_verification: getSetting('cf_site_verification', ''),
@@ -644,6 +650,17 @@ router.post('/settings/swiftpay', (req, res) => {
   setSetting('swiftpay_api_secret', String(req.body.swiftpay_api_secret || '').trim());
   setSetting('swiftpay_webhook_secret', String(req.body.swiftpay_webhook_secret || '').trim());
   flash(req, 'Swiftpay PH configuration saved.');
+  res.redirect('/admin/settings');
+});
+
+router.post('/settings/magpie', (req, res) => {
+  setSetting('magpie_enabled', req.body.magpie_enabled ? '1' : '0');
+  setSetting('magpie_api_base_url', String(req.body.magpie_api_base_url || '').trim());
+  setSetting('magpie_api_key', String(req.body.magpie_api_key || '').trim());
+  setSetting('magpie_api_secret', String(req.body.magpie_api_secret || '').trim());
+  setSetting('magpie_webhook_secret', String(req.body.magpie_webhook_secret || '').trim());
+  setSetting('magpie_target_currency', String(req.body.magpie_target_currency || 'CNY').trim().toUpperCase());
+  flash(req, 'Magpie configuration saved.');
   res.redirect('/admin/settings');
 });
 
