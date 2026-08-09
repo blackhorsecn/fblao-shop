@@ -18,6 +18,9 @@ const ICONS = {
   coinsph: 'https://static.coingecko.com/s/exchanges/images/1114/large/coinsph.png',
   paymongo: 'https://cdn.paymongo.com/images/paymongo-logo.png',
   xendit: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Xendit_Logo.png/512px-Xendit_Logo.png',
+  swiftpay: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Swift_logo.svg/512px-Swift_logo.svg.png',
+  swiftpayph: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Swift_logo.svg/512px-Swift_logo.svg.png',
+  'swiftpay ph': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Swift_logo.svg/512px-Swift_logo.svg.png',
   billease: 'https://cdn.paymongo.com/images/billease.png',
 
   // Cards

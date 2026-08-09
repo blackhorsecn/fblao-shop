@@ -526,6 +526,12 @@ router.get('/settings', (req, res) => {
       xendit_enabled: getSetting('xendit_enabled', '0'),
       xendit_secret_key: getSetting('xendit_secret_key', ''),
       xendit_callback_token: getSetting('xendit_callback_token', ''),
+      swiftpay_enabled: getSetting('swiftpay_enabled', '0'),
+      swiftpay_mode: getSetting('swiftpay_mode', 'sandbox'),
+      swiftpay_api_base_url: getSetting('swiftpay_api_base_url', ''),
+      swiftpay_api_key: getSetting('swiftpay_api_key', ''),
+      swiftpay_api_secret: getSetting('swiftpay_api_secret', ''),
+      swiftpay_webhook_secret: getSetting('swiftpay_webhook_secret', ''),
       cf_turnstile_site_key: getSetting('cf_turnstile_site_key', ''),
       cf_turnstile_secret_key: getSetting('cf_turnstile_secret_key', ''),
       cf_site_verification: getSetting('cf_site_verification', ''),
@@ -627,6 +633,17 @@ router.post('/settings/xendit', (req, res) => {
   setSetting('xendit_secret_key', String(req.body.xendit_secret_key || '').trim());
   setSetting('xendit_callback_token', String(req.body.xendit_callback_token || '').trim());
   flash(req, 'Xendit configuration saved.');
+  res.redirect('/admin/settings');
+});
+
+router.post('/settings/swiftpay', (req, res) => {
+  setSetting('swiftpay_enabled', req.body.swiftpay_enabled ? '1' : '0');
+  setSetting('swiftpay_mode', req.body.swiftpay_mode === 'live' ? 'live' : 'sandbox');
+  setSetting('swiftpay_api_base_url', String(req.body.swiftpay_api_base_url || '').trim());
+  setSetting('swiftpay_api_key', String(req.body.swiftpay_api_key || '').trim());
+  setSetting('swiftpay_api_secret', String(req.body.swiftpay_api_secret || '').trim());
+  setSetting('swiftpay_webhook_secret', String(req.body.swiftpay_webhook_secret || '').trim());
+  flash(req, 'Swiftpay PH configuration saved.');
   res.redirect('/admin/settings');
 });
 

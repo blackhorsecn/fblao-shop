@@ -107,6 +107,7 @@ CREATE TABLE IF NOT EXISTS orders (
   coins_request_id TEXT,
   paymongo_session_id TEXT,
   xendit_invoice_id TEXT,
+  swiftpay_checkout_id TEXT,
   maya_reference   TEXT,
   delivered_content TEXT,
   admin_notes      TEXT,
@@ -167,6 +168,7 @@ try { db.exec("ALTER TABLE orders ADD COLUMN warranty_period TEXT"); } catch(e){
 try { db.exec("ALTER TABLE orders ADD COLUMN coins_request_id TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN paymongo_session_id TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN xendit_invoice_id TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN swiftpay_checkout_id TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE product_stock_pool ADD COLUMN sold_at TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE categories ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
 try { db.exec("ALTER TABLE products ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
@@ -266,6 +268,12 @@ function seed() {
     xendit_enabled: process.env.XENDIT_ENABLED === '1' || !!process.env.XENDIT_SECRET_KEY ? '1' : '0',
     xendit_secret_key: process.env.XENDIT_SECRET_KEY || '',
     xendit_callback_token: process.env.XENDIT_CALLBACK_TOKEN || '',
+    swiftpay_enabled: process.env.SWIFTPAY_ENABLED === '1' || !!process.env.SWIFTPAY_API_KEY ? '1' : '0',
+    swiftpay_mode: process.env.SWIFTPAY_MODE || 'sandbox',
+    swiftpay_api_base_url: process.env.SWIFTPAY_API_BASE_URL || '',
+    swiftpay_api_key: process.env.SWIFTPAY_API_KEY || '',
+    swiftpay_api_secret: process.env.SWIFTPAY_API_SECRET || '',
+    swiftpay_webhook_secret: process.env.SWIFTPAY_WEBHOOK_SECRET || '',
   };
   for (const [k, v] of Object.entries(defaults)) setSetting(k, v);
 

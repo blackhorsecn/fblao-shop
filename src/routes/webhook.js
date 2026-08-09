@@ -6,6 +6,7 @@ const maya = require('../maya');
 const coins = require('../coins');
 const paymongo = require('../paymongo');
 const xendit = require('../xendit');
+const swiftpay = require('../swiftpay');
 const StoreService = require('../services/store');
 
 // PayMongo webhook
@@ -67,6 +68,43 @@ router.post('/xendit', async (req, res) => {
     return res.status(200).json({ ok: true });
   } catch (e) {
     console.error('xendit webhook error', e);
+    return res.status(200).json({ ok: false, error: e.message });
+  }
+});
+
+// Swiftpay PH webhook
+router.post('/swiftpay', async (req, res) => {
+  try {
+    const rawBody = req.rawBody || Buffer.from(JSON.stringify(req.body || {}));
+    const signature = req.get('X-SWIFTPAY-SIGNATURE') || req.get('x-swiftpay-signature') || '';
+    const sig = swiftpay.verifyWebhookSignature(rawBody, signature);
+    if (!sig.skipped && !sig.verified) {
+      return res.status(401).json({ error: 'invalid signature' });
+    }
+
+    const body = req.body || {};
+    const orderNumber =
+      body.reference_number ||
+      body.external_id ||
+      body.order_number ||
+      (body.data && (body.data.reference_number || body.data.external_id || body.data.order_number));
+    const rawStatus = body.status || body.payment_status || (body.data && (body.data.status || body.data.payment_status));
+    const status = swiftpay.normalizeStatus(rawStatus);
+
+    if (!orderNumber) return res.status(200).json({ ok: true, note: 'reference missing' });
+
+    const order = StoreService.getOrder(orderNumber);
+    if (!order) return res.status(200).json({ ok: true, note: 'order not found' });
+
+    if (status === 'paid') {
+      StoreService.updateOrderStatus(order.id, 'paid', "datetime('now')");
+    } else if (status === 'failed' && order.status === 'pending') {
+      StoreService.updateOrderStatus(order.id, 'failed');
+    }
+
+    return res.status(200).json({ ok: true });
+  } catch (e) {
+    console.error('swiftpay webhook error', e);
     return res.status(200).json({ ok: false, error: e.message });
   }
 });

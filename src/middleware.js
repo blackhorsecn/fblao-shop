@@ -6,6 +6,7 @@ const maya = require('./maya');
 const coins = require('./coins');
 const paymongo = require('./paymongo');
 const xendit = require('./xendit');
+const swiftpay = require('./swiftpay');
 
 function shopContext(req, res, next) {
   const settings = getSettings();
@@ -26,6 +27,7 @@ function shopContext(req, res, next) {
   res.locals.coinsEnabled = coins.isConfigured();
   res.locals.paymongoEnabled = paymongo.isConfigured();
   res.locals.xenditEnabled = xendit.isConfigured();
+  res.locals.swiftpayEnabled = swiftpay.isConfigured();
 
   res.locals.isAdmin = !!(req.session && req.session.adminId);
   res.locals.user = req.session.user || null;

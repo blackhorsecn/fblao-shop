@@ -8,6 +8,7 @@ const maya = require('../maya');
 const coins = require('../coins');
 const paymongo = require('../paymongo');
 const xendit = require('../xendit');
+const swiftpay = require('../swiftpay');
 const { generateOrderNumber } = require('../helpers');
 const { asyncHandler, rateLimit } = require('../middleware');
 const StoreService = require('../services/store');
@@ -29,7 +30,7 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
   const telegramUsername = String(req.body.telegram_username || '').trim().replace(/^@/, '');
   const productId = parseInt(req.body.product_id, 10);
   const quantity = Math.max(1, parseInt(req.body.quantity, 10) || 1);
-  const paymentType = req.body.payment_type; // 'manual', 'maya', or 'coins'
+  const paymentType = req.body.payment_type; // 'manual', 'maya', 'coins', 'paymongo', 'xendit', or 'swiftpay'
   const manualMethodId = req.body.manual_method_id ? parseInt(req.body.manual_method_id, 10) : null;
 
   if (!telegramUsername) {
@@ -66,6 +67,8 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
     return res.status(400).render('error', { title: 'Unavailable', message: 'PayMongo payment is not available right now. Please choose another method.' });
   } else if (paymentType === 'xendit' && !xendit.isConfigured()) {
     return res.status(400).render('error', { title: 'Unavailable', message: 'Xendit payment is not available right now. Please choose another method.' });
+  } else if (paymentType === 'swiftpay' && !swiftpay.isConfigured()) {
+    return res.status(400).render('error', { title: 'Unavailable', message: 'Swiftpay PH payment is not available right now. Please choose another method.' });
   }
 
   const orderNumber = generateOrderNumber();
@@ -152,6 +155,23 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
       return res.status(502).render('error', {
         title: 'Payment error',
         message: 'Could not start Xendit checkout. ' + e.message + ` Your reference is ${orderNumber}.`,
+      });
+    }
+  }
+
+  if (paymentType === 'swiftpay') {
+    try {
+      const { checkoutId, checkoutUrl } = await swiftpay.createCheckout(order, res.locals.baseUrl);
+      db.prepare('UPDATE orders SET swiftpay_checkout_id = ? WHERE id = ?').run(checkoutId, order.id);
+      return res.redirect(checkoutUrl);
+    } catch (e) {
+      db.prepare("UPDATE orders SET status = 'failed', admin_notes = ? WHERE id = ?").run(
+        'Swiftpay checkout error: ' + e.message,
+        order.id
+      );
+      return res.status(502).render('error', {
+        title: 'Payment error',
+        message: 'Could not start Swiftpay PH checkout. ' + e.message + ` Your reference is ${orderNumber}.`,
       });
     }
   }
