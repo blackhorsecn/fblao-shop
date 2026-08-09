@@ -14,7 +14,12 @@ const { generateOrderNumber } = require('../helpers');
 const { asyncHandler, rateLimit } = require('../middleware');
 const StoreService = require('../services/store');
 
-const SWIFTPAY_TYPES = ['swiftpay', 'swiftpay_maya', 'swiftpay_qrph', 'swiftpay_gcash', 'swiftpay_grabpay', 'swiftpay_shopeepay', 'swiftpay_card'];
+const SWIFTPAY_TYPES = [
+  'swiftpay',
+  'swiftpay_maya', 'swiftpay_qrph', 'swiftpay_gcash', 'swiftpay_grabpay', 'swiftpay_shopeepay', 'swiftpay_card',
+  'swiftpay_bdo', 'swiftpay_bpi', 'swiftpay_unionbank', 'swiftpay_metrobank',
+  'swiftpay_rcbc', 'swiftpay_landbank', 'swiftpay_pnb', 'swiftpay_securitybank', 'swiftpay_chinabank',
+];
 
 async function syncSwiftpayOrderStatus(order) {
   if (
@@ -197,6 +202,15 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
       swiftpay_grabpay: 'GRABPAY',
       swiftpay_shopeepay: 'SHOPEEPAY',
       swiftpay_card: 'CARD',
+      swiftpay_bdo: 'BDO',
+      swiftpay_bpi: 'BPI',
+      swiftpay_unionbank: 'UNIONBANK',
+      swiftpay_metrobank: 'METROBANK',
+      swiftpay_rcbc: 'RCBC',
+      swiftpay_landbank: 'LANDBANK',
+      swiftpay_pnb: 'PNB',
+      swiftpay_securitybank: 'SECURITY_BANK',
+      swiftpay_chinabank: 'CHINA_BANK',
       // swiftpay_qrph and plain swiftpay: no institution_code → show selection screen
     };
     const institutionCode = institutionMap[paymentType] || null;
