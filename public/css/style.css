@@ -26,6 +26,20 @@ body {
   color: var(--text);
   line-height: 1.5;
 }
+.login-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+.login-wrap .card {
+  width: min(100%, 420px);
+}
+.user-account-page {
+  display: grid;
+  gap: 24px;
+}
 a { color: var(--blue); text-decoration: none; }
 a:hover { text-decoration: underline; }
 .container { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
@@ -483,8 +497,12 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 
 .actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
 .alert { padding: 10px 14px; border-radius: 8px; margin-top: 14px; font-size: 14px; }
-.alert-error { background: rgba(234,84,85,.15); border: 1px solid rgba(234,84,85,.4); color: #ffb3b3; }
-.alert-ok { background: rgba(40,199,111,.15); border: 1px solid rgba(40,199,111,.4); color: #a6f0c6; }
+.alert-error { background: #fff1f1; border: 1px solid rgba(215,58,73,.22); color: #8a1c1c; }
+.alert-ok { background: #edf9f0; border: 1px solid rgba(40,167,69,.24); color: #1f6b36; }
+.nav-logout {
+  display: inline-block;
+  width: 100%;
+}
 .swiftpay-hero {
   display: flex;
   justify-content: space-between;
@@ -570,6 +588,10 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 @media (max-width: 760px) {
   .store-hero {
     padding: 22px 18px;
+  }
+  .user-account-page > .card > div:first-child {
+    flex-direction: column;
+    align-items: flex-start !important;
   }
   .panel-grid { grid-template-columns: 1fr; }
   .swiftpay-hero { flex-direction: column; }
