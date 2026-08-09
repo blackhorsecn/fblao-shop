@@ -265,6 +265,10 @@ const StoreService = {
     const updatedOrder = this.getOrder(orderId);
     if (status === 'paid' && order.status !== 'paid') {
       NotificationService.onOrderPaid(updatedOrder).catch(console.error);
+      // If auto-delivery ran during this transition, also fire the delivered notification
+      if (updatedOrder && updatedOrder.status === 'delivered') {
+        NotificationService.onOrderDelivered(updatedOrder).catch(console.error);
+      }
     } else if (status === 'delivered' && order.status !== 'delivered') {
       NotificationService.onOrderDelivered(updatedOrder).catch(console.error);
     }

@@ -282,6 +282,7 @@ function seed() {
     swiftpay_failure_url: process.env.SWIFTPAY_FAILURE_URL || '',
     swiftpay_cancel_url: process.env.SWIFTPAY_CANCEL_URL || '',
     magpie_enabled: process.env.MAGPIE_ENABLED === '1' || !!process.env.MAGPIE_API_KEY ? '1' : '0',
+    magpie_mode: process.env.MAGPIE_MODE || 'sandbox',
     magpie_api_base_url: process.env.MAGPIE_API_BASE_URL || '',
     magpie_api_key: process.env.MAGPIE_API_KEY || '',
     magpie_api_secret: process.env.MAGPIE_API_SECRET || '',

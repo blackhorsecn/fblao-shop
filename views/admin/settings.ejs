@@ -203,8 +203,16 @@
     <h2>Magpie (Alipay / WeChat Pay)</h2>
     <p class="muted">Enable Magpie for Alipay and WeChat Pay. The app will auto-convert your order amount into the target currency before creating the checkout.</p>
     <form method="POST" action="/admin/settings/magpie">
-      <label class="field" style="flex:0 0 130px;"><span>Enabled</span><input type="checkbox" name="magpie_enabled" <%= s.magpie_enabled === '1' ? 'checked' : '' %>></label>
-      <label class="field"><span>API Base URL</span><input type="text" name="magpie_api_base_url" value="<%= escapeHtml(s.magpie_api_base_url) %>" placeholder="https://api.magpie.example" required></label>
+      <div class="field-row">
+        <label class="field" style="flex:0 0 130px;"><span>Enabled</span><input type="checkbox" name="magpie_enabled" <%= s.magpie_enabled === '1' ? 'checked' : '' %>></label>
+        <label class="field"><span>Mode</span>
+          <select name="magpie_mode">
+            <option value="sandbox" <%= s.magpie_mode !== 'live' ? 'selected' : '' %>>Sandbox</option>
+            <option value="live" <%= s.magpie_mode === 'live' ? 'selected' : '' %>>Live (production)</option>
+          </select>
+        </label>
+      </div>
+      <label class="field"><span>API Base URL (optional)</span><input type="text" name="magpie_api_base_url" value="<%= escapeHtml(s.magpie_api_base_url) %>" placeholder="Leave blank to use the default URL for the selected mode"></label>
       <label class="field"><span>API Key</span><input type="text" name="magpie_api_key" value="<%= escapeHtml(s.magpie_api_key) %>"></label>
       <label class="field"><span>API Secret (optional)</span><input type="text" name="magpie_api_secret" value="<%= escapeHtml(s.magpie_api_secret) %>"></label>
       <label class="field"><span>Webhook Secret (optional)</span><input type="text" name="magpie_webhook_secret" value="<%= escapeHtml(s.magpie_webhook_secret) %>"></label>
