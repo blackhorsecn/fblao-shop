@@ -3,19 +3,32 @@
 const crypto = require('crypto');
 const { getSetting } = require('./db');
 
+const HOSTS = {
+  sandbox: 'https://api-sandbox.magpie.im',
+  live: 'https://api.magpie.im',
+};
+
+function settingOrEnv(settingKey, envKey, fallback = '') {
+  const value = getSetting(settingKey, '') || process.env[envKey] || fallback;
+  return String(value || '').trim();
+}
+
 function isConfigured() {
   const enabled = getSetting('magpie_enabled') === '1' || process.env.MAGPIE_ENABLED === '1';
-  const apiKey = getSetting('magpie_api_key') || process.env.MAGPIE_API_KEY;
+  const apiKey = settingOrEnv('magpie_api_key', 'MAGPIE_API_KEY');
   return enabled && !!apiKey && !!apiBase();
 }
 
 function apiBase() {
-  return (getSetting('magpie_api_base_url') || process.env.MAGPIE_API_BASE_URL || '').trim().replace(/\/$/, '');
+  const custom = settingOrEnv('magpie_api_base_url', 'MAGPIE_API_BASE_URL');
+  if (custom) return custom.replace(/\/$/, '');
+  const mode = settingOrEnv('magpie_mode', 'MAGPIE_MODE', 'sandbox').toLowerCase();
+  return HOSTS[mode] || HOSTS.sandbox;
 }
 
 function authHeaders() {
-  const apiKey = getSetting('magpie_api_key') || process.env.MAGPIE_API_KEY;
-  const apiSecret = getSetting('magpie_api_secret') || process.env.MAGPIE_API_SECRET;
+  const apiKey = settingOrEnv('magpie_api_key', 'MAGPIE_API_KEY');
+  const apiSecret = settingOrEnv('magpie_api_secret', 'MAGPIE_API_SECRET');
   const headers = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${apiKey}`,
@@ -44,10 +57,10 @@ async function convertAmount(amount, fromCurrency, toCurrency) {
 }
 
 async function createCheckout(order, baseUrl, method = 'alipay') {
-  const apiKey = getSetting('magpie_api_key') || process.env.MAGPIE_API_KEY;
+  const apiKey = settingOrEnv('magpie_api_key', 'MAGPIE_API_KEY');
   if (!apiKey) throw new Error('Magpie API key is not configured');
 
-  const targetCurrency = (getSetting('magpie_target_currency') || process.env.MAGPIE_TARGET_CURRENCY || 'CNY').toUpperCase();
+  const targetCurrency = settingOrEnv('magpie_target_currency', 'MAGPIE_TARGET_CURRENCY', 'CNY').toUpperCase();
   const convertedAmount = await convertAmount(order.total, order.currency || 'PHP', targetCurrency);
   const paymentMethod = method === 'wechat' ? 'wechatpay' : 'alipay';
 
@@ -102,7 +115,7 @@ async function createCheckout(order, baseUrl, method = 'alipay') {
 }
 
 function verifyWebhookSignature(rawBody, signature) {
-  const secret = getSetting('magpie_webhook_secret') || process.env.MAGPIE_WEBHOOK_SECRET;
+  const secret = settingOrEnv('magpie_webhook_secret', 'MAGPIE_WEBHOOK_SECRET');
   if (!secret) return { verified: false, skipped: true };
   if (!signature) return { verified: false, skipped: false };
 

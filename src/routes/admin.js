@@ -661,6 +661,7 @@ router.post('/settings/swiftpay', (req, res) => {
 
 router.post('/settings/magpie', (req, res) => {
   setSetting('magpie_enabled', req.body.magpie_enabled ? '1' : '0');
+  setSetting('magpie_mode', req.body.magpie_mode === 'live' ? 'live' : 'sandbox');
   setSetting('magpie_api_base_url', String(req.body.magpie_api_base_url || '').trim());
   setSetting('magpie_api_key', String(req.body.magpie_api_key || '').trim());
   setSetting('magpie_api_secret', String(req.body.magpie_api_secret || '').trim());
