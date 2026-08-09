@@ -279,10 +279,11 @@ const StoreService = {
     db.prepare("UPDATE orders SET delivered_content = ?, status = 'delivered', delivered_at = datetime('now'), updated_at = datetime('now') WHERE id = ?")
       .run(content, orderId);
 
-    // Decrement stock for non-auto-deliver products that weren't already decremented
+    // Decrement stock for non-auto-deliver products only if stock hasn't already
+    // been decremented (i.e. the order was never transitioned through 'paid')
     if (order && order.product_id) {
       const product = this.getProduct(order.product_id, false);
-      if (product && !product.auto_deliver && order.status !== 'paid') {
+      if (product && !product.auto_deliver && order.status !== 'paid' && order.status !== 'delivered') {
         this.updateProductStock(order.product_id, -order.quantity);
       }
     }
