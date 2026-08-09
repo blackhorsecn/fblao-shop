@@ -73,23 +73,21 @@ router.post('/xendit', async (req, res) => {
   }
 });
 
-// Swiftpay PH webhook
+// Swiftpay PH webhook / callback
+// SwiftPay sends callbacks as POST with x_* params in the body (form or JSON).
+// The signature covers all x_* params sorted alphabetically, concatenated key+value.
 router.post('/swiftpay', async (req, res) => {
   try {
-    const rawBody = req.rawBody || Buffer.from(JSON.stringify(req.body || {}));
-    const signature = req.get('X-SWIFTPAY-SIGNATURE') || req.get('x-swiftpay-signature') || '';
-    const sig = swiftpay.verifyWebhookSignature(rawBody, signature);
+    const body = req.body || {};
+    // The incoming signature is sent as the 'signature' field (not a header).
+    const incomingSignature = body.signature || req.get('x-swiftpay-signature') || '';
+    const sig = swiftpay.verifyWebhookSignature(body, incomingSignature);
     if (!sig.skipped && !sig.verified) {
       return res.status(401).json({ error: 'invalid signature' });
     }
 
-    const body = req.body || {};
-    const orderNumber =
-      body.reference_number ||
-      body.external_id ||
-      body.order_number ||
-      (body.data && (body.data.reference_number || body.data.external_id || body.data.order_number));
-    const rawStatus = body.status || body.payment_status || (body.data && (body.data.status || body.data.payment_status));
+    const orderNumber = body.x_reference_no || body.reference_number || body.order_number;
+    const rawStatus = body.x_payment_status || body.payment_status || body.status;
     const status = swiftpay.normalizeStatus(rawStatus);
 
     if (!orderNumber) return res.status(200).json({ ok: true, note: 'reference missing' });

@@ -190,18 +190,18 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
   }
 
   if (SWIFTPAY_TYPES.includes(paymentType)) {
-    // Map customer-facing type to Swiftpay channel hint
-    const channelMap = {
-      swiftpay_maya: 'maya',
-      swiftpay_qrph: 'qrph',
-      swiftpay_gcash: 'gcash',
-      swiftpay_grabpay: 'grabpay',
-      swiftpay_shopeepay: 'shopeepay',
-      swiftpay_card: 'card',
+    // Map customer-facing type to SwiftPay institution_code (as returned by /api/institutions)
+    const institutionMap = {
+      swiftpay_gcash: 'GCASH',
+      swiftpay_maya: 'MAYA',
+      swiftpay_grabpay: 'GRABPAY',
+      swiftpay_shopeepay: 'SHOPEEPAY',
+      swiftpay_card: 'CARD',
+      // swiftpay_qrph and plain swiftpay: no institution_code → show selection screen
     };
-    const channel = channelMap[paymentType] || null;
+    const institutionCode = institutionMap[paymentType] || null;
     try {
-      const { checkoutId, checkoutUrl } = await swiftpay.createCheckout(order, res.locals.baseUrl, channel);
+      const { checkoutId, checkoutUrl } = await swiftpay.createCheckout(order, res.locals.baseUrl, institutionCode);
       db.prepare('UPDATE orders SET swiftpay_checkout_id = ?, swiftpay_checkout_url = ? WHERE id = ?').run(checkoutId, checkoutUrl, order.id);
       return res.redirect(`/swiftpay/checkout?ref=${encodeURIComponent(orderNumber)}`);
     } catch (e) {
