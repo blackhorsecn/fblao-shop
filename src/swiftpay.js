@@ -41,7 +41,11 @@ function authHeaders() {
 
 function checkoutResultUrl(baseUrl, orderNumber, statusKey, settingKey, envKey) {
   const custom = settingOrEnv(settingKey, envKey);
-  if (custom) return custom;
+  if (custom) {
+    return custom
+      .replace(/\{ORDER_NO\}/g, encodeURIComponent(orderNumber))
+      .replace(/\{STATUS\}/g, encodeURIComponent(statusKey));
+  }
   return `${baseUrl}/order/result?ref=${encodeURIComponent(orderNumber)}&status=${statusKey}`;
 }
 

@@ -187,6 +187,7 @@
       <label class="field"><span>Cancel URL override (optional)</span><input type="text" name="swiftpay_cancel_url" value="<%= escapeHtml(s.swiftpay_cancel_url) %>" placeholder="<%= baseUrl %>/order/result?ref={ORDER_NO}&status=cancel"></label>
       <label class="field"><span>Webhook Secret (optional HMAC)</span><input type="text" name="swiftpay_webhook_secret" value="<%= escapeHtml(s.swiftpay_webhook_secret) %>" placeholder="Add this only if you enabled signed Swiftpay webhooks"></label>
       <div class="alert alert-ok" style="margin:14px 0; font-size:11px;">
+        You can use <code>{ORDER_NO}</code> and <code>{STATUS}</code> in any override URL.<br>
         <strong>Default Success URL:</strong> <code><%= baseUrl %>/order/result?ref={ORDER_NO}&status=success</code><br>
         <strong>Default Failure URL:</strong> <code><%= baseUrl %>/order/result?ref={ORDER_NO}&status=failure</code><br>
         <strong>Default Cancel URL:</strong> <code><%= baseUrl %>/order/result?ref={ORDER_NO}&status=cancel</code>

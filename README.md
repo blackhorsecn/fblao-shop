@@ -109,6 +109,7 @@ Now your `shop.db` will be stored in the persistent volume and survive redeploym
    ```
 4. The app now exposes optional admin-managed success, failure, and cancel redirect URLs. Leave them
    blank to use the built-in order result routes, or set them explicitly if Swiftpay requires your own URLs.
+   Override URLs support the placeholders `{ORDER_NO}` and `{STATUS}`.
 
 ### ⚠️ Note on the keys currently in `.env`
 The keys copied from `API.txt` are **rejected by Maya's sandbox** with
