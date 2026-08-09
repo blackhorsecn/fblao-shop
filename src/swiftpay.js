@@ -43,7 +43,7 @@ function checkoutResultUrl(baseUrl, orderNumber, statusKey, settingKey, envKey) 
   const custom = settingOrEnv(settingKey, envKey);
   if (custom) {
     return custom
-      .replace(/\{ORDER_NO\}/g, String(orderNumber))
+      .replace(/\{ORDER_NO\}/g, encodeURIComponent(String(orderNumber)))
       .replace(/\{STATUS\}/g, String(statusKey));
   }
   return `${baseUrl}/order/result?ref=${encodeURIComponent(orderNumber)}&status=${statusKey}`;
