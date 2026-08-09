@@ -6,7 +6,7 @@ const { getSetting } = require('./db');
 function isConfigured() {
   const enabled = getSetting('magpie_enabled') === '1' || process.env.MAGPIE_ENABLED === '1';
   const apiKey = getSetting('magpie_api_key') || process.env.MAGPIE_API_KEY;
-  return enabled && !!apiKey;
+  return enabled && !!apiKey && !!apiBase();
 }
 
 function apiBase() {
@@ -72,7 +72,9 @@ async function createCheckout(order, baseUrl, method = 'alipay') {
     },
   };
 
-  const endpoint = apiBase() ? `${apiBase()}/v1/payments/checkout` : '/v1/payments/checkout';
+  const base = apiBase();
+  if (!base) throw new Error('Magpie API base URL is not configured');
+  const endpoint = `${base}/v1/payments/checkout`;
   const res = await fetch(endpoint, {
     method: 'POST',
     headers: authHeaders(),

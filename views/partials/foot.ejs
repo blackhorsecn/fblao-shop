@@ -31,8 +31,11 @@
     </div>
     <p>&copy; <%= shopName %>. All accounts are for authorized use only.</p>
     <p>Current Time (PH): <span id="live-clock" style="color: var(--accent); font-weight: bold; font-family: ui-monospace, monospace;"><%= date(new Date().toISOString()) %></span></p>
-    <p>Support: <a href="https://t.me/mm6668mm" target="_blank" style="color: #0088cc; font-weight: bold;">@mm6668mm</a></p>
-    <p class="muted">Powered by <span class="shining-gold">BlackHorse</span> · Digital goods delivered to your TG immediately.</p>
+    <p>Support: <a href="https://t.me/BMXTORE" target="_blank" style="color: #0088cc; font-weight: bold;">@BMXTORE</a></p>
+    <p class="muted">Simple checkout, clear pricing, and buyer-friendly payment options.</p>
+    <% if (magpieEnabled) { %>
+      <p class="muted">Chinese buyers: Alipay / WeChat Pay supported when available.</p>
+    <% } %>
   </div>
 </footer>
 <script src="/static/js/main.js"></script>

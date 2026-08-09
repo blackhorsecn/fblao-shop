@@ -108,6 +108,7 @@ CREATE TABLE IF NOT EXISTS orders (
   paymongo_session_id TEXT,
   xendit_invoice_id TEXT,
   swiftpay_checkout_id TEXT,
+  swiftpay_checkout_url TEXT,
   magpie_checkout_id TEXT,
   maya_reference   TEXT,
   delivered_content TEXT,
@@ -170,6 +171,7 @@ try { db.exec("ALTER TABLE orders ADD COLUMN coins_request_id TEXT"); } catch(e)
 try { db.exec("ALTER TABLE orders ADD COLUMN paymongo_session_id TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN xendit_invoice_id TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN swiftpay_checkout_id TEXT"); } catch(e){}
+try { db.exec("ALTER TABLE orders ADD COLUMN swiftpay_checkout_url TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE orders ADD COLUMN magpie_checkout_id TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE product_stock_pool ADD COLUMN sold_at TEXT"); } catch(e){}
 try { db.exec("ALTER TABLE categories ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e){}
@@ -276,6 +278,9 @@ function seed() {
     swiftpay_api_key: process.env.SWIFTPAY_API_KEY || '',
     swiftpay_api_secret: process.env.SWIFTPAY_API_SECRET || '',
     swiftpay_webhook_secret: process.env.SWIFTPAY_WEBHOOK_SECRET || '',
+    swiftpay_success_url: process.env.SWIFTPAY_SUCCESS_URL || '',
+    swiftpay_failure_url: process.env.SWIFTPAY_FAILURE_URL || '',
+    swiftpay_cancel_url: process.env.SWIFTPAY_CANCEL_URL || '',
     magpie_enabled: process.env.MAGPIE_ENABLED === '1' || !!process.env.MAGPIE_API_KEY ? '1' : '0',
     magpie_api_base_url: process.env.MAGPIE_API_BASE_URL || '',
     magpie_api_key: process.env.MAGPIE_API_KEY || '',

@@ -1,0 +1,55 @@
+<%- include('partials/head') %>
+
+<div class="card">
+  <div class="swiftpay-hero">
+    <div>
+      <div class="status-pill status-pending">Awaiting payment</div>
+      <h2 style="margin: 0 0 8px;">Complete your Swiftpay payment</h2>
+      <p class="muted" style="margin: 0;">Stay on-brand while you send the buyer to Swiftpay's secure payment form.</p>
+    </div>
+    <img class="swiftpay-badge" src="<%= getIcon('swiftpay') %>" alt="Swiftpay PH">
+  </div>
+
+  <div class="swiftpay-layout">
+    <div class="subpanel">
+      <h3 style="margin-top:0;">Order summary</h3>
+      <table class="kv" style="margin-bottom:0;">
+        <tr><th>Order number</th><td><strong><%= order.order_number %></strong></td></tr>
+        <tr><th>Telegram</th><td>@<%= order.telegram_username %></td></tr>
+        <tr><th>Product</th><td><%= order.product_name %></td></tr>
+        <tr><th>Quantity</th><td><%= order.quantity %></td></tr>
+        <tr><th>Total</th><td><strong><%= money(order.total) %></strong></td></tr>
+      </table>
+    </div>
+
+    <div class="subpanel">
+      <h3 style="margin-top:0;">Next step</h3>
+      <p class="muted">Open the secure Swiftpay checkout to finish payment, then come back here to confirm the final status.</p>
+
+      <% if (checkoutUrl) { %>
+        <a class="btn btn-primary btn-block" href="<%= checkoutUrl %>" target="_blank" rel="noopener noreferrer">
+          <img class="payment-inline-logo" src="<%= getIcon('swiftpay') %>" alt="Swiftpay PH">
+          Proceed to Swiftpay
+        </a>
+      <% } else { %>
+        <div class="alert alert-error" style="margin-top:0;">The Swiftpay checkout link is unavailable for this order. Please start a new order.</div>
+      <% } %>
+
+      <div class="instructions swiftpay-note">
+        <h3>What happens next</h3>
+        <div class="instructions-body">
+          1. Complete the payment in Swiftpay.<br>
+          2. Return to the status page for live confirmation.<br>
+          3. Once paid, your order will move forward automatically.
+        </div>
+      </div>
+
+      <div class="actions">
+        <a class="btn" href="/swiftpay/status?ref=<%= encodeURIComponent(order.order_number) %>">I already paid</a>
+        <a class="btn btn-light" href="/status?ref=<%= encodeURIComponent(order.order_number) %>&tg=<%= encodeURIComponent(order.telegram_username) %>">Open general status</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/foot') %>
