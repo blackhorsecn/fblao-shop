@@ -72,9 +72,9 @@ async function createCheckout(order, baseUrl, method = 'alipay') {
     },
   };
 
-  const endpoint = apiBase()
-    ? `${apiBase()}/v1/payments/checkout`
-    : (() => { throw new Error('Magpie API base URL is not configured'); })();
+  const base = apiBase();
+  if (!base) throw new Error('Magpie API base URL is not configured');
+  const endpoint = `${base}/v1/payments/checkout`;
   const res = await fetch(endpoint, {
     method: 'POST',
     headers: authHeaders(),
