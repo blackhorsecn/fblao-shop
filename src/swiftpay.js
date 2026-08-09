@@ -110,6 +110,68 @@ async function createCheckout(order, baseUrl, institutionCode = null) {
 }
 
 /**
+ * Bootstrap a QR Ph payment.
+ * Endpoint: POST /api/bootstrap/qrph
+ * Returns { paymentId, qrCode } — the qrCode is a raw QR string (not a URL).
+ * The QR image can then be fetched from GET /api/payments/qrph/image
+ * with header X-Swiftpay-Payment-Token: {paymentId}
+ *
+ * @param {object} order
+ * @param {'P2P'|'P2M'} type - P2P = sender covers transfer cost (default), P2M = receiver covers it
+ */
+async function createQrph(order, type = 'P2P') {
+  const accessKey = settingOrEnv('swiftpay_api_key', 'SWIFTPAY_API_KEY');
+  const secretKey = settingOrEnv('swiftpay_api_secret', 'SWIFTPAY_API_SECRET');
+  if (!accessKey) throw new Error('SwiftPay access key is not configured');
+  if (!secretKey) throw new Error('SwiftPay secret key is not configured');
+
+  const amount = Number(order.total).toFixed(2);
+
+  const params = {
+    x_access_key: accessKey,
+    x_reference_no: String(order.order_number),
+    x_amount: amount,
+    x_currency: 'PHP',
+  };
+
+  params.signature = computeSignature(params, secretKey);
+
+  // type is a URL query param, not part of the request body
+  const url = `${apiBase()}/api/bootstrap/qrph?type=${encodeURIComponent(type)}`;
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+
+  const text = await res.text();
+  let data = {};
+  try { data = JSON.parse(text); } catch (_) { /* keep raw */ }
+
+  if (!res.ok) {
+    const message = data.message || data.error || text || 'SwiftPay API error';
+    throw new Error(`SwiftPay QR Ph bootstrap failed (${res.status}): ${message}`);
+  }
+
+  // Response: { paymentId, paymentStatus, referenceNo, amount, bankAccountNumber, instapayBankCode, qrCode }
+  const paymentId = data.paymentId;
+  const qrCode = data.qrCode;
+  if (!paymentId) throw new Error('SwiftPay QR Ph response missing paymentId');
+  if (!qrCode) throw new Error('SwiftPay QR Ph response missing qrCode');
+
+  return { paymentId, qrCode };
+}
+
+/**
+ * Get the QR image URL for a QR Ph payment.
+ * The caller should proxy this from their server (it requires the X-Swiftpay-Payment-Token header).
+ */
+function qrphImageUrl(paymentId) {
+  return `${apiBase()}/api/payments/qrph/image`;
+}
+
+/**
  * Query payment status by reference number.
  * Endpoint: GET /api/payments/status/query?accessKey=...&referenceNo=...
  * Returns a normalised status string: 'paid' | 'failed' | 'pending'
@@ -186,6 +248,8 @@ function verifyWebhookSignature(params, incomingSignature) {
 module.exports = {
   isConfigured,
   createCheckout,
+  createQrph,
+  qrphImageUrl,
   getCheckoutStatus,
   normalizeStatus,
   verifyWebhookSignature,

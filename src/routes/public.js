@@ -32,7 +32,12 @@ async function syncSwiftpayOrderStatus(order) {
   }
 
   try {
-    const status = await swiftpay.getCheckoutStatus(order.swiftpay_checkout_id);
+    // For QR Ph, swiftpay_checkout_id holds the paymentId (not the reference number).
+    // The status query always uses the order_number as the referenceNo.
+    const refNo = order.payment_type === 'swiftpay_qrph'
+      ? order.order_number
+      : order.swiftpay_checkout_id;
+    const status = await swiftpay.getCheckoutStatus(refNo);
     if (status === 'paid') {
       StoreService.updateOrderStatus(order.id, 'paid', "datetime('now')");
       return StoreService.getOrder(order.id);
@@ -195,6 +200,27 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
   }
 
   if (SWIFTPAY_TYPES.includes(paymentType)) {
+    // QR Ph has a completely different API flow: bootstrap/qrph returns a QR code
+    // that is displayed inline on our page — there is no customer redirect to SwiftPay.
+    if (paymentType === 'swiftpay_qrph') {
+      try {
+        const { paymentId, qrCode } = await swiftpay.createQrph(order);
+        // Store paymentId as the checkout ID (for status queries) and qrCode as the checkout URL field.
+        db.prepare('UPDATE orders SET swiftpay_checkout_id = ?, swiftpay_checkout_url = ? WHERE id = ?').run(paymentId, qrCode, order.id);
+        return res.redirect(`/swiftpay/qrph?ref=${encodeURIComponent(orderNumber)}`);
+      } catch (e) {
+        db.prepare("UPDATE orders SET status = 'failed', admin_notes = ? WHERE id = ?").run(
+          'SwiftPay QR Ph error: ' + e.message,
+          order.id
+        );
+        return res.status(502).render('error', {
+          title: 'Payment error',
+          message: 'Could not generate QR Ph code. ' + e.message + ` Your reference is ${orderNumber}.`,
+        });
+      }
+    }
+
+    // All other SwiftPay methods use the standard redirect checkout flow.
     // Map customer-facing type to SwiftPay institution_code (as returned by /api/institutions)
     const institutionMap = {
       swiftpay_gcash: 'GCASH',
@@ -274,7 +300,51 @@ router.get('/swiftpay/checkout', asyncHandler(async (req, res) => {
   });
 }));
 
-// Order result / instructions page (after checkout or manual order) ----------
+// QR Ph payment page — shows the InstaPay QR code inline ----------------------
+router.get('/swiftpay/qrph', asyncHandler(async (req, res) => {
+  const ref = String(req.query.ref || '').trim();
+  let order = StoreService.getOrder(ref);
+  if (!order) {
+    return res.status(404).render('error', { title: 'Not found', message: 'Order not found.' });
+  }
+  if (order.payment_type !== 'swiftpay_qrph') {
+    return res.redirect(`/order/result?ref=${encodeURIComponent(order.order_number)}`);
+  }
+
+  // swiftpay_checkout_id holds the paymentId; swiftpay_checkout_url holds the raw qrCode string.
+  order = await syncSwiftpayOrderStatus(order);
+
+  res.render('swiftpay-qrph', {
+    title: `QR Ph Payment · ${order.order_number}`,
+    order,
+    paymentId: order.swiftpay_checkout_id || '',
+    qrCode: order.swiftpay_checkout_url || '',
+  });
+}));
+
+// Proxy the QR image from SwiftPay (requires X-Swiftpay-Payment-Token header) -
+router.get('/swiftpay/qrph/image', asyncHandler(async (req, res) => {
+  const paymentId = String(req.query.paymentId || '').trim();
+  if (!paymentId) return res.status(400).send('Missing paymentId');
+
+  const base = swiftpay.qrphImageUrl(paymentId);
+  try {
+    const upstream = await fetch(base, {
+      method: 'GET',
+      headers: { 'X-Swiftpay-Payment-Token': paymentId },
+    });
+    if (!upstream.ok) return res.status(upstream.status).send('QR image unavailable');
+    const contentType = upstream.headers.get('content-type') || 'image/png';
+    const buf = Buffer.from(await upstream.arrayBuffer());
+    res.set('Content-Type', contentType);
+    res.set('Cache-Control', 'no-store');
+    res.send(buf);
+  } catch (e) {
+    res.status(502).send('QR image fetch failed: ' + e.message);
+  }
+}));
+
+
 router.get('/order/result', asyncHandler(async (req, res) => {
   const ref = String(req.query.ref || '').trim();
   let order = StoreService.getOrder(ref);
@@ -309,7 +379,10 @@ router.get('/order/result', asyncHandler(async (req, res) => {
 }));
 
 router.get('/swiftpay/status', asyncHandler(async (req, res) => {
-  const ref = String(req.query.ref || '').trim();
+  // SwiftPay sends customers back to the redirect URL configured in the merchant portal
+  // with query params: x_reference_no, x_payment_status, x_payment_id, signature
+  // We accept either our own ?ref= param or SwiftPay's ?x_reference_no=
+  const ref = String(req.query.ref || req.query.x_reference_no || '').trim();
   let order = StoreService.getOrder(ref);
   if (!order) {
     return res.status(404).render('error', { title: 'Not found', message: 'Order not found.' });
