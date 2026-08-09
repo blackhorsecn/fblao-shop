@@ -22,13 +22,15 @@
     <tr><th>Order number</th><td><strong><%= order.order_number %></strong></td></tr>
     <tr>
       <th>Payment Method</th>
-      <td style="display: flex; align-items: center; gap: 8px;">
+      <td>
+        <span class="payment-inline">
         <% var icon = getIcon(order.payment_type) || (manualMethod ? getIcon(manualMethod.name, manualMethod.icon_url) : null); %>
         <% if (icon) { %>
-          <img src="<%= icon %>" alt="Icon" style="height: 14px;">
+          <img class="payment-inline-logo" src="<%= icon %>" alt="Icon">
         <% } %>
         <span style="text-transform: uppercase; font-size: 11px; font-weight: bold;"><%= order.payment_type %></span>
         <%= manualMethod ? ' — ' + manualMethod.name : '' %>
+        </span>
       </td>
     </tr>
     <% if (order.email) { %><tr><th>Email</th><td><%= order.email %></td></tr><% } %>

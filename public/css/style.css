@@ -242,13 +242,46 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 }
 .pay-option:last-child { margin-bottom: 0; }
 .pay-option:hover { background: var(--panel-2); border-color: var(--accent); }
+.pay-option-body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+.pay-option-logo,
+.payment-inline-logo {
+  display: block;
+  width: auto;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+}
+.pay-option-logo {
+  height: 28px;
+  min-width: 72px;
+  max-width: 124px;
+  padding: 4px 10px;
+}
+.payment-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.payment-inline-logo {
+  height: 24px;
+  max-width: 104px;
+  padding: 3px 8px;
+}
 .pay-option input[type="radio"] {
   accent-color: var(--accent);
   width: 18px;
   height: 18px;
 }
 .pay-option span { font-size: 14px; flex: 1; line-height: 1.4; }
-.pay-option strong { display: block; color: #fff; margin-bottom: 2px; }
+.pay-option strong { display: block; color: var(--text); margin-bottom: 2px; }
 
 /* Modal */
 .modal-overlay {
@@ -343,18 +376,22 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
 .site-footer { border-top: 1px solid var(--border); padding: 24px 0; margin-top: 40px; color: var(--muted); font-size: 13px; text-align: center; }
 .site-footer p { margin: 4px 0; }
 .site-footer .footer-brand img { height: 32px; max-width: 180px; object-fit: contain; margin-bottom: 18px; }
-.payment-methods { margin-bottom: 20px; display: flex; justify-content: center; gap: 25px; align-items: center; flex-wrap: wrap; }
+.payment-methods { margin-bottom: 20px; display: flex; justify-content: center; gap: 12px; align-items: center; flex-wrap: wrap; }
 .payment-methods .payment-icon {
   display: block;
   width: auto;
-  height: auto;
-  max-height: 24px;
-  max-width: 120px;
+  height: 32px;
+  max-width: 144px;
   object-fit: contain;
-  transition: transform 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
 }
-.payment-methods .payment-icon-mastercard { max-height: 30px; }
-.payment-methods .payment-icon:hover { transform: scale(1.1); }
+.payment-methods .payment-icon-mastercard { max-width: 164px; }
+.payment-methods .payment-icon:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12); }
 
 @keyframes shine {
   0% { background-position: -100% 0; }

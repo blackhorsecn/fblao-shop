@@ -100,8 +100,8 @@
         <% if (mayaEnabled) { %>
           <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
             <input type="radio" name="payment_type" value="maya" checked>
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-               <img src="<%= getIcon('maya') %>" alt="Maya" style="height: 20px;">
+            <div class="pay-option-body">
+              <img class="pay-option-logo" src="<%= getIcon('maya') %>" alt="Maya">
                <span><strong>Maya Checkout</strong> — pay with Maya, GCash, or Card</span>
             </div>
           </label>
@@ -109,8 +109,8 @@
         <% if (coinsEnabled) { %>
           <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
             <input type="radio" name="payment_type" value="coins" <%= !mayaEnabled ? 'checked' : '' %>>
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-               <img src="<%= getIcon('coins.ph') %>" alt="Coins.ph" style="height: 20px;">
+            <div class="pay-option-body">
+              <img class="pay-option-logo" src="<%= getIcon('coins.ph') %>" alt="Coins.ph">
                <span><strong>Coins.ph Enterprise</strong> — Instant Crypto/Wallet payment</span>
             </div>
           </label>
@@ -118,8 +118,8 @@
         <% if (paymongoEnabled) { %>
           <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
             <input type="radio" name="payment_type" value="paymongo" <%= (!mayaEnabled && !coinsEnabled) ? 'checked' : '' %>>
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-               <img src="<%= getIcon('paymongo') %>" alt="PayMongo" style="height: 16px;">
+            <div class="pay-option-body">
+              <img class="pay-option-logo" src="<%= getIcon('paymongo') %>" alt="PayMongo">
                <span><strong>PayMongo</strong> — GCash, Maya, Cards, BillEase</span>
             </div>
           </label>
@@ -127,8 +127,8 @@
         <% if (xenditEnabled) { %>
           <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
             <input type="radio" name="payment_type" value="xendit" <%= (!mayaEnabled && !coinsEnabled && !paymongoEnabled) ? 'checked' : '' %>>
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-               <img src="<%= getIcon('xendit') %>" alt="Xendit" style="height: 16px;">
+            <div class="pay-option-body">
+              <img class="pay-option-logo" src="<%= getIcon('xendit') %>" alt="Xendit">
                <span><strong>Xendit</strong> — Invoices (PH/ID Local Payments)</span>
             </div>
           </label>
@@ -136,8 +136,8 @@
         <% if (swiftpayEnabled) { %>
           <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
             <input type="radio" name="payment_type" value="swiftpay" <%= (!mayaEnabled && !coinsEnabled && !paymongoEnabled && !xenditEnabled && !magpieEnabled) ? 'checked' : '' %>>
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-               <img src="<%= getIcon('swiftpay') %>" alt="Swiftpay PH" style="height: 16px;">
+            <div class="pay-option-body">
+              <img class="pay-option-logo" src="<%= getIcon('swiftpay') %>" alt="Swiftpay PH">
                <span><strong>Swiftpay PH</strong> — Fast online checkout</span>
             </div>
           </label>
@@ -145,15 +145,15 @@
         <% if (magpieEnabled) { %>
           <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
             <input type="radio" name="payment_type" value="magpie_alipay" <%= (!mayaEnabled && !coinsEnabled && !paymongoEnabled && !xenditEnabled && !swiftpayEnabled) ? 'checked' : '' %>>
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-               <img src="<%= getIcon('alipay') %>" alt="Alipay" style="height: 16px;">
+            <div class="pay-option-body">
+              <img class="pay-option-logo" src="<%= getIcon('alipay') %>" alt="Alipay">
                <span><strong>Magpie Alipay</strong> — auto-converted to CNY</span>
             </div>
           </label>
           <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
             <input type="radio" name="payment_type" value="magpie_wechat" <%= (!mayaEnabled && !coinsEnabled && !paymongoEnabled && !xenditEnabled && !swiftpayEnabled) ? 'checked' : '' %>>
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-               <img src="<%= getIcon('wechat') %>" alt="WeChat Pay" style="height: 16px;">
+            <div class="pay-option-body">
+              <img class="pay-option-logo" src="<%= getIcon('wechat') %>" alt="WeChat Pay">
                <span><strong>Magpie WeChat Pay</strong> — auto-converted to CNY</span>
             </div>
           </label>
@@ -162,10 +162,10 @@
           <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
             <input type="radio" name="payment_type" value="manual"
                    data-manual="<%= m.id %>" <%= (!mayaEnabled && !coinsEnabled && !paymongoEnabled && !xenditEnabled && !swiftpayEnabled && !magpieEnabled && i === 0) ? 'checked' : '' %>>
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+            <div class="pay-option-body">
                <% var icon = getIcon(m.name, m.icon_url); %>
                <% if (icon) { %>
-                 <img src="<%= icon %>" alt="<%= m.name %>" style="height: 20px;">
+                 <img class="pay-option-logo" src="<%= icon %>" alt="<%= m.name %>">
                <% } else { %>
                  <div style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; background: var(--panel-2); border-radius: 4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg></div>
                <% } %>

@@ -90,13 +90,15 @@
           </tr>
           <tr style="border-bottom: 1px solid var(--border);">
             <th style="padding: 12px; background: rgba(255,255,255,0.02);">Payment Method</th>
-            <td style="padding: 12px; display: flex; align-items: center; gap: 8px;">
+            <td style="padding: 12px;">
+               <span class="payment-inline">
                <% var icon = getIcon(order.payment_type) || (manualMethod ? getIcon(manualMethod.name, manualMethod.icon_url) : null); %>
                <% if (icon) { %>
-                 <img src="<%= icon %>" alt="Icon" style="height: 14px;">
+                 <img class="payment-inline-logo" src="<%= icon %>" alt="Icon">
                <% } %>
                <span style="text-transform: uppercase; font-size: 11px; font-weight: bold;"><%= order.payment_type %></span>
                <%= manualMethod ? ' — ' + manualMethod.name : '' %>
+               </span>
             </td>
           </tr>
           <tr>

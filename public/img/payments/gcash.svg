@@ -1,1 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><rect width="256" height="256" rx="56" fill="#fef2f2"/><circle cx="128" cy="128" r="86" fill="#ef4444"/><path d="M82 104h92v48H82z" fill="#fff"/><path d="M92 84h72v88H92z" fill="#f59e0b"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="96" viewBox="0 0 320 96" role="img" aria-labelledby="title">
+  <title>GCash</title>
+  <rect width="320" height="96" rx="24" fill="#1d4ed8"/>
+  <rect x="2" y="2" width="316" height="92" rx="22" fill="none" stroke="#93c5fd" stroke-width="2" opacity=".45"/>
+  <circle cx="58" cy="48" r="18" fill="#ffffff"/>
+  <path d="M58 30a18 18 0 1 0 0 36a14 14 0 1 1 0-28" fill="#60a5fa"/>
+  <text x="92" y="58" font-size="29" font-family="Arial, Helvetica, sans-serif" font-weight="700" fill="#ffffff">GCash</text>
+</svg>

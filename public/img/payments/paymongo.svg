@@ -1,1 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><rect width="256" height="256" rx="56" fill="#0f172a"/><path d="M74 82h108l-28 92H46z" fill="#60a5fa"/><path d="M130 82h52l-20 92h-52z" fill="#2563eb"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="96" viewBox="0 0 320 96" role="img" aria-labelledby="title">
+  <title>PayMongo</title>
+  <rect width="320" height="96" rx="24" fill="#0f172a"/>
+  <rect x="2" y="2" width="316" height="92" rx="22" fill="none" stroke="#475569" stroke-width="2"/>
+  <path d="M46 62V34h18c11 0 18 6 18 15s-7 13-18 13H46zm11-10h7c4 0 7-1 7-4s-3-4-7-4h-7z" fill="#ffffff"/>
+  <text x="92" y="58" font-size="28" font-family="Arial, Helvetica, sans-serif" font-weight="700" fill="#ffffff">PayMongo</text>
+</svg>
