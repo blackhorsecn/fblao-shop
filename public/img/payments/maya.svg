@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="320" height="96" viewBox="0 0 320 96" role="img" aria-labelledby="title">
-  <title>Maya</title>
+  <title id="title">Maya</title>
   <rect width="320" height="96" rx="24" fill="#065f46"/>
   <rect x="2" y="2" width="316" height="92" rx="22" fill="none" stroke="#6ee7b7" stroke-width="2" opacity=".45"/>
   <circle cx="60" cy="48" r="20" fill="#f59e0b"/>

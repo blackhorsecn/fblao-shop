@@ -253,7 +253,7 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
   display: block;
   width: auto;
   object-fit: contain;
-  background: #fff;
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 999px;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
@@ -384,7 +384,7 @@ input:focus, textarea:focus, select:focus { outline: none; border-color: var(--a
   max-width: 144px;
   object-fit: contain;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  background: #fff;
+  background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 6px 12px;
