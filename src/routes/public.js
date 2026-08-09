@@ -15,7 +15,12 @@ const { asyncHandler, rateLimit } = require('../middleware');
 const StoreService = require('../services/store');
 
 async function syncSwiftpayOrderStatus(order) {
-  if (!order || order.payment_type !== 'swiftpay' || order.status !== 'pending' || !order.swiftpay_checkout_id) {
+  if (
+    !order ||
+    order.payment_type !== 'swiftpay' ||
+    !['pending', 'failed'].includes(order.status) ||
+    !order.swiftpay_checkout_id
+  ) {
     return order;
   }
 
@@ -25,7 +30,7 @@ async function syncSwiftpayOrderStatus(order) {
       StoreService.updateOrderStatus(order.id, 'paid', "datetime('now')");
       return StoreService.getOrder(order.id);
     }
-    if (status === 'failed') {
+    if (status === 'failed' && order.status !== 'failed') {
       StoreService.updateOrderStatus(order.id, 'failed');
       return StoreService.getOrder(order.id);
     }
