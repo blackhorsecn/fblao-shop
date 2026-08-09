@@ -197,7 +197,7 @@ router.post('/orders/:id/update-details', (req, res) => {
     db.prepare(`
       INSERT INTO order_audit_log (order_id, old_status, new_status, change_type, admin_username, notes)
       VALUES (?, ?, ?, 'admin', ?, 'Admin updated order status')
-    `).run(req.params.id, oldOrder.status, newStatus, req.session.adminUsername || 'admin');
+    `).run(req.params.id, oldOrder.status, newStatus, req.session.adminName || 'admin');
   }
 
   const updatedOrder = StoreService.getOrder(req.params.id);
@@ -223,7 +223,7 @@ router.post('/orders/:id/cancel', (req, res) => {
     db.prepare(`
       INSERT INTO order_audit_log (order_id, old_status, new_status, change_type, admin_username, notes)
       VALUES (?, ?, 'cancelled', 'admin', ?, 'Admin cancelled order')
-    `).run(req.params.id, order.status, req.session.adminUsername || 'admin');
+    `).run(req.params.id, order.status, req.session.adminName || 'admin');
   }
 
   flash(req, 'Order cancelled.');

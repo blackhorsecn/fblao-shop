@@ -467,6 +467,11 @@ router.get('/auth/telegram', (req, res) => {
   const hmac = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
 
   if (hmac === hash) {
+    // Reject auth data older than 24 hours to prevent replay attacks
+    const authDate = parseInt(data.auth_date, 10);
+    if (!authDate || Math.floor(Date.now() / 1000) - authDate > 86400) {
+      return res.status(401).send('Telegram auth expired. Please try again.');
+    }
     // Valid login
     req.session.user = {
       telegram_id: data.id,

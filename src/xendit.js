@@ -11,7 +11,7 @@ function basicAuth() {
 }
 
 function isConfigured() {
-  const enabled = getSetting('xendit_enabled') === '1' || getSetting('xedit_enabled') === '1' || process.env.XENDIT_ENABLED === '1';
+  const enabled = getSetting('xendit_enabled') === '1' || process.env.XENDIT_ENABLED === '1';
   const secretKey = getSetting('xendit_secret_key') || process.env.XENDIT_SECRET_KEY;
   return enabled && !!secretKey;
 }
