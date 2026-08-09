@@ -119,8 +119,14 @@ router.post('/magpie', async (req, res) => {
     }
 
     const body = req.body || {};
-    const orderNumber = body.reference || body.order_number || (body.data && (body.data.reference || body.data.order_number));
-    const rawStatus = body.status || body.payment_status || (body.data && (body.data.status || body.data.payment_status));
+    // Magpie v1.1 webhook payload for charges:
+    //   { id, status, referenceNumber, source: { ... }, ... }
+    // Also handle wrapped { data: { ... } } or legacy field names.
+    const data = body.data || body;
+    const orderNumber =
+      data.referenceNumber || data.reference_number ||
+      data.reference || data.order_number || null;
+    const rawStatus = data.status || data.payment_status || null;
     const status = magpie.normalizeStatus(rawStatus);
 
     if (!orderNumber) return res.status(200).json({ ok: true, note: 'reference missing' });
