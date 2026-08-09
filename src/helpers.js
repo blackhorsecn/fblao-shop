@@ -11,9 +11,26 @@ function generateOrderNumber() {
 }
 
 function formatMoney(amount, currency = 'PHP') {
-  const symbol = currency === 'PHP' ? '₱' : '';
+  const code = String(currency || 'PHP').toUpperCase();
+  const symbolMap = {
+    PHP: '₱',
+    CNY: '¥',
+    CNH: '¥',
+    RMB: '¥',
+    USD: '$',
+  };
+  const localeMap = {
+    PHP: 'en-PH',
+    CNY: 'zh-CN',
+    CNH: 'zh-CN',
+    RMB: 'zh-CN',
+    USD: 'en-US',
+  };
+  const symbol = symbolMap[code] || '';
+  const locale = localeMap[code] || 'en-PH';
   const n = Number(amount || 0);
-  return `${symbol}${n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const formatted = n.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return symbol ? `${symbol}${formatted}` : `${formatted} ${code}`.trim();
 }
 
 function escapeHtml(str) {

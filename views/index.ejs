@@ -1,5 +1,23 @@
 <%- include('partials/head') %>
 
+<section class="store-hero card">
+  <div>
+    <p class="store-hero-kicker">Minimal storefront · 中文买家友好</p>
+    <h1>Fast checkout, clear pricing, and easy order tracking.</h1>
+    <p class="store-hero-copy">Browse products quickly, see stock at a glance, and use the payment method that fits you best.</p>
+  </div>
+  <div class="store-hero-chips">
+    <span class="hero-chip">Simple layout / 极简布局</span>
+    <span class="hero-chip">Live stock / 实时库存</span>
+    <span class="hero-chip">Order lookup / 订单查询</span>
+    <% if (magpieEnabled) { %>
+      <span class="hero-chip">Alipay 支付宝</span>
+      <span class="hero-chip">WeChat Pay 微信支付</span>
+      <span class="hero-chip">CNY-friendly 人民币友好</span>
+    <% } %>
+  </div>
+</section>
+
 <% if (banners && banners.length) { %>
   <div class="banner-strip">
     <% banners.forEach(function(b){ %>
@@ -16,7 +34,7 @@
   <section class="catalog-filters card">
     <div class="catalog-filters-header">
       <div>
-        <h2>Browse Products Faster</h2>
+        <h2>Browse Products / 商品筛选</h2>
         <p class="muted">Search by product, description, or category, then narrow by price and stock.</p>
       </div>
       <button type="button" class="btn btn-sm" id="catalogFilterClear">Clear filters</button>
@@ -24,20 +42,20 @@
 
     <form class="catalog-filter-grid" id="catalogFilters" autocomplete="off">
       <label class="field">
-        <span>Search</span>
+        <span>Search / 搜索</span>
         <input type="text" id="catalogSearch" placeholder="Search products or categories">
       </label>
       <label class="field">
-        <span>Min price</span>
+        <span>Min price / 最低价</span>
         <input type="number" id="catalogMinPrice" min="0" step="0.01" placeholder="0.00">
       </label>
       <label class="field">
-        <span>Max price</span>
+        <span>Max price / 最高价</span>
         <input type="number" id="catalogMaxPrice" min="0" step="0.01" placeholder="9999.00">
       </label>
       <label class="catalog-checkbox">
         <input type="checkbox" id="catalogInStock">
-        <span>Show only in-stock items</span>
+        <span>Show only in-stock items / 仅看有货</span>
       </label>
     </form>
 
@@ -46,7 +64,7 @@
     </div>
   </section>
 
-  <div class="empty-state" id="catalogFilterEmpty" hidden>No products match your current filters.</div>
+  <div class="empty-state" id="catalogFilterEmpty" hidden>No products match your current filters. / 当前筛选下暂无商品。</div>
 <% } %>
 
 <% catalog.forEach(function(cat){ %>
@@ -95,10 +113,10 @@
                           data-stock="<%= p.stock %>"
                           data-min="<%= p.min_quantity || 1 %>">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                    Buy Now
+                    Buy Now / 立即购买
                   </button>
                 <% } else { %>
-                  <button class="btn btn-disabled" disabled>Out of Stock</button>
+                  <button class="btn btn-disabled" disabled>Out of Stock / 缺货</button>
                 <% } %>
               </td>
             </tr>
@@ -113,33 +131,38 @@
 <div class="modal-overlay" id="buyModal">
   <div class="modal">
     <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
-    <h3 class="modal-title">Buy <span id="m-product"></span></h3>
+    <h3 class="modal-title">Buy / 购买 <span id="m-product"></span></h3>
     <form method="POST" action="/order" id="buyForm">
       <input type="hidden" name="product_id" id="m-product-id">
 
+      <div class="modal-note">
+        Clear checkout with buyer-friendly payment choices.
+        <% if (magpieEnabled) { %>支持支付宝 / 微信支付。<% } %>
+      </div>
+
       <label class="field">
-        <span>Telegram Username</span>
+        <span>Telegram Username / 电报用户名</span>
         <input type="text" name="telegram_username" id="m-telegram" required placeholder="@username" value="<%= user ? user.username : '' %>">
         <small class="muted">Your order details and delivery will be linked to this username.</small>
       </label>
 
       <div class="field-row">
         <label class="field">
-          <span>Quantity</span>
+          <span>Quantity / 数量</span>
           <input type="number" name="quantity" id="m-qty" value="1" min="1" required>
         </label>
         <div class="field">
-          <span>Unit price</span>
+          <span>Unit price / 单价</span>
           <div class="readout" id="m-unit"></div>
         </div>
         <div class="field">
-          <span>Total</span>
+          <span>Total / 合计</span>
           <div class="readout total" id="m-total"></div>
         </div>
       </div>
 
       <fieldset class="field pay-methods">
-        <legend>Payment method</legend>
+        <legend>Payment method / 支付方式</legend>
         <% if (mayaEnabled) { %>
           <label class="pay-option" style="display: flex; align-items: center; gap: 12px;">
             <input type="radio" name="payment_type" value="maya" checked>
@@ -228,7 +251,7 @@
         </div>
       <% } %>
 
-      <button type="submit" class="btn btn-primary btn-block" id="m-submit" style="margin-top: 15px;">Proceed to payment</button>
+      <button type="submit" class="btn btn-primary btn-block" id="m-submit" style="margin-top: 15px;">Proceed to payment / 去付款</button>
     </form>
   </div>
 </div>

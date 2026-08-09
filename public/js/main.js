@@ -25,10 +25,16 @@
   updateClock();
   setInterval(updateClock, 1000);
 
-  var currencySymbol = '₱'; // ₱
+  var currencyCode = (document.body && document.body.getAttribute('data-currency')) || 'PHP';
+  currencyCode = String(currencyCode).toUpperCase();
 
   function fmt(n) {
-    return currencySymbol + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    var symbolMap = { PHP: '₱', CNY: '¥', CNH: '¥', RMB: '¥', USD: '$' };
+    var localeMap = { PHP: 'en-PH', CNY: 'zh-CN', CNH: 'zh-CN', RMB: 'zh-CN', USD: 'en-US' };
+    var symbol = symbolMap[currencyCode] || '';
+    var locale = localeMap[currencyCode] || 'en-PH';
+    var formatted = Number(n).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return symbol ? symbol + formatted : formatted + ' ' + currencyCode;
   }
 
   var filterForm = document.getElementById('catalogFilters');

@@ -3,19 +3,19 @@
 <div class="card narrow">
   <% if (order.status === 'delivered') { %>
     <div class="status-pill status-delivered">Delivered</div>
-    <h2>Thank you! Your order is complete.</h2>
+    <h2>Thank you! Your order is complete. / 订单已完成</h2>
   <% } else if (order.status === 'paid') { %>
     <div class="status-pill status-paid">Paid</div>
-    <h2>Payment received — preparing your delivery.</h2>
+    <h2>Payment received — preparing your delivery. / 已收款，正在发货</h2>
   <% } else if (order.status === 'failed') { %>
     <div class="status-pill status-failed">Payment failed</div>
-    <h2>We could not confirm your payment.</h2>
+    <h2>We could not confirm your payment. / 付款未确认</h2>
   <% } else if (order.payment_type === 'manual') { %>
     <div class="status-pill status-pending">Awaiting payment</div>
-    <h2>Almost there — please complete your payment.</h2>
+    <h2>Almost there — please complete your payment. / 请完成付款</h2>
   <% } else { %>
     <div class="status-pill status-pending">Pending</div>
-    <h2>Order received.</h2>
+    <h2>Order received. / 订单已创建</h2>
   <% } %>
 
   <table class="kv">
@@ -41,7 +41,7 @@
 
   <% if (order.payment_type === 'manual' && (order.status === 'pending') && manualMethod) { %>
     <div class="instructions">
-      <h3>Payment instructions — <%= manualMethod.name %></h3>
+      <h3>Payment instructions / 支付说明 — <%= manualMethod.name %></h3>
       <div class="instructions-body"><%- nl2br(manualMethod.instructions) %></div>
       <p class="ref-note">Use your order number <strong><%= order.order_number %></strong> as the payment reference.</p>
     </div>
@@ -49,7 +49,7 @@
 
   <% if (order.status === 'delivered' && order.delivered_content) { %>
     <div class="delivery">
-      <h3>Your delivery</h3>
+      <h3>Your delivery / 发货内容</h3>
       <pre class="delivery-body"><%= order.delivered_content %></pre>
     </div>
   <% } else if (order.status === 'paid') { %>
@@ -57,8 +57,8 @@
   <% } %>
 
   <div class="actions">
-    <a class="btn" href="/status">Check this order later</a>
-    <a class="btn btn-light" href="/">Back to shop</a>
+    <a class="btn" href="/status">Check this order later / 稍后查询</a>
+    <a class="btn btn-light" href="/">Back to shop / 返回商店</a>
   </div>
 </div>
 
