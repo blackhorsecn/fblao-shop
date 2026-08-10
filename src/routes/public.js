@@ -224,7 +224,7 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
     // Map customer-facing type to SwiftPay institution_code (as returned by /api/institutions)
     const institutionMap = {
       swiftpay_gcash: 'GCASH',
-      swiftpay_maya: 'MAYA',
+      swiftpay_maya: 'MAYA_WALLET',
       swiftpay_grabpay: 'GRABPAY',
       swiftpay_shopeepay: 'SHOPEEPAY',
       swiftpay_card: 'CARD',
