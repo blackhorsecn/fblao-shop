@@ -1,0 +1,25 @@
+From adcb8656fd47a3481c7167ade48e3fdc9d6fa12c Mon Sep 17 00:00:00 2001
+From: soft3vhs <admin@drl-softechs.dev>
+Date: Mon, 10 Aug 2026 14:29:46 +0000
+Subject: [PATCH 1/4] Fix Swiftpay Maya institution mapping to MAYA_WALLET
+
+---
+ src/routes/public.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/routes/public.js b/src/routes/public.js
+index 4e17a94..09893a4 100644
+--- a/src/routes/public.js
++++ b/src/routes/public.js
+@@ -224,7 +224,7 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
+     // Map customer-facing type to SwiftPay institution_code (as returned by /api/institutions)
+     const institutionMap = {
+       swiftpay_gcash: 'GCASH',
+-      swiftpay_maya: 'MAYA',
++      swiftpay_maya: 'MAYA_WALLET',
+       swiftpay_grabpay: 'GRABPAY',
+       swiftpay_shopeepay: 'SHOPEEPAY',
+       swiftpay_card: 'CARD',
+-- 
+2.53.0
+

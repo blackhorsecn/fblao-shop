@@ -86,7 +86,7 @@ function verifyWebhookSignature(rawBody, signature) {
 
   let ok = false;
   try {
-    ok = crypto.timingSafeEqual(Buffer.from(sigToVerify), Buffer.from(expected));
+    ok = crypto.timingSafeEqual(Buffer.from(sigToVerify, 'hex'), Buffer.from(expected, 'hex'));
   } catch (_) {
     ok = false;
   }

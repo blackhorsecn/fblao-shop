@@ -6,6 +6,8 @@ const maya = require('../maya');
 const coins = require('../coins');
 const paymongo = require('../paymongo');
 const xendit = require('../xendit');
+const swiftpay = require('../swiftpay');
+const magpie = require('../magpie');
 const StoreService = require('../services/store');
 
 // PayMongo webhook
@@ -67,6 +69,80 @@ router.post('/xendit', async (req, res) => {
     return res.status(200).json({ ok: true });
   } catch (e) {
     console.error('xendit webhook error', e);
+    return res.status(200).json({ ok: false, error: e.message });
+  }
+});
+
+// Swiftpay PH webhook / callback
+// SwiftPay sends callbacks as POST with x_* params in the body (form or JSON).
+// The signature covers all x_* params sorted alphabetically, concatenated key+value.
+router.post('/swiftpay', async (req, res) => {
+  try {
+    const body = req.body || {};
+    // The incoming signature is sent as the 'signature' field (not a header).
+    const incomingSignature = body.signature || req.get('x-swiftpay-signature') || '';
+    const sig = swiftpay.verifyWebhookSignature(body, incomingSignature);
+    if (!sig.skipped && !sig.verified) {
+      return res.status(401).json({ error: 'invalid signature' });
+    }
+
+    const orderNumber = body.x_reference_no || body.reference_number || body.order_number;
+    const rawStatus = body.x_payment_status || body.payment_status || body.status;
+    const status = swiftpay.normalizeStatus(rawStatus);
+
+    if (!orderNumber) return res.status(200).json({ ok: true, note: 'reference missing' });
+
+    const order = StoreService.getOrder(orderNumber);
+    if (!order) return res.status(200).json({ ok: true, note: 'order not found' });
+
+    if (status === 'paid') {
+      StoreService.updateOrderStatus(order.id, 'paid', "datetime('now')");
+    } else if (status === 'failed' && order.status === 'pending') {
+      StoreService.updateOrderStatus(order.id, 'failed');
+    }
+
+    return res.status(200).json({ ok: true });
+  } catch (e) {
+    console.error('swiftpay webhook error', e);
+    return res.status(200).json({ ok: false, error: e.message });
+  }
+});
+
+// Magpie webhook
+router.post('/magpie', async (req, res) => {
+  try {
+    const rawBody = req.rawBody || Buffer.from(JSON.stringify(req.body || {}));
+    const signature = req.get('X-MAGPIE-SIGNATURE') || req.get('x-magpie-signature') || '';
+    const sig = magpie.verifyWebhookSignature(rawBody, signature);
+    if (!sig.skipped && !sig.verified) {
+      return res.status(401).json({ error: 'invalid signature' });
+    }
+
+    const body = req.body || {};
+    // Magpie v1.1 webhook payload for charges:
+    //   { id, status, referenceNumber, source: { ... }, ... }
+    // Also handle wrapped { data: { ... } } or legacy field names.
+    const data = body.data || body;
+    const orderNumber =
+      data.referenceNumber || data.reference_number ||
+      data.reference || data.order_number || null;
+    const rawStatus = data.status || data.payment_status || null;
+    const status = magpie.normalizeStatus(rawStatus);
+
+    if (!orderNumber) return res.status(200).json({ ok: true, note: 'reference missing' });
+
+    const order = StoreService.getOrder(orderNumber);
+    if (!order) return res.status(200).json({ ok: true, note: 'order not found' });
+
+    if (status === 'paid') {
+      StoreService.updateOrderStatus(order.id, 'paid', "datetime('now')");
+    } else if (status === 'failed' && order.status === 'pending') {
+      StoreService.updateOrderStatus(order.id, 'failed');
+    }
+
+    return res.status(200).json({ ok: true });
+  } catch (e) {
+    console.error('magpie webhook error', e);
     return res.status(200).json({ ok: false, error: e.message });
   }
 });

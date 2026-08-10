@@ -1,52 +1,70 @@
 'use strict';
 
 /**
- * High-stability professional CDN links for payment and brand logos.
- * Using Wikipedia and PayMongo CDNs which are highly reliable.
+ * Payment and brand logos served from local SVG assets.
  */
 const ICONS = {
   // E-Wallets & Digital Payments
-  gcash: 'https://cdn.paymongo.com/images/gcash.png',
-  maya: 'https://cdn.paymongo.com/images/maya.png',
-  paymaya: 'https://cdn.paymongo.com/images/maya.png',
-  grabpay: 'https://cdn.paymongo.com/images/grabpay.png',
-  grab: 'https://cdn.paymongo.com/images/grabpay.png',
-  shopeepay: 'https://cdn.paymongo.com/images/shopeepay.png',
-  shopee: 'https://cdn.paymongo.com/images/shopeepay.png',
-  coins: 'https://static.coingecko.com/s/exchanges/images/1114/large/coinsph.png',
-  'coins.ph': 'https://static.coingecko.com/s/exchanges/images/1114/large/coinsph.png',
-  coinsph: 'https://static.coingecko.com/s/exchanges/images/1114/large/coinsph.png',
-  paymongo: 'https://cdn.paymongo.com/images/paymongo-logo.png',
-  xendit: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Xendit_Logo.png/512px-Xendit_Logo.png',
-  billease: 'https://cdn.paymongo.com/images/billease.png',
+  gcash: '/static/img/payments/gcash.svg',
+  maya: '/static/img/payments/maya.svg',
+  paymaya: '/static/img/payments/maya.svg',
+  grabpay: '/static/img/payments/grabpay.svg',
+  grab: '/static/img/payments/grabpay.svg',
+  shopeepay: '/static/img/payments/shopeepay.svg',
+  shopee: '/static/img/payments/shopeepay.svg',
+  coins: '/static/img/payments/coins.svg',
+  'coins.ph': '/static/img/payments/coins.svg',
+  coinsph: '/static/img/payments/coins.svg',
+  paymongo: '/static/img/payments/paymongo.svg',
+  xendit: '/static/img/payments/xendit.svg',
+  swiftpay: '/static/img/payments/swiftpay.svg',
+  swiftpayph: '/static/img/payments/swiftpay.svg',
+  'swiftpay ph': '/static/img/payments/swiftpay.svg',
+  alipay: '/static/img/payments/alipay.svg',
+  'alipay pay': '/static/img/payments/alipay.svg',
+  wechat: '/static/img/payments/wechat.svg',
+  'wechat pay': '/static/img/payments/wechat.svg',
+  billease: '/static/img/payments/paymongo.svg',
 
   // Cards
-  visa: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Visa_2021.svg/512px-Visa_2021.svg.png',
-  mastercard: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/512px-Mastercard-logo.svg.png',
-  jcb: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/JCB_logo.svg/512px-JCB_logo.svg.png',
-  amex: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/American_Express_logo_%282018%29.svg/512px-American_Express_logo_%282018%29.svg.png',
+  visa: '/static/img/payments/visa.svg',
+  mastercard: '/static/img/payments/mastercard.svg',
+  jcb: '/static/img/payments/jcb.svg',
+  amex: '/static/img/payments/amex.svg',
 
   // Banks (PH & International)
-  bpi: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/BPI_Logo.svg/512px-BPI_Logo.svg.png',
-  unionbank: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/UnionBank_of_the_Philippines_logo.svg/512px-UnionBank_of_the_Philippines_logo.svg.png',
-  'union bank': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/UnionBank_of_the_Philippines_logo.svg/512px-UnionBank_of_the_Philippines_logo.svg.png',
-  bdo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/BDO_Unibank_%28logo%29.svg/512px-BDO_Unibank_%28logo%29.svg.png',
-  metrobank: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Metrobank_%28Philippines%29_logo.svg/512px-Metrobank_%28Philippines%29_logo.svg.png',
-  rcbc: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/RCBC_logo.svg/512px-RCBC_logo.svg.png',
-  landbank: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Land_Bank_of_the_Philippines_logo.svg/512px-Land_Bank_of_the_Philippines_logo.svg.png',
-  securitybank: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Security_Bank_logo.svg/512px-Security_Bank_logo.svg.png',
-  chinabank: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/China_Bank_logo.svg/512px-China_Bank_logo.svg.png',
-  pnb: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Philippine_National_Bank_logo.svg/512px-Philippine_National_Bank_logo.svg.png',
+  bpi: '/static/img/payments/bpi.svg',
+  'bank of the philippine islands': '/static/img/payments/bpi.svg',
+  unionbank: '/static/img/payments/unionbank.svg',
+  'union bank': '/static/img/payments/unionbank.svg',
+  'unionbank of the philippines': '/static/img/payments/unionbank.svg',
+  bdo: '/static/img/payments/bdo.svg',
+  'banco de oro': '/static/img/payments/bdo.svg',
+  metrobank: '/static/img/payments/metrobank.svg',
+  'metropolitan bank': '/static/img/payments/metrobank.svg',
+  rcbc: '/static/img/payments/rcbc.svg',
+  'rizal commercial': '/static/img/payments/rcbc.svg',
+  landbank: '/static/img/payments/landbank.svg',
+  'land bank': '/static/img/payments/landbank.svg',
+  securitybank: '/static/img/payments/securitybank.svg',
+  'security bank': '/static/img/payments/securitybank.svg',
+  chinabank: '/static/img/payments/chinabank.svg',
+  'china bank': '/static/img/payments/chinabank.svg',
+  'china banking': '/static/img/payments/chinabank.svg',
+  pnb: '/static/img/payments/pnb.svg',
+  'philippine national bank': '/static/img/payments/pnb.svg',
 
   // Other
-  paypal: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/512px-PayPal.svg.png',
-  binance: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Binance_Logo.svg/512px-Binance_Logo.svg.png',
-  usdt: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Tether_Logo.svg/512px-Tether_Logo.svg.png',
-  bitcoin: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/512px-Bitcoin.svg.png',
-  ethereum: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Ethereum-logo-2.svg/512px-Ethereum-logo-2.svg.png',
-  telegram: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/512px-Telegram_logo.svg.png',
-  gcash_pro: 'https://cdn.paymongo.com/images/gcash.png',
-  maya_pro: 'https://cdn.paymongo.com/images/maya.png'
+  paypal: '/static/img/payments/paypal.svg',
+  // Use generic `coins` asset for crypto and miscellaneous providers where
+  // a dedicated icon is not present in the repo yet.
+  binance: '/static/img/payments/coins.svg',
+  usdt: '/static/img/payments/coins.svg',
+  bitcoin: '/static/img/payments/coins.svg',
+  ethereum: '/static/img/payments/coins.svg',
+  telegram: '/static/img/payments/coins.svg',
+  gcash_pro: '/static/img/payments/gcash.svg',
+  maya_pro: '/static/img/payments/maya.svg'
 };
 
 function getIcon(name, dbIconUrl) {

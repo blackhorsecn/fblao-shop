@@ -52,14 +52,13 @@ const DATA_DIR = process.env.DATA_DIR
   ? path.resolve(process.env.DATA_DIR)
   : path.join(__dirname, '..', 'data');
 
-// Serve uploaded logo from persistent data dir
+// Serve uploaded logo from persistent data dir, falling back to the real PNG asset.
 app.get('/logo.png', (req, res) => {
   const logoPath = path.join(DATA_DIR, 'logo.png');
   if (fs.existsSync(logoPath)) {
     res.sendFile(logoPath);
   } else {
-    res.type('svg+xml');
-    res.sendFile(path.join(__dirname, '..', 'public', 'img', 'logo.svg'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'img', 'logo.png'));
   }
 });
 
@@ -114,12 +113,19 @@ app.use((err, req, res, _next) => {
     message: err.message || 'Something went wrong.',
     shopName: res.locals.shopName || 'Shop',
     settings: res.locals.settings || {},
+    currency: res.locals.currency || 'PHP',
     currentPath: req.path,
     isAdmin: !!(req.session && req.session.adminId),
     user: req.session ? req.session.user : null,
     mayaEnabled: res.locals.mayaEnabled || false,
+    coinsEnabled: res.locals.coinsEnabled || false,
+    paymongoEnabled: res.locals.paymongoEnabled || false,
+    xenditEnabled: res.locals.xenditEnabled || false,
+    swiftpayEnabled: res.locals.swiftpayEnabled || false,
+    magpieEnabled: res.locals.magpieEnabled || false,
     footerMethods: res.locals.footerMethods || [],
     date: res.locals.date || ((d) => d),
+    escapeHtml: res.locals.escapeHtml || ((value) => String(value || '')),
     getIcon: res.locals.getIcon || (() => null)
   };
   res.status(500).render('error', locals);

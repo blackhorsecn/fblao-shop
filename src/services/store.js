@@ -80,7 +80,7 @@ const StoreService = {
   },
 
   deleteProduct(id) {
-    return db.prepare('DELETE FROM products WHERE id = ?').run(id);
+    return db.prepare("UPDATE products SET deleted_at = datetime('now') WHERE id = ?").run(id);
   },
 
   updateProductStock(id, delta) {
@@ -265,14 +265,28 @@ const StoreService = {
     const updatedOrder = this.getOrder(orderId);
     if (status === 'paid' && order.status !== 'paid') {
       NotificationService.onOrderPaid(updatedOrder).catch(console.error);
+      // If auto-delivery ran during this transition, also fire the delivered notification
+      if (updatedOrder && updatedOrder.status === 'delivered') {
+        NotificationService.onOrderDelivered(updatedOrder).catch(console.error);
+      }
     } else if (status === 'delivered' && order.status !== 'delivered') {
       NotificationService.onOrderDelivered(updatedOrder).catch(console.error);
     }
   },
 
   deliverOrder(orderId, content) {
+    const order = this.getOrder(orderId);
     db.prepare("UPDATE orders SET delivered_content = ?, status = 'delivered', delivered_at = datetime('now'), updated_at = datetime('now') WHERE id = ?")
       .run(content, orderId);
+
+    // Decrement stock for non-auto-deliver products only if stock hasn't already
+    // been decremented (i.e. the order was never transitioned through 'paid')
+    if (order && order.product_id) {
+      const product = this.getProduct(order.product_id, false);
+      if (product && !product.auto_deliver && order.status !== 'paid' && order.status !== 'delivered') {
+        this.updateProductStock(order.product_id, -order.quantity);
+      }
+    }
 
     const updatedOrder = this.getOrder(orderId);
     NotificationService.onOrderDelivered(updatedOrder).catch(console.error);

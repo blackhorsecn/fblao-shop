@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40">
+  <rect width="120" height="40" rx="10" fill="#065F46"/>
+  <circle cx="24" cy="20" r="10" fill="#FBBF24"/>
+  <path d="M18 24l4-8 4 8 4-8" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="44" y="26" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700" fill="#ffffff">Maya</text>
+</svg>

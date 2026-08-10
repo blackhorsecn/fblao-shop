@@ -3,32 +3,34 @@
 <div class="card narrow">
   <% if (order.status === 'delivered') { %>
     <div class="status-pill status-delivered">Delivered</div>
-    <h2>Thank you! Your order is complete.</h2>
+    <h2>Thank you! Your order is complete. / 订单已完成</h2>
   <% } else if (order.status === 'paid') { %>
     <div class="status-pill status-paid">Paid</div>
-    <h2>Payment received — preparing your delivery.</h2>
+    <h2>Payment received — preparing your delivery. / 已收款，正在发货</h2>
   <% } else if (order.status === 'failed') { %>
     <div class="status-pill status-failed">Payment failed</div>
-    <h2>We could not confirm your payment.</h2>
+    <h2>We could not confirm your payment. / 付款未确认</h2>
   <% } else if (order.payment_type === 'manual') { %>
     <div class="status-pill status-pending">Awaiting payment</div>
-    <h2>Almost there — please complete your payment.</h2>
+    <h2>Almost there — please complete your payment. / 请完成付款</h2>
   <% } else { %>
     <div class="status-pill status-pending">Pending</div>
-    <h2>Order received.</h2>
+    <h2>Order received. / 订单已创建</h2>
   <% } %>
 
   <table class="kv">
     <tr><th>Order number</th><td><strong><%= order.order_number %></strong></td></tr>
     <tr>
       <th>Payment Method</th>
-      <td style="display: flex; align-items: center; gap: 8px;">
+      <td>
+        <span class="payment-inline">
         <% var icon = getIcon(order.payment_type) || (manualMethod ? getIcon(manualMethod.name, manualMethod.icon_url) : null); %>
         <% if (icon) { %>
-          <img src="<%= icon %>" alt="Icon" style="height: 14px;">
+          <img class="payment-inline-logo" src="<%= icon %>" alt="Icon">
         <% } %>
         <span style="text-transform: uppercase; font-size: 11px; font-weight: bold;"><%= order.payment_type %></span>
         <%= manualMethod ? ' — ' + manualMethod.name : '' %>
+        </span>
       </td>
     </tr>
     <% if (order.email) { %><tr><th>Email</th><td><%= order.email %></td></tr><% } %>
@@ -37,9 +39,11 @@
     <tr><th>Total</th><td><%= money(order.total) %></td></tr>
   </table>
 
+  <p class="muted">How you receive your product: after payment is confirmed, the delivered account or product details will appear on this page. You can check it again later with your Telegram username and order number. / 收货方式：付款确认后，发货的账号或商品内容会显示在此页面。之后也可以使用电报用户名和订单号再次查询。</p>
+
   <% if (order.payment_type === 'manual' && (order.status === 'pending') && manualMethod) { %>
     <div class="instructions">
-      <h3>Payment instructions — <%= manualMethod.name %></h3>
+      <h3>Payment instructions / 支付说明 — <%= manualMethod.name %></h3>
       <div class="instructions-body"><%- nl2br(manualMethod.instructions) %></div>
       <p class="ref-note">Use your order number <strong><%= order.order_number %></strong> as the payment reference.</p>
     </div>
@@ -47,16 +51,16 @@
 
   <% if (order.status === 'delivered' && order.delivered_content) { %>
     <div class="delivery">
-      <h3>Your delivery</h3>
+      <h3>Your delivery / 发货内容</h3>
       <pre class="delivery-body"><%= order.delivered_content %></pre>
     </div>
   <% } else if (order.status === 'paid') { %>
-    <p class="muted">Your payment is confirmed. Your goods will appear here and are sent to your email shortly.</p>
+    <p class="muted">Your payment is confirmed. Your goods will appear here soon. / 付款已确认，商品内容将很快显示在这里。</p>
   <% } %>
 
   <div class="actions">
-    <a class="btn" href="/query">Check this order later</a>
-    <a class="btn btn-light" href="/">Back to shop</a>
+    <a class="btn" href="/status">Check this order later / 稍后查询</a>
+    <a class="btn btn-light" href="/">Back to shop / 返回商店</a>
   </div>
 </div>
 
