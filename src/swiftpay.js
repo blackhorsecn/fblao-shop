@@ -23,7 +23,8 @@ function apiBase() {
 function isConfigured() {
   const enabled = getSetting('swiftpay_enabled') === '1' || process.env.SWIFTPAY_ENABLED === '1';
   const accessKey = settingOrEnv('swiftpay_api_key', 'SWIFTPAY_API_KEY');
-  return enabled && !!accessKey;
+  const secretKey = settingOrEnv('swiftpay_api_secret', 'SWIFTPAY_API_SECRET');
+  return enabled && !!accessKey && !!secretKey;
 }
 
 /**
