@@ -1,7 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
-const { getSetting } = require('./db');
+const { getSetting, setSetting } = require('./db');
 
 const HOSTS = {
   sandbox: 'https://api-sandbox.magpie.im',
@@ -28,27 +28,85 @@ function isConfigured() {
 }
 
 /**
+ * Fetch or compute a converted amount using a rate provider with caching.
+ * Stores cached rates in the settings table under key magpie_rate_<BASE>_<TARGET>.
+ * Provider selection via MAGPIE_RATE_PROVIDER (values: er-api | exchangerate.host)
+ * TTL (minutes) via MAGPIE_RATE_TTL (default 10)
+ */
+async function convertAmountWithCache(baseCurrency, targetCurrency, amount) {
+  baseCurrency = String(baseCurrency || '').toUpperCase();
+  targetCurrency = String(targetCurrency || '').toUpperCase();
+  if (!baseCurrency || !targetCurrency) return null;
+  if (baseCurrency === targetCurrency) return Number(amount);
+
+  const ttlMinutes = Number(settingOrEnv('magpie_rate_ttl', 'MAGPIE_RATE_TTL', '10'));
+  const ttlMs = Math.max(0, ttlMinutes) * 60 * 1000;
+  const cacheKey = `magpie_rate_${baseCurrency}_${targetCurrency}`;
+
+  const cached = getSetting(cacheKey, '');
+  if (cached) {
+    try {
+      const c = JSON.parse(cached);
+      if (c && typeof c.rate === 'number' && c.fetched_at) {
+        const fetched = new Date(c.fetched_at).getTime();
+        if (!Number.isNaN(fetched) && Date.now() - fetched < ttlMs) {
+          return Number(amount) * c.rate;
+        }
+      }
+    } catch (_) { /* ignore parse errors */ }
+  }
+
+  // Provider selection
+  const provider = settingOrEnv('magpie_rate_provider', 'MAGPIE_RATE_PROVIDER', 'er-api');
+  let rate = null;
+
+  if (provider === 'er-api') {
+    // ExchangeRate-API (open.er-api.com) — public/free endpoint
+    try {
+      const url = `https://open.er-api.com/v6/latest/${encodeURIComponent(baseCurrency)}`;
+      const res = await fetch(url, { method: 'GET' });
+      if (res.ok) {
+        const data = await res.json().catch(() => null);
+        if (data && data.result === 'success' && data.rates && typeof data.rates[targetCurrency] === 'number') {
+          rate = Number(data.rates[targetCurrency]);
+        }
+      }
+    } catch (e) {
+      console.warn('[Magpie] er-api conversion error:', e && e.message);
+    }
+  }
+
+  if (rate === null) {
+    // Fallback to exchangerate.host (still public)
+    try {
+      const url = `https://api.exchangerate.host/convert?from=${encodeURIComponent(baseCurrency)}&to=${encodeURIComponent(targetCurrency)}`;
+      const res = await fetch(url, { method: 'GET' });
+      if (res.ok) {
+        const data = await res.json().catch(() => null);
+        if (data && typeof data.result === 'number' && typeof data.info?.rate === 'number') {
+          rate = Number(data.info.rate);
+        } else if (data && typeof data.result === 'number') {
+          // If convert returned a result but no info.rate, compute rate from amount=1
+          rate = Number(data.result);
+        }
+      }
+    } catch (e) {
+      console.warn('[Magpie] exchangerate.host conversion error:', e && e.message);
+    }
+  }
+
+  if (rate !== null && Number.isFinite(rate) && rate > 0) {
+    try {
+      setSetting(cacheKey, JSON.stringify({ rate: rate, fetched_at: new Date().toISOString() }));
+    } catch (_) { /* ignore cache write errors */ }
+    return Number(amount) * rate;
+  }
+
+  return null; // indicate failure
+}
+
+/**
  * Create a payment source and charge via the Magpie v1.1 API.
- *
- * Magpie Alipay/WeChat flow:
- *   Step 1 — POST /v1.1/sources (auth: public key)
- *             Body: { type, currency, amount, redirect: { success, fail } }
- *             Response: { id, redirect: { checkout_url } }
- *   Step 2 — POST /v1.1/charges (auth: secret key)
- *             Body: { amount, currency, source, description, referenceNumber }
- *             Response: { id, status, source: { redirect: { checkout_url } } }
- *
- * The app now supports a configurable target currency (magpie_target_currency).
- * If the target currency differs from the store currency, the amount is converted
- * using a public exchange API before creating the checkout. On conversion failures
- * we fall back to the legacy behavior (PHP).
- *
- * Amounts are sent in the smallest unit of the target currency (e.g. cents).
- *
- * @param {object} order
- * @param {string} baseUrl
- * @param {'alipay'|'wechat'} method
- * @returns {{ checkoutId: string, checkoutUrl: string }}
  */
 async function createCheckout(order, baseUrl, method = 'alipay') {
   const publicKey = settingOrEnv('magpie_api_key', 'MAGPIE_API_KEY');
@@ -67,40 +125,29 @@ async function createCheckout(order, baseUrl, method = 'alipay') {
   const storeAmount = Number(order.total);
   if (Number.isNaN(storeAmount)) throw new Error('Invalid order total');
 
-  // Convert amount to target currency if needed.
-  // We use exchangerate.host's public convert endpoint as a simple fallback.
-  // If conversion fails, we'll fallback to sending PHP (legacy behaviour).
+  // Convert amount to target currency if needed, using caching/provider helper
   let amountInTarget = storeAmount;
   let usedCurrency = storeCurrency;
-
   if (targetCurrency !== storeCurrency) {
     try {
-      const convUrl = `https://api.exchangerate.host/convert?from=${encodeURIComponent(storeCurrency)}&to=${encodeURIComponent(targetCurrency)}&amount=${encodeURIComponent(storeAmount)}`;
-      const convRes = await fetch(convUrl, { method: 'GET' });
-      if (convRes.ok) {
-        const convData = await convRes.json().catch(() => null);
-        if (convData && typeof convData.result === 'number') {
-          amountInTarget = Number(convData.result);
-          usedCurrency = targetCurrency;
-        } else {
-          console.warn('[Magpie] exchange conversion returned unexpected data, falling back to store currency');
-        }
+      const converted = await convertAmountWithCache(storeCurrency, targetCurrency, storeAmount);
+      if (converted !== null) {
+        amountInTarget = converted;
+        usedCurrency = targetCurrency;
       } else {
-        console.warn('[Magpie] exchange conversion failed with status', convRes.status, 'falling back to store currency');
+        console.warn('[Magpie] currency conversion failed — falling back to store currency');
       }
     } catch (e) {
-      console.warn('[Magpie] exchange conversion error, falling back to store currency:', e && e.message);
+      console.warn('[Magpie] currency conversion error — falling back to store currency:', e && e.message);
     }
   }
 
   // Magpie amount is in the smallest currency unit (assume 2 decimal places).
-  // For most target currencies (CNY, PHP, USD) this is cents; adjust if you need JPY, etc.
   const amountSmallestUnit = Math.round(Number(amountInTarget) * 100);
 
   const successUrl = `${baseUrl}/order/result?ref=${encodeURIComponent(order.order_number)}&status=success`;
   const failUrl = `${baseUrl}/order/result?ref=${encodeURIComponent(order.order_number)}&status=cancel`;
 
-  // ── Step 1: Create source ────────────────────────────────────────────────
   const sourcePayload = {
     type: sourceType,
     currency: usedCurrency.toLowerCase(),
@@ -132,7 +179,6 @@ async function createCheckout(order, baseUrl, method = 'alipay') {
   const sourceId = sourceData.id;
   if (!sourceId) throw new Error('Magpie source response missing id');
 
-  // ── Step 2: Create charge ─────────────────────────────────────────────────
   const chargePayload = {
     amount: amountSmallestUnit,
     currency: usedCurrency.toLowerCase(),
@@ -162,8 +208,6 @@ async function createCheckout(order, baseUrl, method = 'alipay') {
   const chargeId = chargeData.id;
   if (!chargeId) throw new Error('Magpie charge response missing id');
 
-  // The checkout URL lives in the source's redirect object on the charge response,
-  // or may be on the source itself from step 1.
   const checkoutUrl =
     chargeData?.source?.redirect?.checkout_url ||
     chargeData?.redirect?.checkout_url ||
@@ -201,11 +245,6 @@ function verifyWebhookSignature(rawBody, signature) {
   return { verified: ok, skipped: false };
 }
 
-/**
- * Normalise Magpie status strings to our internal values.
- * Magpie charge statuses: pending | paid | failed | cancelled | refunded
- * Magpie source statuses: pending | chargeable | expired | consumed
- */
 function normalizeStatus(raw) {
   if (!raw) return 'pending';
   const s = String(raw).trim().toLowerCase();
