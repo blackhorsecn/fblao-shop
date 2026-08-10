@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40">
-  <rect width="120" height="40" rx="6" fill="#EE4D2D"/>
-  <text x="60" y="27" font-family="Arial, sans-serif" font-size="14" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="-0.5">ShopeePay</text>
+  <rect width="120" height="40" rx="10" fill="#EE4D2D"/>
+  <rect x="14" y="12" width="20" height="16" rx="4" fill="#ffffff"/>
+  <path d="M24 14h8c2.2 0 4 1.8 4 4v4c0 2.2-1.8 4-4 4h-8V14z" fill="#EE4D2D"/>
+  <text x="44" y="26" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700" fill="#ffffff">ShopeePay</text>
 </svg>

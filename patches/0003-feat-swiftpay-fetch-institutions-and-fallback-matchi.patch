@@ -1,0 +1,71 @@
+From 9df485e5f1aec30941a696e8d4109a732fd2ab83 Mon Sep 17 00:00:00 2001
+From: soft3vhs <admin@drl-softechs.dev>
+Date: Mon, 10 Aug 2026 14:34:43 +0000
+Subject: [PATCH 3/4] feat(swiftpay): fetch institutions and fallback matching
+ for institution_code
+
+---
+ src/routes/public.js | 16 +++++++++++++++-
+ src/swiftpay.js      | 14 ++++++++++++++
+ 2 files changed, 29 insertions(+), 1 deletion(-)
+
+diff --git a/src/routes/public.js b/src/routes/public.js
+index 09893a4..097ec40 100644
+--- a/src/routes/public.js
++++ b/src/routes/public.js
+@@ -239,7 +239,21 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
+       swiftpay_chinabank: 'CHINA_BANK',
+       // swiftpay_qrph and plain swiftpay: no institution_code → show selection screen
+     };
+-    const institutionCode = institutionMap[paymentType] || null;
++    let institutionCode = institutionMap[paymentType] || null;
++    if (!institutionCode) {
++      try {
++        const insts = await swiftpay.listInstitutions();
++        const key = String(paymentType || '').replace(/^swiftpay_/, '').toLowerCase();
++        const match = insts.find(i => {
++          const code = String(i.code || '').toLowerCase();
++          const name = String(i.name || '').toLowerCase();
++          return code.includes(key) || name.includes(key);
++        });
++        institutionCode = match ? match.code : null;
++      } catch (e) {
++        institutionCode = null;
++      }
++    }
+     try {
+       const { checkoutId, checkoutUrl } = await swiftpay.createCheckout(order, res.locals.baseUrl, institutionCode);
+       db.prepare('UPDATE orders SET swiftpay_checkout_id = ?, swiftpay_checkout_url = ? WHERE id = ?').run(checkoutId, checkoutUrl, order.id);
+diff --git a/src/swiftpay.js b/src/swiftpay.js
+index 40b45c0..c2cfc8c 100644
+--- a/src/swiftpay.js
++++ b/src/swiftpay.js
+@@ -209,6 +209,19 @@ async function getCheckoutStatus(checkoutId) {
+   return normalizeStatus(sorted[0].paymentStatus);
+ }
+ 
++/**
++ * List available institutions from SwiftPay (returns array of institution objects)
++ */
++async function listInstitutions() {
++  const url = `${apiBase()}/api/institutions`;
++  const res = await fetch(url, { method: 'GET' });
++  const text = await res.text();
++  let data = [];
++  try { data = JSON.parse(text); } catch (_) { /* keep raw */ }
++  if (!res.ok) throw new Error(`SwiftPay institutions fetch failed (${res.status}): ${text}`);
++  return Array.isArray(data) ? data : [];
++}
++
+ /**
+  * Normalise SwiftPay status strings to our internal values.
+  * SwiftPay statuses: PENDING | EXECUTED | CANCELED | REJECTED | EXPIRED
+@@ -254,4 +267,5 @@ module.exports = {
+   getCheckoutStatus,
+   normalizeStatus,
+   verifyWebhookSignature,
++  listInstitutions,
+ };
+-- 
+2.53.0
+

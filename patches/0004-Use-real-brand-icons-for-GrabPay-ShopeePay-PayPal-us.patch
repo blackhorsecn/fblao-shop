@@ -1,0 +1,51 @@
+From 07d62bc4b0a944a2635129271d58d1738dac15ce Mon Sep 17 00:00:00 2001
+From: soft3vhs <admin@drl-softechs.dev>
+Date: Mon, 10 Aug 2026 15:10:43 +0000
+Subject: [PATCH 4/4] Use real brand icons for GrabPay/ShopeePay/PayPal; use
+ coins.svg for crypto
+
+---
+ src/icons.js | 20 ++++++++++++--------
+ 1 file changed, 12 insertions(+), 8 deletions(-)
+
+diff --git a/src/icons.js b/src/icons.js
+index 2db100e..69cbe64 100644
+--- a/src/icons.js
++++ b/src/icons.js
+@@ -10,8 +10,10 @@ const ICONS = {
+   paymaya: '/static/img/payments/maya.svg',
+   grabpay: '/static/img/payments/paymongo.svg',
+   grab: '/static/img/payments/paymongo.svg',
+-  shopeepay: '/static/img/payments/paymongo.svg',
+-  shopee: '/static/img/payments/paymongo.svg',
++  grabpay: '/static/img/payments/grabpay.svg',
++  grab: '/static/img/payments/grabpay.svg',
++  shopeepay: '/static/img/payments/shopeepay.svg',
++  shopee: '/static/img/payments/shopeepay.svg',
+   coins: '/static/img/payments/coins.svg',
+   'coins.ph': '/static/img/payments/coins.svg',
+   coinsph: '/static/img/payments/coins.svg',
+@@ -55,12 +57,14 @@ const ICONS = {
+   'philippine national bank': '/static/img/payments/pnb.svg',
+ 
+   // Other
+-  paypal: '/static/img/payments/paymongo.svg',
+-  binance: '/static/img/payments/paymongo.svg',
+-  usdt: '/static/img/payments/paymongo.svg',
+-  bitcoin: '/static/img/payments/paymongo.svg',
+-  ethereum: '/static/img/payments/paymongo.svg',
+-  telegram: '/static/img/payments/paymongo.svg',
++  paypal: '/static/img/payments/paypal.svg',
++  // Use generic `coins` asset for crypto and miscellaneous providers where
++  // a dedicated icon is not present in the repo yet.
++  binance: '/static/img/payments/coins.svg',
++  usdt: '/static/img/payments/coins.svg',
++  bitcoin: '/static/img/payments/coins.svg',
++  ethereum: '/static/img/payments/coins.svg',
++  telegram: '/static/img/payments/coins.svg',
+   gcash_pro: '/static/img/payments/gcash.svg',
+   maya_pro: '/static/img/payments/maya.svg'
+ };
+-- 
+2.53.0
+

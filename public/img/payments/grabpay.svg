@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40">
-  <rect width="120" height="40" rx="6" fill="#00B14F"/>
-  <text x="60" y="27" font-family="Arial, sans-serif" font-size="16" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="-0.5">GrabPay</text>
+  <rect width="120" height="40" rx="10" fill="#FF6600"/>
+  <path d="M26 12h18c4.4 0 8 3.6 8 8v0c0 4.4-3.6 8-8 8H26c-4.4 0-8-3.6-8-8v0c0-4.4 3.6-8 8-8z" fill="#ffffff" opacity="0.18"/>
+  <text x="22" y="26" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" fill="#ffffff">GRAB</text>
+  <text x="22" y="34" font-family="Inter, Arial, sans-serif" font-size="10" fill="#ffffff">PAY</text>
 </svg>
