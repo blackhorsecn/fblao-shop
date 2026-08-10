@@ -10,8 +10,10 @@ const ICONS = {
   paymaya: '/static/img/payments/maya.svg',
   grabpay: '/static/img/payments/paymongo.svg',
   grab: '/static/img/payments/paymongo.svg',
-  shopeepay: '/static/img/payments/paymongo.svg',
-  shopee: '/static/img/payments/paymongo.svg',
+  grabpay: '/static/img/payments/grabpay.svg',
+  grab: '/static/img/payments/grabpay.svg',
+  shopeepay: '/static/img/payments/shopeepay.svg',
+  shopee: '/static/img/payments/shopeepay.svg',
   coins: '/static/img/payments/coins.svg',
   'coins.ph': '/static/img/payments/coins.svg',
   coinsph: '/static/img/payments/coins.svg',
@@ -55,12 +57,14 @@ const ICONS = {
   'philippine national bank': '/static/img/payments/pnb.svg',
 
   // Other
-  paypal: '/static/img/payments/paymongo.svg',
-  binance: '/static/img/payments/paymongo.svg',
-  usdt: '/static/img/payments/paymongo.svg',
-  bitcoin: '/static/img/payments/paymongo.svg',
-  ethereum: '/static/img/payments/paymongo.svg',
-  telegram: '/static/img/payments/paymongo.svg',
+  paypal: '/static/img/payments/paypal.svg',
+  // Use generic `coins` asset for crypto and miscellaneous providers where
+  // a dedicated icon is not present in the repo yet.
+  binance: '/static/img/payments/coins.svg',
+  usdt: '/static/img/payments/coins.svg',
+  bitcoin: '/static/img/payments/coins.svg',
+  ethereum: '/static/img/payments/coins.svg',
+  telegram: '/static/img/payments/coins.svg',
   gcash_pro: '/static/img/payments/gcash.svg',
   maya_pro: '/static/img/payments/maya.svg'
 };
