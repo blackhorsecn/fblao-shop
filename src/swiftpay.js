@@ -210,6 +210,19 @@ async function getCheckoutStatus(checkoutId) {
 }
 
 /**
+ * List available institutions from SwiftPay (returns array of institution objects)
+ */
+async function listInstitutions() {
+  const url = `${apiBase()}/api/institutions`;
+  const res = await fetch(url, { method: 'GET' });
+  const text = await res.text();
+  let data = [];
+  try { data = JSON.parse(text); } catch (_) { /* keep raw */ }
+  if (!res.ok) throw new Error(`SwiftPay institutions fetch failed (${res.status}): ${text}`);
+  return Array.isArray(data) ? data : [];
+}
+
+/**
  * Normalise SwiftPay status strings to our internal values.
  * SwiftPay statuses: PENDING | EXECUTED | CANCELED | REJECTED | EXPIRED
  */
@@ -254,4 +267,5 @@ module.exports = {
   getCheckoutStatus,
   normalizeStatus,
   verifyWebhookSignature,
+  listInstitutions,
 };

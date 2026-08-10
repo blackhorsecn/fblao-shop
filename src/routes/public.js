@@ -239,7 +239,21 @@ router.post('/order', rateLimit, asyncHandler(async (req, res) => {
       swiftpay_chinabank: 'CHINA_BANK',
       // swiftpay_qrph and plain swiftpay: no institution_code → show selection screen
     };
-    const institutionCode = institutionMap[paymentType] || null;
+    let institutionCode = institutionMap[paymentType] || null;
+    if (!institutionCode) {
+      try {
+        const insts = await swiftpay.listInstitutions();
+        const key = String(paymentType || '').replace(/^swiftpay_/, '').toLowerCase();
+        const match = insts.find(i => {
+          const code = String(i.code || '').toLowerCase();
+          const name = String(i.name || '').toLowerCase();
+          return code.includes(key) || name.includes(key);
+        });
+        institutionCode = match ? match.code : null;
+      } catch (e) {
+        institutionCode = null;
+      }
+    }
     try {
       const { checkoutId, checkoutUrl } = await swiftpay.createCheckout(order, res.locals.baseUrl, institutionCode);
       db.prepare('UPDATE orders SET swiftpay_checkout_id = ?, swiftpay_checkout_url = ? WHERE id = ?').run(checkoutId, checkoutUrl, order.id);
